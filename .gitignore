@@ -1,0 +1,39 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+local.settings.json
+
+# JavaScript
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Models and data
+data/
+artifacts/
+*.pkl
+*.joblib
+
+# Azure and tools
+.azure/
+.func/
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
