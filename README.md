@@ -2,9 +2,11 @@
 
 FootballVS es una aplicación web responsive para comparar dos equipos de fútbol mediante estadísticas históricas, visualizaciones interactivas y probabilidades estimadas por un modelo estadístico.
 
+El MVP comenzará con la Premier League 2026/27 y utilizará la API v4 de `football-data.org` mediante su plan gratuito.
+
 ## Estado
 
-Fase 0 — definición y fundaciones del proyecto.
+Fase 0 completada — definición y fundaciones del proyecto.
 
 ## MVP
 
@@ -52,3 +54,9 @@ La instalación de las aplicaciones se realizará en la Fase 1. Las variables pr
 ## Aviso sobre las predicciones
 
 Las probabilidades de FootballVS son estimaciones estadísticas y no garantizan resultados. No deben presentarse como asesoría de apuestas.
+
+## Licencia
+
+El código y la documentación propios de FootballVS se distribuyen bajo la [licencia MIT](LICENSE).
+
+La licencia MIT no concede derechos sobre datos obtenidos de `football-data.org`, nombres y escudos de equipos, marcas comerciales ni otros recursos de terceros. Esos elementos permanecen sujetos a los términos y derechos de sus respectivos propietarios.
