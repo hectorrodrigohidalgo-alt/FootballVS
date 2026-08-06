@@ -22,7 +22,8 @@ Aficionado al fútbol que desea analizar rápidamente un posible cruce entre dos
 ### Incluido
 
 - Diseño responsive para móvil, tablet y escritorio.
-- Una competición inicial, ampliable según cobertura de la API.
+- Premier League de Inglaterra como competición inicial, comenzando con la temporada 2026/27.
+- Datos básicos obtenidos desde `football-data.org`, ampliables según cobertura y presupuesto.
 - Comparación de dos equipos distintos.
 - Resumen de partidos jugados, ganados, empatados, perdidos, goles a favor y en contra.
 - Forma de los últimos 5 y 10 partidos, separable por localía.
@@ -68,9 +69,19 @@ Aficionado al fútbol que desea analizar rápidamente un posible cruce entre dos
 - Predicciones evaluadas con división temporal, Log Loss, Brier Score y calibración.
 - Pruebas automáticas sobre reglas, transformaciones y endpoints críticos.
 
-## Preguntas por cerrar antes de la Fase 1
+## Decisiones de identidad y experiencia
 
-- Competición y temporada iniciales.
-- Fuente de datos definitiva después de validar cobertura y licencia.
-- Idioma único inicial o preparación para internacionalización.
-- Identidad visual y nombre definitivo del producto.
+- Nombre definitivo del proyecto: FootballVS.
+- Idioma de la aplicación: español.
+- No se contempla internacionalización, ya que el proyecto es de uso personal y tiene fines educativos.
+- El diseño visual y la identidad gráfica se definirán e implementarán durante la Fase 1.
+
+## Decisiones de datos
+
+- Competición piloto: Premier League de Inglaterra.
+- Código del proveedor: `PL`.
+- Temporada operativa inicial: 2026/27.
+- Proveedor: `football-data.org`, API v4 y plan gratuito.
+- El MVP trabajará con resultados, calendario y tablas; no dependerá de estadísticas avanzadas de pago.
+- El uso y la conservación de datos respetarán los términos de la cuenta de `football-data.org`; no se publicará una copia del dataset original.
+- Antes de entrenar el modelo se comprobará con la API autenticada cuántas temporadas históricas están disponibles para la cuenta gratuita.

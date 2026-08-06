@@ -7,11 +7,23 @@
 - [x] Definir modelo estadístico inicial y evaluación.
 - [x] Bosquejar modelo de datos y endpoints.
 - [x] Crear estructura, reglas Git y archivos seguros.
-- [ ] Elegir competición/temporada inicial.
-- [ ] Validar cobertura, licencia y límites reales del proveedor.
-- [ ] Crear repositorio remoto y primer commit.
+- [x] Elegir Premier League, temporada 2026/27, como competición inicial.
+- [x] Seleccionar `football-data.org` y validar la cobertura básica y los límites de su plan gratuito.
+- [x] Crear repositorio remoto y primer commit.
+- [x] Adoptar la licencia MIT para el código y la documentación propios del repositorio.
 
-Salida: alcance acordado, proveedor validado y repositorio base publicado.
+Salida: alcance acordado, proveedor validado y repositorio base publicado. **Completada.**
+
+### Restricciones confirmadas del proveedor
+
+- API: `football-data.org` v4.
+- Competición: Premier League (`PL`), incluida en la cobertura gratuita.
+- Plan: Free, 12 competiciones y 10 solicitudes por minuto.
+- Datos incluidos: resultados con demora, fixtures/calendario con demora y tablas de posiciones.
+- Datos avanzados, estadísticas detalladas y diez temporadas históricas no forman parte del plan gratuito estándar.
+- El servicio no se tratará como una fuente de datos abierta: su uso queda sujeto a los términos aceptados al registrar la cuenta y se evitará redistribuir el dataset original.
+- En la Fase 1 se verificará con la API autenticada la cantidad exacta de temporadas accesibles antes de fijar la ventana del modelo.
+- La clave se almacenará sólo en variables seguras del backend; nunca en el frontend ni en Git.
 
 ## Fase 1 — Esqueleto ejecutable
 
@@ -19,6 +31,7 @@ Salida: alcance acordado, proveedor validado y repositorio base publicado.
 - Crear Azure Functions Python.
 - Añadir lint, tipos, pruebas y build en CI.
 - Implementar layout responsive y contrato API simulado.
+- Registrar una cuenta gratuita, configurar la clave localmente y comprobar acceso a `PL` y temporadas disponibles.
 
 Salida: aplicación local y pipeline verde.
 

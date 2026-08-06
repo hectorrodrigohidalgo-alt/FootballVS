@@ -5,7 +5,7 @@
 Se utilizará un monorepo con frontend React/TypeScript, API serverless Python y un proceso separado de sincronización y cálculo. Esto mantiene bajo el costo y permite desplegar cada componente de manera independiente.
 
 ```text
-Proveedor de datos
+football-data.org API v4
        |
        v
 Sincronizador programado --> Normalización --> Cosmos DB
@@ -45,11 +45,15 @@ Endpoints iniciales:
 
 ### Datos y sincronización
 
+- El proveedor inicial es `football-data.org` y la competición se consulta con el código `PL`.
 - El navegador nunca consulta directamente al proveedor externo.
 - Una función programada importa cambios respetando límites de uso.
+- El plan gratuito admite 10 solicitudes por minuto; el cliente aplicará limitación, reintentos con espera y caché.
+- La sincronización no dependerá de datos en vivo: los resultados y calendarios gratuitos pueden llegar con demora.
 - Los identificadores externos se conservan junto a identificadores internos.
 - La escritura de partidos es idempotente.
 - Se registra cada ejecución, rango consultado, resultado y error.
+- La disponibilidad histórica se comprobará mediante `GET /v4/competitions/PL` antes de definir la ventana de entrenamiento.
 
 ### Modelo estadístico
 
