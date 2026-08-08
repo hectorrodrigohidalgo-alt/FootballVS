@@ -4,9 +4,11 @@ FootballVS es una aplicación web responsive para comparar dos equipos de fútbo
 
 El MVP comenzará con la Premier League 2026/27 y utilizará la API v4 de `football-data.org` mediante su plan gratuito.
 
+La cuenta gratuita validada permite consultar equipos y partidos desde 2023/24 hasta 2026/27. El entrenamiento inicial utilizará las tres temporadas completas 2023/24–2025/26 y añadirá 2026/27 progresivamente.
+
 ## Estado
 
-Fase 0 completada. Fase 1 en progreso: puntos 1–8 completados en la rama `feat/Fase-1-Fundacion`.
+Fase 0 completada. Fase 1 en progreso: puntos 1–9 completados en la rama `feat/Fase-1-Fundacion`.
 
 ## MVP
 

@@ -84,4 +84,5 @@ Aficionado al fútbol que desea analizar rápidamente un posible cruce entre dos
 - Proveedor: `football-data.org`, API v4 y plan gratuito.
 - El MVP trabajará con resultados, calendario y tablas; no dependerá de estadísticas avanzadas de pago.
 - El uso y la conservación de datos respetarán los términos de la cuenta de `football-data.org`; no se publicará una copia del dataset original.
-- Antes de entrenar el modelo se comprobará con la API autenticada cuántas temporadas históricas están disponibles para la cuenta gratuita.
+- La validación autenticada confirmó equipos y partidos disponibles para 2023/24, 2024/25, 2025/26 y 2026/27; 2022/23 está restringida.
+- El entrenamiento inicial utilizará las tres temporadas completas 2023/24–2025/26. La temporada 2026/27 se incorporará progresivamente al disponer de resultados.

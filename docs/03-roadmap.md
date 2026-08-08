@@ -22,7 +22,8 @@ Salida: alcance acordado, proveedor validado y repositorio base publicado. **Com
 - Datos incluidos: resultados con demora, fixtures/calendario con demora y tablas de posiciones.
 - Datos avanzados, estadísticas detalladas y diez temporadas históricas no forman parte del plan gratuito estándar.
 - El servicio no se tratará como una fuente de datos abierta: su uso queda sujeto a los términos aceptados al registrar la cuenta y se evitará redistribuir el dataset original.
-- En la Fase 1 se verificará con la API autenticada la cantidad exacta de temporadas accesibles antes de fijar la ventana del modelo.
+- La validación autenticada confirmó equipos y partidos para cuatro temporadas: 2023/24–2026/27; 2022/23 está restringida.
+- La ventana inicial de entrenamiento será 2023/24–2025/26 y la temporada 2026/27 se incorporará progresivamente.
 - La clave se almacenará sólo en variables seguras del backend; nunca en el frontend ni en Git.
 
 ## Fase 1 — Esqueleto ejecutable
@@ -35,7 +36,7 @@ Salida: alcance acordado, proveedor validado y repositorio base publicado. **Com
 - [x] Punto 6: implementar el contrato mock y conectar frontend–API.
 - [x] Punto 7: añadir pruebas automáticas y reforzar validaciones locales.
 - [x] Punto 8: configurar lint, tipos, pruebas y build en GitHub Actions.
-- [ ] Punto 9: configurar la clave en backend y comprobar acceso a `PL` y temporadas disponibles.
+- [x] Punto 9: configurar la clave en backend y comprobar acceso a `PL` y temporadas disponibles.
 - [ ] Punto 10: completar documentación y cerrar la fase mediante pull request.
 
 Salida: aplicación local y pipeline verde.

@@ -16,7 +16,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase | Estado | Avance | Rama de trabajo |
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
-| Fase 1 — Esqueleto ejecutable | En progreso | 8 de 10 puntos | `feat/Fase-1-Fundacion` |
+| Fase 1 — Esqueleto ejecutable | En progreso | 9 de 10 puntos | `feat/Fase-1-Fundacion` |
 | Fase 2 — Datos | Pendiente | 0% | — |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
@@ -70,7 +70,7 @@ Estado: **Completada**.
 - Estado: completado.
 - Competición: Premier League, temporada 2026/27.
 - Proveedor: `football-data.org` v4 con plan gratuito.
-- Restricción: la ventana histórica exacta se confirmará mediante una consulta autenticada antes de entrenar el modelo.
+- Validación posterior: la ventana accesible quedó confirmada en el Punto 9 para 2023/24–2026/27.
 - Evidencia: `docs/03-roadmap.md`.
 
 ### Punto 0.7 — Seguridad de configuración
@@ -223,8 +223,27 @@ Estado: **En progreso**.
 
 ### Punto 9 — Validación autenticada del proveedor
 
-- Estado: pendiente.
-- Alcance previsto: configurar la clave sólo en backend y comprobar acceso a `PL`, equipos y temporadas disponibles.
+- Estado: completado.
+- Fecha de inicio: 8 de agosto de 2026.
+- Proveedor: `football-data.org` API v4 mediante el plan gratuito.
+- Implementación:
+  - Cliente HTTP reutilizable basado en la biblioteca estándar de Python.
+  - Herramienta local que carga `local.settings.json` sin mostrar la clave.
+  - Host restringido a `https://api.football-data.org` para evitar enviar el token a otro destino.
+  - Pausas de 6,5 segundos entre solicitudes para respetar el límite gratuito.
+  - Pruebas simuladas de autenticación, configuración insegura, errores y ventana histórica.
+- Validación autenticada:
+  - Competición: Premier League, código `PL`, identificador `2021`.
+  - Temporada actual informada: 2026/27, con 20 equipos y 10 partidos en la jornada 1.
+  - Temporadas accesibles para equipos y partidos: 2026/27, 2025/26, 2024/25 y 2023/24.
+  - Primera temporada restringida: 2022/23.
+  - El recurso de competición lista 128 temporadas, pero la cuenta no tiene acceso operativo a todas ellas.
+  - La ejecución final utilizó 10 solicitudes espaciadas y concluyó correctamente.
+- Decisión de datos: entrenar inicialmente con 2023/24–2025/26 y añadir 2026/27 conforme se jueguen partidos.
+- Seguridad: la clave no fue mostrada, registrada ni añadida a Git; CI continúa usando sólo mocks.
+- Validaciones locales: Ruff aprobado y 16 pruebas API aprobadas.
+- Archivos principales: `api/football_data_client.py`, `api/tools/validate_football_data.py` y sus pruebas.
+- Resultado: autenticación, cobertura de `PL` y ventana histórica confirmadas.
 
 ### Punto 10 — Documentación y cierre de fase
 
@@ -233,7 +252,7 @@ Estado: **En progreso**.
 
 ## Próximo paso
 
-Implementar el **Punto 9 — Validación autenticada del proveedor**, manteniendo la clave sólo en el backend.
+Completar el **Punto 10 — Documentación y cierre de fase** mediante validación final y pull request.
 
 ## Plantilla para próximas actualizaciones
 

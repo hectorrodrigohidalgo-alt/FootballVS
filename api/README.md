@@ -36,3 +36,17 @@ Desde `api/`, con el entorno virtual preparado:
 ```
 
 Las pruebas utilizan únicamente el dataset mock y no necesitan una clave de API.
+
+## Validación segura de football-data.org
+
+La clave real debe existir únicamente en `local.settings.json` bajo
+`FOOTBALL_DATA_API_KEY`. Para comprobar autenticación, acceso a Premier League y
+temporadas recientes:
+
+```powershell
+.venv\Scripts\python.exe -m tools.validate_football_data
+```
+
+La herramienta respeta el límite gratuito mediante pausas, comprueba equipos y
+partidos de la jornada 1, sólo contacta el host HTTPS oficial y nunca imprime la
+clave ni las respuestas completas del proveedor.

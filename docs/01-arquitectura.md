@@ -53,7 +53,7 @@ Endpoints iniciales:
 - Los identificadores externos se conservan junto a identificadores internos.
 - La escritura de partidos es idempotente.
 - Se registra cada ejecución, rango consultado, resultado y error.
-- La disponibilidad histórica se comprobará mediante `GET /v4/competitions/PL` antes de definir la ventana de entrenamiento.
+- La disponibilidad histórica se comprobó mediante los recursos autenticados de competición, equipos y partidos: la ventana accesible es 2023/24–2026/27 y 2022/23 está restringida.
 
 ### Modelo estadístico
 
