@@ -15,6 +15,7 @@ Copy-Item local.settings.json.example local.settings.json
 ## Ejecución
 
 ```powershell
+.\.venv\Scripts\Activate.ps1
 func.cmd start
 ```
 
@@ -23,6 +24,12 @@ Comprobar el estado:
 ```text
 GET http://localhost:7071/api/v1/health
 ```
+
+Endpoints mock disponibles:
+
+- `GET /api/v1/competitions`
+- `GET /api/v1/competitions/{competition_id}/teams`
+- `GET /api/v1/comparisons?team1={id}&team2={id}&venue={team1|team2|neutral}`
 
 `local.settings.json` y `.venv/` son locales y no deben publicarse en Git.
 

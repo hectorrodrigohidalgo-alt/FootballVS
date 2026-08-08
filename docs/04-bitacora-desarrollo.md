@@ -111,10 +111,10 @@ Estado: **En progreso**.
 
 ### Punto 2 — Rama de la fase
 
-- Estado: completado localmente.
+- Estado: completado y publicado.
 - Rama: `feat/Fase-1-Fundacion`.
 - Objetivo: mantener `main` estable durante la implementación.
-- Publicación: la rama y sus cambios todavía no tienen commit ni push de la Fase 1.
+- Publicación: rama disponible en `origin/feat/Fase-1-Fundacion` con integración continua activa.
 
 ### Punto 3 — Frontend React
 
@@ -248,7 +248,19 @@ Estado: **En progreso**.
 ### Punto 10 — Documentación y cierre de fase
 
 - Estado: en progreso.
-- Alcance: instrucciones reproducibles de instalación y ejecución, actualización de esta bitácora y cierre mediante commit, push y pull request.
+- Objetivo: entregar instrucciones reproducibles, evidencia de calidad y un pull request revisable hacia `main`.
+- Documentación preparada:
+  - README raíz con estado real del stack, badge de CI e inicio rápido.
+  - Guía integral de desarrollo local.
+  - Instrucciones específicas para frontend y API.
+  - Checklist ampliado de contribución y pull request.
+- Validación final local:
+  - Enlaces internos de Markdown resueltos correctamente.
+  - Oxlint y comprobación TypeScript aprobados.
+  - 4 pruebas frontend y build Vite aprobados.
+  - Ruff y 16 pruebas API aprobados.
+  - `git diff --check` sin errores.
+- Trabajo pendiente: publicar estos cambios, abrir el pull request y confirmar CI en verde.
 
 ## Próximo paso
 

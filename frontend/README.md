@@ -7,7 +7,7 @@ Interfaz responsive construida con React, TypeScript, Vite, Tailwind CSS y TanSt
 Desde PowerShell, dentro de `frontend/`:
 
 ```powershell
-npm.cmd install
+npm.cmd ci
 Copy-Item .env.example .env.local
 ```
 
