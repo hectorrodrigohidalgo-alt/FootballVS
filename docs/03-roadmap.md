@@ -1,5 +1,11 @@
 # Plan de desarrollo
 
+## Estado actual
+
+- Fase 0: completada e integrada en `main`.
+- Fase 1: completada, 10 de 10 puntos, con CI verde e integrada en `main` mediante los PR `#2` y `#3`.
+- Próximo objetivo: iniciar la Fase 2 — Datos.
+
 ## Fase 0 — Descubrimiento y fundaciones
 
 - [x] Definir problema, usuario, flujo y alcance del MVP.
@@ -45,10 +51,10 @@ Detalle verificable: `docs/04-bitacora-desarrollo.md`.
 
 ## Fase 2 — Datos
 
-- Integrar proveedor y manejar límites/errores.
-- Normalizar competiciones, equipos y partidos.
-- Persistir datos y ejecutar sincronización idempotente.
-- Calcular estadísticas agregadas.
+- [ ] Integrar el proveedor y manejar límites/errores.
+- [ ] Normalizar competiciones, equipos y partidos.
+- [ ] Persistir datos y ejecutar sincronización idempotente.
+- [ ] Calcular estadísticas agregadas.
 
 Salida: datos reales consultables y trazables.
 

@@ -16,7 +16,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase | Estado | Avance | Rama de trabajo |
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
-| Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `feat/Fase-1-Fundacion` |
+| Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Pendiente | 0% | — |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
@@ -264,10 +264,12 @@ Estado: **Completada**.
   - Pull request: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/pull/2`.
   - Rama base: `main`.
   - Rama de trabajo: `feat/Fase-1-Fundacion`.
-  - Estado del PR: abierto, listo para revisión y combinable.
+  - Estado del PR: integrado mediante squash en `main`.
+  - Commit de integración: `fd26dee` (`#2`).
+  - Cierre documental posterior: `0486d72` (`#3`).
   - GitHub Actions del PR: completado correctamente.
   - Ejecución: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31279018227`.
-- Resultado: documentación reproducible, PR revisable y Fase 1 lista para integración mediante squash.
+- Resultado: documentación reproducible y Fase 1 integrada y cerrada en `main`.
 
 ## Próximo paso
 
