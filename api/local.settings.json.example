@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "APP_VERSION": "local",
+    "FOOTBALL_DATA_API_KEY": "replace_me",
+    "FOOTBALL_DATA_BASE_URL": "https://api.football-data.org/v4"
+  },
+  "Host": {
+    "CORS": "http://localhost:5173",
+    "CORSCredentials": false
+  }
+}

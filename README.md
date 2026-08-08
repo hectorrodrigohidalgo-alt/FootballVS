@@ -1,12 +1,16 @@
 # FootballVS
 
+[![Continuous Integration](https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/workflows/ci.yml/badge.svg)](https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/workflows/ci.yml)
+
 FootballVS es una aplicación web responsive para comparar dos equipos de fútbol mediante estadísticas históricas, visualizaciones interactivas y probabilidades estimadas por un modelo estadístico.
 
 El MVP comenzará con la Premier League 2026/27 y utilizará la API v4 de `football-data.org` mediante su plan gratuito.
 
+La cuenta gratuita validada permite consultar equipos y partidos desde 2023/24 hasta 2026/27. El entrenamiento inicial utilizará las tres temporadas completas 2023/24–2025/26 y añadirá 2026/27 progresivamente.
+
 ## Estado
 
-Fase 0 completada — definición y fundaciones del proyecto.
+Fase 0 completada. Fase 1 en progreso: puntos 1–9 completados en la rama `feat/Fase-1-Fundacion`.
 
 ## MVP
 
@@ -20,13 +24,21 @@ El usuario podrá:
 
 El MVP no incluye autenticación, pagos, apuestas, datos en vivo ni predicciones de jugadores.
 
-## Stack previsto
+## Stack
 
-- Frontend: React, TypeScript, Vite, Tailwind CSS y Apache ECharts.
+Implementado en la Fase 1:
+
+- Frontend: React, TypeScript, Vite, Tailwind CSS y TanStack Query.
 - API: Python con Azure Functions.
-- Datos: API externa de fútbol y Azure Cosmos DB.
+- Calidad: Vitest, Testing Library, pytest, Ruff, Oxlint y GitHub Actions.
+- Datos actuales: contrato y dashboard mock; cliente seguro para validar `football-data.org`.
+
+Previsto para fases posteriores:
+
+- Visualización: Apache ECharts.
+- Persistencia: Azure Cosmos DB.
 - Analítica: pandas, NumPy, Elo y Poisson con corrección Dixon-Coles.
-- Infraestructura: Azure Static Web Apps, Azure Functions, Cosmos DB y GitHub Actions.
+- Despliegue: Azure Static Web Apps y Azure Functions.
 
 ## Estructura
 
@@ -45,11 +57,34 @@ docs/           Producto, arquitectura y planificación
 - [Arquitectura técnica](docs/01-arquitectura.md)
 - [Modelo de datos](docs/02-modelo-datos.md)
 - [Plan de desarrollo](docs/03-roadmap.md)
+- [Bitácora de desarrollo](docs/04-bitacora-desarrollo.md)
+- [Guía de desarrollo local](docs/05-guia-desarrollo-local.md)
 - [Forma de contribuir](CONTRIBUTING.md)
 
-## Configuración local
+## Inicio rápido
 
-La instalación de las aplicaciones se realizará en la Fase 1. Las variables previstas están documentadas en `.env.example`; nunca deben guardarse claves reales en Git.
+Clonar el repositorio y preparar la API:
+
+```powershell
+git clone https://github.com/hectorrodrigohidalgo-alt/FootballVS.git
+cd FootballVS\api
+py -3.12 -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+Copy-Item local.settings.json.example local.settings.json
+.\.venv\Scripts\Activate.ps1
+func.cmd start
+```
+
+En una segunda terminal, preparar el frontend:
+
+```powershell
+cd FootballVS\frontend
+npm.cmd ci
+Copy-Item .env.example .env.local
+npm.cmd run dev
+```
+
+Abrir `http://localhost:5173`. El dashboard usa datos simulados y no requiere una clave real. Consulta la [guía local completa](docs/05-guia-desarrollo-local.md) para validaciones, variables y solución de problemas.
 
 ## Aviso sobre las predicciones
 

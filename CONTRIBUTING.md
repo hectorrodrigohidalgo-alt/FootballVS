@@ -25,3 +25,26 @@ Usar Conventional Commits:
 - Lint, tipos, pruebas y build finalizan correctamente.
 - No hay secretos ni archivos generados versionados.
 - La documentación refleja cualquier decisión pública o técnica nueva.
+
+## Validación local
+
+Antes de abrir un pull request:
+
+```powershell
+cd frontend
+npm.cmd ci
+npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd run test
+npm.cmd run build
+```
+
+Desde otra terminal:
+
+```powershell
+cd api
+.venv\Scripts\python.exe -m ruff check .
+.venv\Scripts\python.exe -m pytest
+```
+
+La clave real de `football-data.org` no es necesaria para CI ni para las pruebas.
