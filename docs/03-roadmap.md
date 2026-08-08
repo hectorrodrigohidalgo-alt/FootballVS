@@ -27,13 +27,20 @@ Salida: alcance acordado, proveedor validado y repositorio base publicado. **Com
 
 ## Fase 1 — Esqueleto ejecutable
 
-- Crear frontend React/TypeScript/Vite.
-- Crear Azure Functions Python.
-- Añadir lint, tipos, pruebas y build en CI.
-- Implementar layout responsive y contrato API simulado.
-- Registrar una cuenta gratuita, configurar la clave localmente y comprobar acceso a `PL` y temporadas disponibles.
+- [x] Punto 1: preparar y validar el entorno de desarrollo.
+- [x] Punto 2: crear la rama `feat/Fase-1-Fundacion`.
+- [x] Punto 3: crear el frontend React/TypeScript/Vite.
+- [x] Punto 4: configurar Tailwind CSS y el layout responsive.
+- [x] Punto 5: crear la API Python con Azure Functions.
+- [x] Punto 6: implementar el contrato mock y conectar frontend–API.
+- [x] Punto 7: añadir pruebas automáticas y reforzar validaciones locales.
+- [ ] Punto 8: configurar lint, tipos, pruebas y build en GitHub Actions. Workflow implementado localmente; falta validarlo en GitHub.
+- [ ] Punto 9: configurar la clave en backend y comprobar acceso a `PL` y temporadas disponibles.
+- [ ] Punto 10: completar documentación y cerrar la fase mediante pull request.
 
 Salida: aplicación local y pipeline verde.
+
+Detalle verificable: `docs/04-bitacora-desarrollo.md`.
 
 ## Fase 2 — Datos
 

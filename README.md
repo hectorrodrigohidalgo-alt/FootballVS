@@ -6,7 +6,7 @@ El MVP comenzará con la Premier League 2026/27 y utilizará la API v4 de `footb
 
 ## Estado
 
-Fase 0 completada — definición y fundaciones del proyecto.
+Fase 0 completada. Fase 1 en progreso: puntos 1–7 completados en la rama `feat/Fase-1-Fundacion`.
 
 ## MVP
 
@@ -45,11 +45,12 @@ docs/           Producto, arquitectura y planificación
 - [Arquitectura técnica](docs/01-arquitectura.md)
 - [Modelo de datos](docs/02-modelo-datos.md)
 - [Plan de desarrollo](docs/03-roadmap.md)
+- [Bitácora de desarrollo](docs/04-bitacora-desarrollo.md)
 - [Forma de contribuir](CONTRIBUTING.md)
 
 ## Configuración local
 
-La instalación de las aplicaciones se realizará en la Fase 1. Las variables previstas están documentadas en `.env.example`; nunca deben guardarse claves reales en Git.
+El frontend y la API ya disponen de instrucciones locales en sus respectivos archivos `README.md`. Las variables previstas están documentadas en archivos `.example`; nunca deben guardarse claves reales en Git.
 
 ## Aviso sobre las predicciones
 

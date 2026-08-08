@@ -1,0 +1,247 @@
+# Bitácora de desarrollo
+
+Última actualización: **8 de agosto de 2026**.
+
+Este documento registra el avance verificable de FootballVS. Se actualiza al finalizar cada punto y distingue entre trabajo implementado localmente, validado y publicado en GitHub.
+
+## Convenciones
+
+- **Completado:** implementado y validado según los criterios del punto.
+- **En progreso:** existe trabajo iniciado, pero falta una validación o decisión.
+- **Pendiente:** todavía no se ha iniciado.
+- Ningún secreto, clave real o valor de `local.settings.json` debe copiarse en esta bitácora.
+
+## Resumen
+
+| Fase | Estado | Avance | Rama de trabajo |
+| --- | --- | ---: | --- |
+| Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
+| Fase 1 — Esqueleto ejecutable | En progreso | 7 de 10 puntos | `feat/Fase-1-Fundacion` |
+| Fase 2 — Datos | Pendiente | 0% | — |
+| Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
+| Fase 4 — Modelo estadístico | Pendiente | 0% | — |
+| Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
+
+## Fase 0 — Descubrimiento y fundaciones
+
+Estado: **Completada**.
+
+### Punto 0.1 — Problema, usuario y alcance
+
+- Estado: completado.
+- Objetivo: delimitar qué necesidad resuelve FootballVS y para quién.
+- Resultado: se definió un usuario aficionado al fútbol, un flujo sin registro y un MVP centrado en comparar dos equipos.
+- Decisiones: quedan fuera del MVP autenticación, pagos, apuestas, datos en vivo y predicciones individuales de jugadores.
+- Evidencia: `docs/00-producto.md`.
+
+### Punto 0.2 — Métricas y reglas funcionales
+
+- Estado: completado.
+- Resultado: se definieron forma reciente, resultados, goles, Elo, probabilidades 1X2 y goles estimados.
+- Reglas: no se permite comparar el mismo equipo; la localía es obligatoria; los datos insuficientes se informan explícitamente.
+- Decisión: los goles calculados por el modelo no se presentan como xG real.
+- Evidencia: `docs/00-producto.md`.
+
+### Punto 0.3 — Stack tecnológico
+
+- Estado: completado.
+- Frontend: React, TypeScript, Vite, Tailwind CSS, TanStack Query y Apache ECharts.
+- Backend: Python y Azure Functions.
+- Datos: `football-data.org` y Azure Cosmos DB.
+- Modelo: Elo y Poisson con corrección Dixon-Coles.
+- Infraestructura: Azure Static Web Apps, Azure Functions, Cosmos DB y GitHub Actions.
+- Evidencia: `README.md` y `docs/01-arquitectura.md`.
+
+### Punto 0.4 — Arquitectura
+
+- Estado: completado.
+- Resultado: se definió un monorepo con frontend, API, sincronización, almacenamiento y modelo estadístico separados.
+- Decisión: el navegador nunca debe consultar directamente la API externa ni conocer su clave.
+- Evidencia: `docs/01-arquitectura.md`.
+
+### Punto 0.5 — Modelo de datos y endpoints
+
+- Estado: completado.
+- Resultado: se bosquejaron competiciones, temporadas, equipos, partidos, snapshots, historial Elo, versiones del modelo, predicciones y ejecuciones de sincronización.
+- Evidencia: `docs/02-modelo-datos.md`.
+
+### Punto 0.6 — Competición y proveedor inicial
+
+- Estado: completado.
+- Competición: Premier League, temporada 2026/27.
+- Proveedor: `football-data.org` v4 con plan gratuito.
+- Restricción: la ventana histórica exacta se confirmará mediante una consulta autenticada antes de entrenar el modelo.
+- Evidencia: `docs/03-roadmap.md`.
+
+### Punto 0.7 — Seguridad de configuración
+
+- Estado: completado.
+- Resultado: `.env`, `local.settings.json`, entornos virtuales, datos y artefactos del modelo quedan ignorados por Git.
+- Decisión: sólo se publican plantillas como `.env.example` y `local.settings.json.example`.
+
+### Punto 0.8 — Repositorio y flujo Git
+
+- Estado: completado.
+- Resultado: repositorio GitHub creado, rama principal `main`, Conventional Commits y trabajo mediante ramas cortas y pull requests.
+- Commit de cierre de la fase: `25a9f06`.
+
+### Punto 0.9 — Licencia
+
+- Estado: completado.
+- Resultado: código y documentación propios publicados bajo licencia MIT.
+- Restricción: la licencia no concede derechos sobre datasets, escudos, marcas o recursos de terceros.
+- Evidencia: `LICENSE` y `README.md`.
+
+## Fase 1 — Esqueleto ejecutable
+
+Estado: **En progreso**.
+
+### Punto 1 — Entorno de desarrollo
+
+- Estado: completado.
+- Objetivo: disponer de herramientas compatibles y reproducibles.
+- Herramientas verificadas:
+  - Git `2.52.0`.
+  - Node.js `24.19.0` LTS.
+  - npm `11.17.0`.
+  - Python `3.12.10` de 64 bits.
+  - Azure Functions Core Tools v4.
+- Decisión: usar entornos locales aislados en lugar de una máquina virtual.
+- Nota: en PowerShell se utilizan `npm.cmd` y `func.cmd` para evitar el bloqueo de scripts `.ps1`.
+
+### Punto 2 — Rama de la fase
+
+- Estado: completado localmente.
+- Rama: `feat/Fase-1-Fundacion`.
+- Objetivo: mantener `main` estable durante la implementación.
+- Publicación: la rama y sus cambios todavía no tienen commit ni push de la Fase 1.
+
+### Punto 3 — Frontend React
+
+- Estado: completado.
+- Implementación:
+  - React `19.2.8`.
+  - TypeScript `6.0.2`.
+  - Vite `8.2.1`.
+  - Oxlint `1.75.0`.
+  - Instalación reproducible mediante `package-lock.json`.
+- Validaciones: lint y build de producción correctos; cero vulnerabilidades reportadas al instalar la plantilla.
+- Archivos principales: `frontend/package.json`, `frontend/src/main.tsx` y `frontend/vite.config.ts`.
+
+### Punto 4 — Tailwind y layout responsive
+
+- Estado: completado y aprobado visualmente.
+- Implementación:
+  - Tailwind CSS `4.3.3` mediante el plugin oficial de Vite.
+  - Diseño mobile-first.
+  - Encabezado, introducción, competición, dos selectores, localía y botón condicionado.
+  - Área reservada para el dashboard.
+- Decisión visual: fondo verde musgo oscuro con degradado `#536449 → #2d3b29 → #172117`.
+- Accesibilidad: etiquetas asociadas, foco visible, controles nativos y región `aria-live`.
+- Validaciones: lint y build correctos.
+
+### Punto 5 — API base con Azure Functions
+
+- Estado: completado.
+- Implementación:
+  - Azure Functions con modelo Python v2.
+  - Entorno aislado `api/.venv`.
+  - Dependencia `azure-functions 1.25.0`.
+  - Endpoint `GET /api/v1/health`.
+  - Configuración local y ejemplo versionable separados.
+- Respuesta verificada: HTTP `200` con estado, servicio, versión y timestamp UTC.
+- Seguridad: `.venv` y `local.settings.json` permanecen ignorados por Git.
+- Archivos principales: `api/function_app.py`, `api/host.json`, `api/requirements.txt` y `api/README.md`.
+
+### Punto 6 — Contrato mock y conexión frontend–API
+
+- Estado: completado y aprobado visualmente.
+- Convención: campos JSON en inglés con `snake_case`; textos visibles en español.
+- Endpoints implementados:
+  - `GET /api/v1/competitions`.
+  - `GET /api/v1/competitions/{competition_id}/teams`.
+  - `GET /api/v1/comparisons?team1={id}&team2={id}&venue={team1|team2|neutral}`.
+- Dataset mock: Arsenal, Chelsea, Liverpool y Manchester City.
+- Métricas: resultados, goles por partido, forma reciente, Elo, probabilidades 1X2 y goles estimados.
+- Comportamiento: los datos son determinísticos; una misma solicitud produce el mismo resultado.
+- Errores: contrato uniforme con `error.code` y `error.message`; estados `400` y `404` verificados.
+- Frontend:
+  - TanStack Query `5.101.4`.
+  - Caché de cinco minutos y un reintento automático.
+  - Skeletons, panel de error y botón `Reintentar`.
+  - Dashboard tipado y etiqueta visible de datos simulados.
+- Validaciones:
+  - Endpoints exitosos con HTTP `200`.
+  - Selección inválida con HTTP `400`.
+  - Recurso inexistente con HTTP `404`.
+  - CORS permitido para `http://localhost:5173`.
+  - Lint y build del frontend correctos.
+- Archivos principales: `api/mock_data.py`, `api/http_responses.py`, `frontend/src/api/`, `frontend/src/components/` y `frontend/src/App.tsx`.
+
+### Punto 7 — Pruebas automáticas
+
+- Estado: completado.
+- Fecha: 8 de agosto de 2026.
+- Objetivo: detectar regresiones del contrato HTTP y de los flujos principales antes de configurar integración continua.
+- Frontend:
+  - Vitest `4.1.10`, Testing Library React `16.3.2`, jest-dom `7.0.0`, user-event `14.6.3` y jsdom `30.0.1`.
+  - Caché aislada de TanStack Query y reintentos desactivados durante cada prueba.
+  - Casos para URL y respuesta del cliente HTTP, traducción de errores, habilitación del botón, envío del formulario, render del dashboard y estado de error.
+  - Ejecución con un worker basado en hilos para reducir uso de recursos en local y futuros runners gratuitos.
+- API:
+  - pytest `9.1.1` y Ruff `0.16.2`, definidos en `requirements-dev.txt`.
+  - Casos para salud, competiciones, resúmenes de equipos, comparación determinística, suma de probabilidades y errores `400/404`.
+- Resultado: 4 pruebas frontend y 9 pruebas API aprobadas; 13 en total.
+- Validaciones adicionales: Oxlint, TypeScript, Ruff y build Vite aprobados.
+- Seguridad: las pruebas usan datos mock; no leen ni exponen la clave de `local.settings.json`.
+- Archivos principales: `frontend/src/**/*.test.tsx`, `frontend/src/api/client.test.ts`, `frontend/src/test/`, `api/tests/`, `api/pyproject.toml` y `api/requirements-dev.txt`.
+
+### Punto 8 — Integración continua
+
+- Estado: en progreso.
+- Fecha de inicio: 8 de agosto de 2026.
+- Objetivo: rechazar automáticamente cambios que rompan la calidad del frontend o la API.
+- Implementación local:
+  - Workflow `Continuous Integration` para eventos `push`, `pull_request` y ejecución manual.
+  - Trabajo `Frontend quality` con Node.js 24, caché npm, instalación reproducible mediante `npm ci`, Oxlint, TypeScript, Vitest y build Vite.
+  - Trabajo `API quality` con Python 3.12, caché pip, instalación desde `requirements-dev.txt`, Ruff y pytest.
+  - Trabajos independientes sobre `ubuntu-latest`, con límite de diez minutos.
+  - Permiso mínimo `contents: read` y cancelación de ejecuciones obsoletas de la misma referencia.
+- Validación local:
+  - Reconstrucción desde `package-lock.json` aprobada y cero vulnerabilidades reportadas por npm.
+  - Frontend: lint, tipos, 4 pruebas y build aprobados.
+  - API: reconstrucción de dependencias, Ruff y 9 pruebas aprobados.
+- Seguridad: el workflow no recibe secretos ni consulta `football-data.org`; utiliza exclusivamente datos mock.
+- Archivo principal: `.github/workflows/ci.yml`.
+- Trabajo pendiente: autorizar publicación de la rama y confirmar ambos trabajos en verde dentro de GitHub Actions. Sólo entonces el punto se marcará como completado.
+
+### Punto 9 — Validación autenticada del proveedor
+
+- Estado: pendiente.
+- Alcance previsto: configurar la clave sólo en backend y comprobar acceso a `PL`, equipos y temporadas disponibles.
+
+### Punto 10 — Documentación y cierre de fase
+
+- Estado: en progreso.
+- Alcance: instrucciones reproducibles de instalación y ejecución, actualización de esta bitácora y cierre mediante commit, push y pull request.
+
+## Próximo paso
+
+Implementar el **Punto 8 — Integración continua** con GitHub Actions.
+
+## Plantilla para próximas actualizaciones
+
+Al completar un punto nuevo, añadir:
+
+```markdown
+### Punto N — Nombre
+
+- Estado: completado | en progreso | pendiente.
+- Fecha:
+- Objetivo:
+- Implementación:
+- Decisiones:
+- Validaciones:
+- Archivos principales:
+- Trabajo pendiente:
+```
