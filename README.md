@@ -6,7 +6,7 @@ El MVP comenzará con la Premier League 2026/27 y utilizará la API v4 de `footb
 
 ## Estado
 
-Fase 0 completada. Fase 1 en progreso: puntos 1–7 completados en la rama `feat/Fase-1-Fundacion`.
+Fase 0 completada. Fase 1 en progreso: puntos 1–8 completados en la rama `feat/Fase-1-Fundacion`.
 
 ## MVP
 

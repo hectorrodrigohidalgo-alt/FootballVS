@@ -16,7 +16,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase | Estado | Avance | Rama de trabajo |
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
-| Fase 1 — Esqueleto ejecutable | En progreso | 7 de 10 puntos | `feat/Fase-1-Fundacion` |
+| Fase 1 — Esqueleto ejecutable | En progreso | 8 de 10 puntos | `feat/Fase-1-Fundacion` |
 | Fase 2 — Datos | Pendiente | 0% | — |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
@@ -198,7 +198,7 @@ Estado: **En progreso**.
 
 ### Punto 8 — Integración continua
 
-- Estado: en progreso.
+- Estado: completado.
 - Fecha de inicio: 8 de agosto de 2026.
 - Objetivo: rechazar automáticamente cambios que rompan la calidad del frontend o la API.
 - Implementación local:
@@ -211,9 +211,15 @@ Estado: **En progreso**.
   - Reconstrucción desde `package-lock.json` aprobada y cero vulnerabilidades reportadas por npm.
   - Frontend: lint, tipos, 4 pruebas y build aprobados.
   - API: reconstrucción de dependencias, Ruff y 9 pruebas aprobados.
+- Validación en GitHub:
+  - Commit validado: `3d37a1c`.
+  - Evento: `push` sobre `feat/Fase-1-Fundacion`.
+  - `Frontend quality`: completado correctamente.
+  - `API quality`: completado correctamente.
+  - Ejecución: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31277269875`.
 - Seguridad: el workflow no recibe secretos ni consulta `football-data.org`; utiliza exclusivamente datos mock.
 - Archivo principal: `.github/workflows/ci.yml`.
-- Trabajo pendiente: autorizar publicación de la rama y confirmar ambos trabajos en verde dentro de GitHub Actions. Sólo entonces el punto se marcará como completado.
+- Resultado: integración continua activa y aprobada en GitHub Actions.
 
 ### Punto 9 — Validación autenticada del proveedor
 
@@ -227,7 +233,7 @@ Estado: **En progreso**.
 
 ## Próximo paso
 
-Implementar el **Punto 8 — Integración continua** con GitHub Actions.
+Implementar el **Punto 9 — Validación autenticada del proveedor**, manteniendo la clave sólo en el backend.
 
 ## Plantilla para próximas actualizaciones
 

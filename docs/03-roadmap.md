@@ -34,7 +34,7 @@ Salida: alcance acordado, proveedor validado y repositorio base publicado. **Com
 - [x] Punto 5: crear la API Python con Azure Functions.
 - [x] Punto 6: implementar el contrato mock y conectar frontend–API.
 - [x] Punto 7: añadir pruebas automáticas y reforzar validaciones locales.
-- [ ] Punto 8: configurar lint, tipos, pruebas y build en GitHub Actions. Workflow implementado localmente; falta validarlo en GitHub.
+- [x] Punto 8: configurar lint, tipos, pruebas y build en GitHub Actions.
 - [ ] Punto 9: configurar la clave en backend y comprobar acceso a `PL` y temporadas disponibles.
 - [ ] Punto 10: completar documentación y cerrar la fase mediante pull request.
 
