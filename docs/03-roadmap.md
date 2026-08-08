@@ -37,9 +37,9 @@ Salida: alcance acordado, proveedor validado y repositorio base publicado. **Com
 - [x] Punto 7: añadir pruebas automáticas y reforzar validaciones locales.
 - [x] Punto 8: configurar lint, tipos, pruebas y build en GitHub Actions.
 - [x] Punto 9: configurar la clave en backend y comprobar acceso a `PL` y temporadas disponibles.
-- [ ] Punto 10: completar documentación y cerrar la fase mediante pull request.
+- [x] Punto 10: completar documentación y cerrar la fase mediante pull request.
 
-Salida: aplicación local y pipeline verde.
+Salida: aplicación local y pipeline verde. **Completada.**
 
 Detalle verificable: `docs/04-bitacora-desarrollo.md`.
 

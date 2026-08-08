@@ -10,7 +10,7 @@ La cuenta gratuita validada permite consultar equipos y partidos desde 2023/24 h
 
 ## Estado
 
-Fase 0 completada. Fase 1 en progreso: puntos 1–9 completados en la rama `feat/Fase-1-Fundacion`.
+Fases 0 y 1 completadas. La Fase 1 cerró sus 10 puntos con aplicación local ejecutable, pruebas automatizadas, integración continua y documentación reproducible.
 
 ## MVP
 

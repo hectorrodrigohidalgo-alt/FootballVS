@@ -16,7 +16,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase | Estado | Avance | Rama de trabajo |
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
-| Fase 1 — Esqueleto ejecutable | En progreso | 9 de 10 puntos | `feat/Fase-1-Fundacion` |
+| Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `feat/Fase-1-Fundacion` |
 | Fase 2 — Datos | Pendiente | 0% | — |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
@@ -94,7 +94,7 @@ Estado: **Completada**.
 
 ## Fase 1 — Esqueleto ejecutable
 
-Estado: **En progreso**.
+Estado: **Completada**.
 
 ### Punto 1 — Entorno de desarrollo
 
@@ -247,7 +247,7 @@ Estado: **En progreso**.
 
 ### Punto 10 — Documentación y cierre de fase
 
-- Estado: en progreso.
+- Estado: completado.
 - Objetivo: entregar instrucciones reproducibles, evidencia de calidad y un pull request revisable hacia `main`.
 - Documentación preparada:
   - README raíz con estado real del stack, badge de CI e inicio rápido.
@@ -260,11 +260,18 @@ Estado: **En progreso**.
   - 4 pruebas frontend y build Vite aprobados.
   - Ruff y 16 pruebas API aprobados.
   - `git diff --check` sin errores.
-- Trabajo pendiente: publicar estos cambios, abrir el pull request y confirmar CI en verde.
+- Cierre en GitHub:
+  - Pull request: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/pull/2`.
+  - Rama base: `main`.
+  - Rama de trabajo: `feat/Fase-1-Fundacion`.
+  - Estado del PR: abierto, listo para revisión y combinable.
+  - GitHub Actions del PR: completado correctamente.
+  - Ejecución: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31279018227`.
+- Resultado: documentación reproducible, PR revisable y Fase 1 lista para integración mediante squash.
 
 ## Próximo paso
 
-Completar el **Punto 10 — Documentación y cierre de fase** mediante validación final y pull request.
+Iniciar la **Fase 2 — Datos** con normalización, persistencia y sincronización idempotente del proveedor.
 
 ## Plantilla para próximas actualizaciones
 
