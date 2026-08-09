@@ -57,3 +57,13 @@ temporadas recientes:
 La herramienta respeta el límite gratuito mediante pausas, comprueba equipos y
 partidos de la jornada 1, sólo contacta el host HTTPS oficial y nunca imprime la
 clave ni las respuestas completas del proveedor.
+
+## Control de solicitudes y errores
+
+`FootballDataClient` espera 6,1 segundos entre solicitudes para mantenerse bajo
+el límite gratuito de 10 solicitudes por minuto. Ante un límite `429`, errores
+transitorios `5xx` o fallos de conexión realiza hasta dos reintentos. La espera
+respeta `Retry-After` cuando el proveedor lo informa y, en caso contrario, crece
+de forma exponencial. Los errores permanentes de autenticación, permisos,
+parámetros o recursos inexistentes se devuelven inmediatamente y nunca incluyen
+la clave.

@@ -17,7 +17,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
-| Fase 2 — Datos | Pendiente | 0% | — |
+| Fase 2 — Datos | En progreso | 1 de 4 puntos | `feat/Fase-2-Datos` |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
@@ -271,9 +271,30 @@ Estado: **Completada**.
   - Ejecución: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31279018227`.
 - Resultado: documentación reproducible y Fase 1 integrada y cerrada en `main`.
 
+## Fase 2 — Datos
+
+Estado: **En progreso**.
+
+### Punto 1 — Integración resiliente del proveedor
+
+- Estado: completado.
+- Fecha: 9 de agosto de 2026.
+- Objetivo: consumir `football-data.org` sin exponer la clave y respetando las restricciones del plan gratuito.
+- Implementación:
+  - Intervalo automático de 6,1 segundos entre solicitudes del mismo cliente.
+  - Máximo de dos reintentos para `429`, errores HTTP `5xx` transitorios y fallos de conexión.
+  - Soporte de la cabecera `Retry-After` y espera exponencial cuando no está disponible.
+  - Errores de autenticación, permisos, parámetros y recursos inexistentes sin reintentos innecesarios.
+  - Validación de tiempos y cantidad de reintentos al construir el cliente.
+  - Dependencias de reloj y espera inyectables para probar el comportamiento sin llamadas ni pausas reales.
+- Seguridad: el token permanece únicamente en el backend y nunca se incorpora a mensajes de error.
+- Validaciones: Ruff aprobado y 20 pruebas API aprobadas; todas utilizan respuestas simuladas.
+- Archivos principales: `api/football_data_client.py` y `api/tests/test_football_data_client.py`.
+- Resultado: cliente del proveedor preparado para realizar consultas controladas durante la normalización y sincronización.
+
 ## Próximo paso
 
-Iniciar la **Fase 2 — Datos** con normalización, persistencia y sincronización idempotente del proveedor.
+Continuar el **Punto 2 de la Fase 2** definiendo y probando la normalización de competiciones, equipos y partidos.
 
 ## Plantilla para próximas actualizaciones
 
