@@ -67,3 +67,11 @@ respeta `Retry-After` cuando el proveedor lo informa y, en caso contrario, crece
 de forma exponencial. Los errores permanentes de autenticación, permisos,
 parámetros o recursos inexistentes se devuelven inmediatamente y nunca incluyen
 la clave.
+
+## Normalización
+
+`data_normalizer.py` convierte competiciones, temporadas, equipos y partidos al
+contrato interno antes de persistirlos. Cada entidad recibe un identificador
+estable como `football-data:team:57`, conserva su `provider_id` y valida campos,
+tipos y relaciones obligatorias. Los partidos programados admiten jornada y
+marcadores nulos; los registros incompletos se rechazan explícitamente.

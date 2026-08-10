@@ -1,6 +1,9 @@
 # Modelo de datos inicial
 
-El esquema es conceptual y se validará con respuestas reales del proveedor antes de implementarlo.
+El esquema se validó contra los campos disponibles en `football-data.org`. Las
+entidades normalizadas usan identificadores deterministas con el formato
+`football-data:{entidad}:{provider_id}` y conservan el identificador numérico
+externo para trazabilidad.
 
 ## Entidades
 
@@ -11,7 +14,7 @@ El esquema es conceptual y se validará con respuestas reales del proveedor ante
 
 ### season
 
-- `id`, `competition_id`, `name`, `start_date`, `end_date`
+- `id`, `provider_id`, `competition_id`, `name`, `start_date`, `end_date`
 
 ### team
 

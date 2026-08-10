@@ -17,7 +17,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
-| Fase 2 — Datos | En progreso | 1 de 4 puntos | `feat/Fase-2-Datos` |
+| Fase 2 — Datos | En progreso | 2 de 4 puntos | `feat/Fase-2-Datos` |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
@@ -292,9 +292,72 @@ Estado: **En progreso**.
 - Archivos principales: `api/football_data_client.py` y `api/tests/test_football_data_client.py`.
 - Resultado: cliente del proveedor preparado para realizar consultas controladas durante la normalización y sincronización.
 
+### Punto 2 — Normalización de datos
+
+- Estado: completado.
+- Fecha: 9 de agosto de 2026.
+- Objetivo: desacoplar el formato externo de `football-data.org` del modelo interno de FootballVS.
+- Implementación:
+  - Normalizadores independientes para competiciones, temporadas, equipos y partidos.
+  - Identificadores deterministas con el formato `football-data:{entidad}:{provider_id}`.
+  - Conservación de `provider_id` para trazabilidad y futuras sincronizaciones idempotentes.
+  - Referencias consistentes entre competición, temporada, equipos y partidos.
+  - Fechas de sincronización convertidas a UTC y temporadas con nombre legible, por ejemplo `2026/27`.
+  - Soporte de marcadores, jornada y ganador nulos en partidos todavía programados.
+  - Rechazo explícito de objetos incompletos, tipos inválidos y marcas horarias sin zona.
+- Decisión: no se almacena la respuesta cruda del proveedor; sólo los campos necesarios y validados por el contrato interno.
+- Validaciones: Ruff aprobado y 29 pruebas API aprobadas con registros terminados, programados e inválidos.
+- Archivos principales: `api/data_normalizer.py` y `api/tests/test_data_normalizer.py`.
+- Resultado: entidades estables y listas para persistirse sin depender del formato externo en el resto de la aplicación.
+
+#### Explicación sencilla de la normalización
+
+`football-data.org` entrega información de fútbol usando su propio formato. El
+normalizador funciona como un traductor: recibe esos datos, comprueba que estén
+completos y los ordena usando siempre las reglas de FootballVS.
+
+Por ejemplo, el proveedor puede identificar al Arsenal con el número `57`. El
+normalizador conserva ese número como `provider_id` y además crea la etiqueta
+interna estable `football-data:team:57`. Si el equipo vuelve a descargarse, se
+genera exactamente la misma etiqueta, lo que permitirá evitar duplicados al
+implementar la base de datos.
+
+El archivo `api/data_normalizer.py` realiza cuatro tareas principales:
+
+1. Convierte competiciones, temporadas, equipos y partidos al formato interno.
+2. Crea identificadores únicos y conecta cada partido con su competición,
+   temporada, equipo local y equipo visitante.
+3. Comprueba que los campos obligatorios tengan el tipo y contenido esperados.
+4. Permite campos vacíos en partidos aún no jugados, como marcador y ganador.
+
+Si falta información necesaria, se produce un
+`FootballDataNormalizationError` y el registro no continúa hacia la futura capa
+de persistencia.
+
+El archivo `api/tests/test_data_normalizer.py` actúa como un profesor que revisa
+el trabajo del normalizador. Sus pruebas comprueban competiciones, temporadas,
+equipos, partidos finalizados, partidos programados y respuestas incompletas o
+inválidas. De esta manera, un cambio futuro no puede alterar el contrato interno
+sin que las pruebas lo detecten.
+
+El flujo actual puede resumirse así:
+
+```text
+football-data.org
+       |
+       v
+data_normalizer.py
+       |
+       v
+Datos limpios, relacionados y listos para guardar
+```
+
+En este punto los datos sólo se transforman y validan; todavía no se almacenan
+en una base de datos. La persistencia corresponde al Punto 3.
+
 ## Próximo paso
 
-Continuar el **Punto 2 de la Fase 2** definiendo y probando la normalización de competiciones, equipos y partidos.
+Continuar el **Punto 3 de la Fase 2** con persistencia y sincronización idempotente.
 
 ## Plantilla para próximas actualizaciones
 

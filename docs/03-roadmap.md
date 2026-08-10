@@ -4,8 +4,8 @@
 
 - Fase 0: completada e integrada en `main`.
 - Fase 1: completada, 10 de 10 puntos, con CI verde e integrada en `main` mediante los PR `#2` y `#3`.
-- Fase 2: en progreso, 1 de 4 puntos completados.
-- Próximo objetivo: normalizar competiciones, equipos y partidos.
+- Fase 2: en progreso, 2 de 4 puntos completados.
+- Próximo objetivo: persistir datos y ejecutar sincronización idempotente.
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -53,7 +53,7 @@ Detalle verificable: `docs/04-bitacora-desarrollo.md`.
 ## Fase 2 — Datos
 
 - [x] Punto 1: integrar el proveedor y manejar límites/errores.
-- [ ] Punto 2: normalizar competiciones, equipos y partidos.
+- [x] Punto 2: normalizar competiciones, equipos y partidos.
 - [ ] Punto 3: persistir datos y ejecutar sincronización idempotente.
 - [ ] Punto 4: calcular estadísticas agregadas.
 
