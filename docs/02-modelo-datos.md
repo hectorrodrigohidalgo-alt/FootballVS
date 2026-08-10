@@ -70,3 +70,11 @@ La partición exacta se decidirá tras medir patrones de acceso. Como punto de p
 - Ejecuciones de sincronización por `provider`.
 
 No se fijará el diseño físico de Cosmos DB hasta validar consultas, volumen y límites del plan gratuito.
+
+## Persistencia local validada
+
+SQLite utiliza temporalmente una tabla documental con clave primaria compuesta
+por `entity_type` e `id`. Cada carga ejecuta un `upsert`: crea el documento si no
+existe y reemplaza su contenido si ya está guardado. Esta estructura permitió
+verificar la idempotencia antes de decidir contenedores y particiones físicas de
+Cosmos DB.

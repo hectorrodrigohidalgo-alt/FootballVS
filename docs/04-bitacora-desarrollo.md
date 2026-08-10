@@ -17,7 +17,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
-| Fase 2 — Datos | En progreso | 2 de 4 puntos | `feat/Fase-2-Datos` |
+| Fase 2 — Datos | En progreso | 3 de 4 puntos | `feat/Fase-2-Datos` |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
@@ -355,9 +355,33 @@ Datos limpios, relacionados y listos para guardar
 En este punto los datos sólo se transforman y validan; todavía no se almacenan
 en una base de datos. La persistencia corresponde al Punto 3.
 
+### Punto 3 — Persistencia y sincronización idempotente
+
+- Estado: completado.
+- Fecha: 9 de agosto de 2026.
+- Objetivo: guardar localmente datos reales y permitir que una sincronización pueda repetirse sin generar duplicados.
+- Implementación:
+  - Contrato `DataRepository` independiente de una tecnología concreta.
+  - Repositorio local SQLite basado en documentos JSON e incluido en Python.
+  - Clave primaria compuesta por tipo de entidad e identificador determinista.
+  - Operaciones `upsert` que crean documentos nuevos o reemplazan los existentes.
+  - Sincronizador de una competición y temporada que descarga primero todos los recursos, después normaliza y finalmente persiste.
+  - Herramienta de terminal con configuración local segura y resumen sin claves ni respuestas crudas.
+  - Base predeterminada `api/data/footballvs.db`, excluida de Git mediante `data/`.
+- Decisión: comenzar con SQLite sin costo y mantener el repositorio desacoplado para añadir Cosmos DB cuando exista una suscripción activa.
+- Validaciones automatizadas: Ruff aprobado y 34 pruebas API aprobadas.
+- Validación real:
+  - Competición `PL`, temporada 2026/27.
+  - Primera ejecución: 1 competición, 1 temporada, 20 equipos y 380 partidos procesados.
+  - Segunda ejecución: los totales almacenados permanecieron en 1 competición, 1 temporada, 20 equipos y 380 partidos.
+  - Resultado: la repetición actualizó los mismos identificadores y no produjo duplicados.
+- Archivos principales: `api/data_repository.py`, `api/data_sync.py`, `api/tools/sync_football_data.py` y sus pruebas.
+- Trabajo posterior: implementar el adaptador Cosmos DB y un disparador programado cuando la suscripción de Azure esté activa.
+- Resultado: datos reales persistidos localmente y sincronización idempotente verificada.
+
 ## Próximo paso
 
-Continuar el **Punto 3 de la Fase 2** con persistencia y sincronización idempotente.
+Continuar el **Punto 4 de la Fase 2** con el cálculo de estadísticas agregadas.
 
 ## Plantilla para próximas actualizaciones
 

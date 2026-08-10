@@ -46,6 +46,8 @@ Endpoints iniciales:
 ### Datos y sincronización
 
 - El proveedor inicial es `football-data.org` y la competición se consulta con el código `PL`.
+- SQLite actúa como almacén documental local sin costo durante el desarrollo; Cosmos DB será el adaptador de producción cuando exista una suscripción activa.
+- El sincronizador depende del contrato `DataRepository`, no directamente de SQLite o Cosmos DB.
 - El navegador nunca consulta directamente al proveedor externo.
 - Una función programada importa cambios respetando límites de uso.
 - El plan gratuito admite 10 solicitudes por minuto; el cliente aplicará limitación, reintentos con espera y caché.

@@ -75,3 +75,22 @@ contrato interno antes de persistirlos. Cada entidad recibe un identificador
 estable como `football-data:team:57`, conserva su `provider_id` y valida campos,
 tipos y relaciones obligatorias. Los partidos programados admiten jornada y
 marcadores nulos; los registros incompletos se rechazan explícitamente.
+
+## Persistencia y sincronización local
+
+Durante el desarrollo, los datos normalizados se guardan en SQLite mediante el
+contrato `DataRepository`. La base predeterminada es `data/footballvs.db` dentro
+de `api/` y está ignorada por Git. Los documentos usan una clave primaria
+compuesta por tipo e ID; `upsert` reemplaza un documento existente cuando se
+repite una sincronización.
+
+Con `local.settings.json` configurado, sincronizar la Premier League 2026/27:
+
+```powershell
+.venv\Scripts\python.exe -m tools.sync_football_data --season 2026
+```
+
+El resumen muestra cuántos registros se procesaron y los totales almacenados,
+pero nunca imprime la clave ni las respuestas crudas. La implementación está
+separada del sincronizador para poder añadir un repositorio Cosmos DB sin cambiar
+la normalización ni el flujo de descarga.
