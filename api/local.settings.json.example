@@ -5,7 +5,8 @@
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "APP_VERSION": "local",
     "FOOTBALL_DATA_API_KEY": "replace_me",
-    "FOOTBALL_DATA_BASE_URL": "https://api.football-data.org/v4"
+    "FOOTBALL_DATA_BASE_URL": "https://api.football-data.org/v4",
+    "FOOTBALLVS_DB_PATH": "data/footballvs.db"
   },
   "Host": {
     "CORS": "http://localhost:5173",

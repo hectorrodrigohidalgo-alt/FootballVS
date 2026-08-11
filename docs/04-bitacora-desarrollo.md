@@ -16,8 +16,8 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase | Estado | Avance | Rama de trabajo |
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
-| Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `feat/Fase-1-Fundacion` |
-| Fase 2 — Datos | Pendiente | 0% | — |
+| Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
+| Fase 2 — Datos | Pendiente de integración | 4 de 4 puntos | `feat/Fase-2-Datos` |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
@@ -264,14 +264,147 @@ Estado: **Completada**.
   - Pull request: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/pull/2`.
   - Rama base: `main`.
   - Rama de trabajo: `feat/Fase-1-Fundacion`.
-  - Estado del PR: abierto, listo para revisión y combinable.
+  - Estado del PR: integrado mediante squash en `main`.
+  - Commit de integración: `fd26dee` (`#2`).
+  - Cierre documental posterior: `0486d72` (`#3`).
   - GitHub Actions del PR: completado correctamente.
   - Ejecución: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31279018227`.
-- Resultado: documentación reproducible, PR revisable y Fase 1 lista para integración mediante squash.
+- Resultado: documentación reproducible y Fase 1 integrada y cerrada en `main`.
+
+## Fase 2 — Datos
+
+Estado: **En progreso**.
+
+### Punto 1 — Integración resiliente del proveedor
+
+- Estado: completado.
+- Fecha: 9 de agosto de 2026.
+- Objetivo: consumir `football-data.org` sin exponer la clave y respetando las restricciones del plan gratuito.
+- Implementación:
+  - Intervalo automático de 6,1 segundos entre solicitudes del mismo cliente.
+  - Máximo de dos reintentos para `429`, errores HTTP `5xx` transitorios y fallos de conexión.
+  - Soporte de la cabecera `Retry-After` y espera exponencial cuando no está disponible.
+  - Errores de autenticación, permisos, parámetros y recursos inexistentes sin reintentos innecesarios.
+  - Validación de tiempos y cantidad de reintentos al construir el cliente.
+  - Dependencias de reloj y espera inyectables para probar el comportamiento sin llamadas ni pausas reales.
+- Seguridad: el token permanece únicamente en el backend y nunca se incorpora a mensajes de error.
+- Validaciones: Ruff aprobado y 20 pruebas API aprobadas; todas utilizan respuestas simuladas.
+- Archivos principales: `api/football_data_client.py` y `api/tests/test_football_data_client.py`.
+- Resultado: cliente del proveedor preparado para realizar consultas controladas durante la normalización y sincronización.
+
+### Punto 2 — Normalización de datos
+
+- Estado: completado.
+- Fecha: 9 de agosto de 2026.
+- Objetivo: desacoplar el formato externo de `football-data.org` del modelo interno de FootballVS.
+- Implementación:
+  - Normalizadores independientes para competiciones, temporadas, equipos y partidos.
+  - Identificadores deterministas con el formato `football-data:{entidad}:{provider_id}`.
+  - Conservación de `provider_id` para trazabilidad y futuras sincronizaciones idempotentes.
+  - Referencias consistentes entre competición, temporada, equipos y partidos.
+  - Fechas de sincronización convertidas a UTC y temporadas con nombre legible, por ejemplo `2026/27`.
+  - Soporte de marcadores, jornada y ganador nulos en partidos todavía programados.
+  - Rechazo explícito de objetos incompletos, tipos inválidos y marcas horarias sin zona.
+- Decisión: no se almacena la respuesta cruda del proveedor; sólo los campos necesarios y validados por el contrato interno.
+- Validaciones: Ruff aprobado y 29 pruebas API aprobadas con registros terminados, programados e inválidos.
+- Archivos principales: `api/data_normalizer.py` y `api/tests/test_data_normalizer.py`.
+- Resultado: entidades estables y listas para persistirse sin depender del formato externo en el resto de la aplicación.
+
+#### Explicación sencilla de la normalización
+
+`football-data.org` entrega información de fútbol usando su propio formato. El
+normalizador funciona como un traductor: recibe esos datos, comprueba que estén
+completos y los ordena usando siempre las reglas de FootballVS.
+
+Por ejemplo, el proveedor puede identificar al Arsenal con el número `57`. El
+normalizador conserva ese número como `provider_id` y además crea la etiqueta
+interna estable `football-data:team:57`. Si el equipo vuelve a descargarse, se
+genera exactamente la misma etiqueta, lo que permitirá evitar duplicados al
+implementar la base de datos.
+
+El archivo `api/data_normalizer.py` realiza cuatro tareas principales:
+
+1. Convierte competiciones, temporadas, equipos y partidos al formato interno.
+2. Crea identificadores únicos y conecta cada partido con su competición,
+   temporada, equipo local y equipo visitante.
+3. Comprueba que los campos obligatorios tengan el tipo y contenido esperados.
+4. Permite campos vacíos en partidos aún no jugados, como marcador y ganador.
+
+Si falta información necesaria, se produce un
+`FootballDataNormalizationError` y el registro no continúa hacia la futura capa
+de persistencia.
+
+El archivo `api/tests/test_data_normalizer.py` actúa como un profesor que revisa
+el trabajo del normalizador. Sus pruebas comprueban competiciones, temporadas,
+equipos, partidos finalizados, partidos programados y respuestas incompletas o
+inválidas. De esta manera, un cambio futuro no puede alterar el contrato interno
+sin que las pruebas lo detecten.
+
+El flujo actual puede resumirse así:
+
+```text
+football-data.org
+       |
+       v
+data_normalizer.py
+       |
+       v
+Datos limpios, relacionados y listos para guardar
+```
+
+En este punto los datos sólo se transforman y validan; todavía no se almacenan
+en una base de datos. La persistencia corresponde al Punto 3.
+
+### Punto 3 — Persistencia y sincronización idempotente
+
+- Estado: completado.
+- Fecha: 9 de agosto de 2026.
+- Objetivo: guardar localmente datos reales y permitir que una sincronización pueda repetirse sin generar duplicados.
+- Implementación:
+  - Contrato `DataRepository` independiente de una tecnología concreta.
+  - Repositorio local SQLite basado en documentos JSON e incluido en Python.
+  - Clave primaria compuesta por tipo de entidad e identificador determinista.
+  - Operaciones `upsert` que crean documentos nuevos o reemplazan los existentes.
+  - Sincronizador de una competición y temporada que descarga primero todos los recursos, después normaliza y finalmente persiste.
+  - Herramienta de terminal con configuración local segura y resumen sin claves ni respuestas crudas.
+  - Base predeterminada `api/data/footballvs.db`, excluida de Git mediante `data/`.
+- Decisión: comenzar con SQLite sin costo y mantener el repositorio desacoplado para añadir Cosmos DB cuando exista una suscripción activa.
+- Validaciones automatizadas: Ruff aprobado y 34 pruebas API aprobadas.
+- Validación real:
+  - Competición `PL`, temporada 2026/27.
+  - Primera ejecución: 1 competición, 1 temporada, 20 equipos y 380 partidos procesados.
+  - Segunda ejecución: los totales almacenados permanecieron en 1 competición, 1 temporada, 20 equipos y 380 partidos.
+  - Resultado: la repetición actualizó los mismos identificadores y no produjo duplicados.
+- Archivos principales: `api/data_repository.py`, `api/data_sync.py`, `api/tools/sync_football_data.py` y sus pruebas.
+- Trabajo posterior: implementar el adaptador Cosmos DB y un disparador programado cuando la suscripción de Azure esté activa.
+- Resultado: datos reales persistidos localmente y sincronización idempotente verificada.
+
+### Punto 4 — Estadísticas agregadas
+
+- Estado: completado técnicamente; pendiente de integración.
+- Fecha: 10 de agosto de 2026.
+- Objetivo: transformar partidos normalizados en métricas comparables por equipo y temporada.
+- Implementación:
+  - Snapshots deterministas por equipo, competición y temporada.
+  - Partidos, victorias, empates, derrotas, puntos, porcentaje de victoria y puntos por partido.
+  - Goles a favor, goles en contra, diferencia y promedios por partido.
+  - Porterías a cero y partidos en que ambos equipos marcaron.
+  - Estadísticas separadas como local y visitante.
+  - Forma cronológica de los últimos 5 y 10 partidos.
+  - Exclusión de partidos no finalizados para no inventar resultados.
+  - Valores en cero para equipos de una temporada sin partidos finalizados.
+  - Herramienta local que calcula y persiste snapshots mediante `upsert`.
+- Validaciones automatizadas: Ruff aprobado y 39 pruebas API aprobadas.
+- Validación con datos reales:
+  - 2025/26: 20 snapshots calculados, con hasta 38 partidos finalizados por equipo.
+  - 2026/27: 20 snapshots calculados con métricas iniciales en cero al no existir todavía resultados finalizados.
+  - Total local: 40 snapshots almacenados sin publicar la base ni el dataset en Git.
+- Archivos principales: `api/team_statistics.py`, `api/tools/calculate_team_statistics.py` y `api/tests/test_team_statistics.py`.
+- Resultado: estadísticas precalculadas, reproducibles y listas para alimentar los futuros endpoints de comparación.
 
 ## Próximo paso
 
-Iniciar la **Fase 2 — Datos** con normalización, persistencia y sincronización idempotente del proveedor.
+Confirmar el commit, validar CI y cerrar la **Fase 2 — Datos** mediante pull request hacia `main`.
 
 ## Plantilla para próximas actualizaciones
 

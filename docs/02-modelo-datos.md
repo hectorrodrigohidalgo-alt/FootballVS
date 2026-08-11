@@ -1,6 +1,9 @@
 # Modelo de datos inicial
 
-El esquema es conceptual y se validará con respuestas reales del proveedor antes de implementarlo.
+El esquema se validó contra los campos disponibles en `football-data.org`. Las
+entidades normalizadas usan identificadores deterministas con el formato
+`football-data:{entidad}:{provider_id}` y conservan el identificador numérico
+externo para trazabilidad.
 
 ## Entidades
 
@@ -11,7 +14,7 @@ El esquema es conceptual y se validará con respuestas reales del proveedor ante
 
 ### season
 
-- `id`, `competition_id`, `name`, `start_date`, `end_date`
+- `id`, `provider_id`, `competition_id`, `name`, `start_date`, `end_date`
 
 ### team
 
@@ -32,7 +35,10 @@ La unicidad de `provider_id` hace que la importación sea idempotente.
 
 - `team_id`, `competition_id`, `season_id`, `calculated_at`
 - `matches`, `wins`, `draws`, `losses`
-- `goals_for`, `goals_against`, `points_per_game`
+- `points`, `win_percentage`, `points_per_game`
+- `goals_for`, `goals_against`, `goal_difference`
+- `goals_for_per_match`, `goals_against_per_match`
+- `clean_sheets`, `both_teams_scored`
 - `home_stats`, `away_stats`, `recent_form`
 
 ### elo_history
@@ -67,3 +73,11 @@ La partición exacta se decidirá tras medir patrones de acceso. Como punto de p
 - Ejecuciones de sincronización por `provider`.
 
 No se fijará el diseño físico de Cosmos DB hasta validar consultas, volumen y límites del plan gratuito.
+
+## Persistencia local validada
+
+SQLite utiliza temporalmente una tabla documental con clave primaria compuesta
+por `entity_type` e `id`. Cada carga ejecuta un `upsert`: crea el documento si no
+existe y reemplaza su contenido si ya está guardado. Esta estructura permitió
+verificar la idempotencia antes de decidir contenedores y particiones físicas de
+Cosmos DB.

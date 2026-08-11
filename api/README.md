@@ -57,3 +57,53 @@ temporadas recientes:
 La herramienta respeta el límite gratuito mediante pausas, comprueba equipos y
 partidos de la jornada 1, sólo contacta el host HTTPS oficial y nunca imprime la
 clave ni las respuestas completas del proveedor.
+
+## Control de solicitudes y errores
+
+`FootballDataClient` espera 6,1 segundos entre solicitudes para mantenerse bajo
+el límite gratuito de 10 solicitudes por minuto. Ante un límite `429`, errores
+transitorios `5xx` o fallos de conexión realiza hasta dos reintentos. La espera
+respeta `Retry-After` cuando el proveedor lo informa y, en caso contrario, crece
+de forma exponencial. Los errores permanentes de autenticación, permisos,
+parámetros o recursos inexistentes se devuelven inmediatamente y nunca incluyen
+la clave.
+
+## Normalización
+
+`data_normalizer.py` convierte competiciones, temporadas, equipos y partidos al
+contrato interno antes de persistirlos. Cada entidad recibe un identificador
+estable como `football-data:team:57`, conserva su `provider_id` y valida campos,
+tipos y relaciones obligatorias. Los partidos programados admiten jornada y
+marcadores nulos; los registros incompletos se rechazan explícitamente.
+
+## Persistencia y sincronización local
+
+Durante el desarrollo, los datos normalizados se guardan en SQLite mediante el
+contrato `DataRepository`. La base predeterminada es `data/footballvs.db` dentro
+de `api/` y está ignorada por Git. Los documentos usan una clave primaria
+compuesta por tipo e ID; `upsert` reemplaza un documento existente cuando se
+repite una sincronización.
+
+Con `local.settings.json` configurado, sincronizar la Premier League 2026/27:
+
+```powershell
+.venv\Scripts\python.exe -m tools.sync_football_data --season 2026
+```
+
+El resumen muestra cuántos registros se procesaron y los totales almacenados,
+pero nunca imprime la clave ni las respuestas crudas. La implementación está
+separada del sincronizador para poder añadir un repositorio Cosmos DB sin cambiar
+la normalización ni el flujo de descarga.
+
+## Estadísticas agregadas
+
+Después de sincronizar una temporada, calcular y guardar sus snapshots:
+
+```powershell
+.venv\Scripts\python.exe -m tools.calculate_team_statistics --season 2026
+```
+
+Cada snapshot resume resultados, puntos, goles, porterías a cero, ambos equipos
+marcan, rendimiento como local y visitante, y forma de los últimos 5 y 10
+partidos. Sólo se incluyen encuentros con estado `FINISHED`; una temporada sin
+resultados produce métricas en cero en lugar de datos inventados.
