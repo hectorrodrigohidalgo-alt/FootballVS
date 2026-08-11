@@ -35,7 +35,10 @@ La unicidad de `provider_id` hace que la importación sea idempotente.
 
 - `team_id`, `competition_id`, `season_id`, `calculated_at`
 - `matches`, `wins`, `draws`, `losses`
-- `goals_for`, `goals_against`, `points_per_game`
+- `points`, `win_percentage`, `points_per_game`
+- `goals_for`, `goals_against`, `goal_difference`
+- `goals_for_per_match`, `goals_against_per_match`
+- `clean_sheets`, `both_teams_scored`
 - `home_stats`, `away_stats`, `recent_form`
 
 ### elo_history

@@ -12,6 +12,10 @@ class DataRepository(Protocol):
         """Crea o reemplaza documentos y devuelve la cantidad procesada."""
         ...
 
+    def list_documents(self, entity_type: str) -> list[dict[str, Any]]:
+        """Recupera los documentos guardados para realizar cálculos o consultas."""
+        ...
+
 
 class SQLiteDataRepository:
     """Almacén documental local respaldado por SQLite."""

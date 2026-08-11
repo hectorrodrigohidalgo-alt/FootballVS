@@ -17,7 +17,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
-| Fase 2 — Datos | En progreso | 3 de 4 puntos | `feat/Fase-2-Datos` |
+| Fase 2 — Datos | Pendiente de integración | 4 de 4 puntos | `feat/Fase-2-Datos` |
 | Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
@@ -379,9 +379,32 @@ en una base de datos. La persistencia corresponde al Punto 3.
 - Trabajo posterior: implementar el adaptador Cosmos DB y un disparador programado cuando la suscripción de Azure esté activa.
 - Resultado: datos reales persistidos localmente y sincronización idempotente verificada.
 
+### Punto 4 — Estadísticas agregadas
+
+- Estado: completado técnicamente; pendiente de integración.
+- Fecha: 10 de agosto de 2026.
+- Objetivo: transformar partidos normalizados en métricas comparables por equipo y temporada.
+- Implementación:
+  - Snapshots deterministas por equipo, competición y temporada.
+  - Partidos, victorias, empates, derrotas, puntos, porcentaje de victoria y puntos por partido.
+  - Goles a favor, goles en contra, diferencia y promedios por partido.
+  - Porterías a cero y partidos en que ambos equipos marcaron.
+  - Estadísticas separadas como local y visitante.
+  - Forma cronológica de los últimos 5 y 10 partidos.
+  - Exclusión de partidos no finalizados para no inventar resultados.
+  - Valores en cero para equipos de una temporada sin partidos finalizados.
+  - Herramienta local que calcula y persiste snapshots mediante `upsert`.
+- Validaciones automatizadas: Ruff aprobado y 39 pruebas API aprobadas.
+- Validación con datos reales:
+  - 2025/26: 20 snapshots calculados, con hasta 38 partidos finalizados por equipo.
+  - 2026/27: 20 snapshots calculados con métricas iniciales en cero al no existir todavía resultados finalizados.
+  - Total local: 40 snapshots almacenados sin publicar la base ni el dataset en Git.
+- Archivos principales: `api/team_statistics.py`, `api/tools/calculate_team_statistics.py` y `api/tests/test_team_statistics.py`.
+- Resultado: estadísticas precalculadas, reproducibles y listas para alimentar los futuros endpoints de comparación.
+
 ## Próximo paso
 
-Continuar el **Punto 4 de la Fase 2** con el cálculo de estadísticas agregadas.
+Confirmar el commit, validar CI y cerrar la **Fase 2 — Datos** mediante pull request hacia `main`.
 
 ## Plantilla para próximas actualizaciones
 

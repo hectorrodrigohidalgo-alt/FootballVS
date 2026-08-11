@@ -94,3 +94,16 @@ El resumen muestra cuántos registros se procesaron y los totales almacenados,
 pero nunca imprime la clave ni las respuestas crudas. La implementación está
 separada del sincronizador para poder añadir un repositorio Cosmos DB sin cambiar
 la normalización ni el flujo de descarga.
+
+## Estadísticas agregadas
+
+Después de sincronizar una temporada, calcular y guardar sus snapshots:
+
+```powershell
+.venv\Scripts\python.exe -m tools.calculate_team_statistics --season 2026
+```
+
+Cada snapshot resume resultados, puntos, goles, porterías a cero, ambos equipos
+marcan, rendimiento como local y visitante, y forma de los últimos 5 y 10
+partidos. Sólo se incluyen encuentros con estado `FINISHED`; una temporada sin
+resultados produce métricas en cero en lugar de datos inventados.

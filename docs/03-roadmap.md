@@ -4,8 +4,8 @@
 
 - Fase 0: completada e integrada en `main`.
 - Fase 1: completada, 10 de 10 puntos, con CI verde e integrada en `main` mediante los PR `#2` y `#3`.
-- Fase 2: en progreso, 3 de 4 puntos completados.
-- Próximo objetivo: calcular estadísticas agregadas.
+- Fase 2: 4 de 4 puntos completados localmente; pendiente de integración.
+- Próximo objetivo: validar CI y cerrar la Fase 2 mediante pull request.
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -55,9 +55,9 @@ Detalle verificable: `docs/04-bitacora-desarrollo.md`.
 - [x] Punto 1: integrar el proveedor y manejar límites/errores.
 - [x] Punto 2: normalizar competiciones, equipos y partidos.
 - [x] Punto 3: persistir datos y ejecutar sincronización idempotente.
-- [ ] Punto 4: calcular estadísticas agregadas.
+- [x] Punto 4: calcular estadísticas agregadas.
 
-Salida: datos reales consultables y trazables.
+Salida: datos reales consultables y trazables. **Completada localmente; pendiente de integración.**
 
 ## Fase 3 — Comparador y dashboard
 
