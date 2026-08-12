@@ -5,8 +5,8 @@
 - Fase 0: completada e integrada en `main`.
 - Fase 1: completada, 10 de 10 puntos, con CI verde e integrada en `main` mediante los PR `#2` y `#3`.
 - Fase 2: completada, 4 de 4 puntos, con CI verde e integrada en `main` mediante el PR `#4`.
-- Fase 3: en progreso, 5 de 6 puntos completados.
-- Próximo objetivo: validar CI, documentar y cerrar la fase mediante pull request.
+- Fase 3: completada, 6 de 6 puntos, con CI verde e integrada en `main` mediante el PR `#5`.
+- Próximo objetivo: iniciar la Fase 4 implementando y validando el rating Elo.
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -67,13 +67,13 @@ Salida: datos reales consultables y trazables. **Completada e integrada.**
 - [x] Punto 3: conectar selectores, filtros y validaciones con los datos reales.
 - [x] Punto 4: construir tarjetas, forma reciente, radar e historial directo con Apache ECharts.
 - [x] Punto 5: completar estados de carga, vacío, error y datos antiguos, responsive y accesibilidad.
-- [ ] Punto 6: validar CI, documentar y cerrar la fase mediante pull request.
+- [x] Punto 6: validar CI, documentar y cerrar la fase mediante pull request.
 
 El rating Elo se incorporará en la Fase 4 junto con el modelo estadístico; la
 Fase 3 dejará preparado su espacio en el contrato y la interfaz sin inventar un
 valor antes de calcularlo.
 
-Salida: comparación completa sin predicción avanzada.
+Salida: comparación completa sin predicción avanzada. **Completada e integrada.**
 
 ## Fase 4 — Modelo
 

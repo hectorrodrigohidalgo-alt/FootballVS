@@ -10,7 +10,7 @@ La cuenta gratuita validada permite consultar equipos y partidos desde 2023/24 h
 
 ## Estado
 
-Las Fases 0, 1 y 2 están completadas e integradas en `main`. La Fase 3 dispone de catálogo y comparaciones reales desde SQLite, dashboard interactivo y experiencia responsive y accesible; actualmente se encuentra en proceso de cierre mediante pull request.
+Las Fases 0, 1, 2 y 3 están completadas e integradas en `main`. FootballVS dispone de catálogo y comparaciones reales desde SQLite, dashboard interactivo y experiencia responsive y accesible. La Fase 4 incorporará y evaluará el modelo estadístico.
 
 ## MVP
 
