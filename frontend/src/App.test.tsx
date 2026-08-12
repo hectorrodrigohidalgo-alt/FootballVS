@@ -12,6 +12,14 @@ import {
 import type { Comparison } from './api/types'
 import { renderWithQueryClient } from './test/render'
 
+// Las pruebas del flujo principal no necesitan dibujar SVG reales. El wrapper
+// de ECharts se valida por separado en EChart.test.tsx.
+vi.mock('./components/EChart', () => ({
+  EChart: ({ ariaLabel }: { ariaLabel: string }) => (
+    <div aria-label={ariaLabel} role="img" />
+  ),
+}))
+
 vi.mock('./api/client', async () => {
   const actual = await vi.importActual<typeof import('./api/client')>('./api/client')
   return {

@@ -1,6 +1,6 @@
 # Bitácora de desarrollo
 
-Última actualización: **8 de agosto de 2026**.
+Última actualización: **12 de agosto de 2026**.
 
 Este documento registra el avance verificable de FootballVS. Se actualiza al finalizar cada punto y distingue entre trabajo implementado localmente, validado y publicado en GitHub.
 
@@ -18,7 +18,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
-| Fase 3 — Comparador y dashboard | En progreso | 3 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
+| Fase 3 — Comparador y dashboard | En progreso | 4 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
@@ -478,9 +478,39 @@ Estado: **En progreso**.
 - Archivos principales: `frontend/src/App.tsx`, `frontend/src/api/types.ts`, `frontend/src/api/client.test.ts`, `frontend/src/App.test.tsx` y `frontend/src/components/ComparisonDashboard.tsx`.
 - Resultado: flujo de selección y comparación compatible tanto con datos mock como con SQLite real.
 
+### Punto 4 — Dashboard visual con Apache ECharts
+
+- Estado: completado.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: transformar las métricas del contrato de comparación en gráficos legibles, interactivos y adaptables a distintos tamaños de pantalla.
+- Implementación:
+  - Apache ECharts `6.1.0` instalado como dependencia directa del frontend.
+  - Registro modular de radar, línea y barras con renderizado SVG para evitar cargar tipos de gráficos que el dashboard no utiliza.
+  - Wrapper React reutilizable que crea una sola instancia por contenedor, actualiza sus opciones y libera sus recursos al desmontarse.
+  - `ResizeObserver` para recalcular automáticamente el tamaño de cada gráfico cuando cambia su tarjeta o el ancho de la pantalla.
+  - Radar normalizado de 0 a 100 para porcentaje de victorias, puntos, ataque, defensa, porterías a cero y forma reciente.
+  - Línea de forma reciente que convierte victoria, empate y derrota en 3, 1 y 0 puntos respectivamente.
+  - Barras para victorias de cada equipo y empates en el historial directo, acompañadas por una lista textual de resultados.
+  - Tarjetas estadísticas ampliadas con puntos por partido, porcentaje de victorias y porterías a cero.
+  - Estados vacíos específicos cuando la temporada todavía no tiene resultados o no existen enfrentamientos sincronizados.
+  - Texto alternativo y configuración ARIA en los gráficos; la información del historial también permanece disponible como texto.
+- Decisiones:
+  - Los valores del radar son comparativos y normalizados; no son predicciones ni sustituyen las cifras exactas mostradas en las tarjetas.
+  - El eje de ataque usa 3 goles por partido como referencia superior y el de defensa invierte los goles recibidos, de modo que una cifra mayor siempre representa mejor rendimiento.
+  - Elo y probabilidades continúan pendientes hasta la Fase 4.
+- Pruebas:
+  - Conversión de forma a puntos y normalización del radar.
+  - Estado sin datos y construcción de las barras del historial.
+  - Ciclo de vida del wrapper: inicialización, actualización y liberación de ECharts.
+  - Las pruebas generales reemplazan el dibujo SVG por un componente accesible; la integración gráfica se comprueba de forma aislada sin depender de dimensiones inexistentes en JSDOM.
+- Validaciones: Oxlint y TypeScript aprobados; 10 pruebas frontend aprobadas; build Vite de producción aprobado.
+- Observación: Vite informa que el bundle gráfico supera su umbral recomendado de 500 kB; no bloquea el build y se evaluará división de código durante la optimización de experiencia y rendimiento.
+- Archivos principales: `frontend/src/charts/echarts.ts`, `frontend/src/charts/comparisonOptions.ts`, `frontend/src/components/EChart.tsx`, `frontend/src/components/ComparisonCharts.tsx` y sus pruebas.
+- Resultado: el comparador presenta radar, evolución de forma e historial directo sin inventar métricas ausentes.
+
 ## Próximo paso
 
-Completar el **Punto 4 de la Fase 3** construyendo tarjetas, forma reciente, radar e historial directo con Apache ECharts.
+Completar el **Punto 5 de la Fase 3** reforzando estados de carga, vacío, error y datos antiguos, además del comportamiento responsive y la accesibilidad.
 
 ## Plantilla para próximas actualizaciones
 

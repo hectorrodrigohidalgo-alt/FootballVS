@@ -1,4 +1,5 @@
 import type { Comparison, TeamStatistics } from '../api/types'
+import { ComparisonCharts } from './ComparisonCharts'
 
 type ComparisonDashboardProps = {
   comparison: Comparison
@@ -64,6 +65,18 @@ function TeamStatisticsCard({
       </div>
       <dl className="mt-5 space-y-3 text-sm">
         <div className="flex justify-between gap-4">
+          <dt className="text-slate-500">Puntos por partido</dt>
+          <dd className="font-bold text-slate-800">{statistics.points_per_game ?? '—'}</dd>
+        </div>
+        <div className="flex justify-between gap-4">
+          <dt className="text-slate-500">Porcentaje de victorias</dt>
+          <dd className="font-bold text-slate-800">
+            {statistics.win_percentage === undefined
+              ? '—'
+              : `${statistics.win_percentage}%`}
+          </dd>
+        </div>
+        <div className="flex justify-between gap-4">
           <dt className="text-slate-500">Goles a favor por partido</dt>
           <dd className="font-bold text-slate-800">{statistics.goals_for_per_match}</dd>
         </div>
@@ -74,6 +87,10 @@ function TeamStatisticsCard({
         <div className="flex items-center justify-between gap-4">
           <dt className="text-slate-500">Últimos cinco</dt>
           <dd><RecentForm form={statistics.recent_form} /></dd>
+        </div>
+        <div className="flex justify-between gap-4">
+          <dt className="text-slate-500">Porterías a cero</dt>
+          <dd className="font-bold text-slate-800">{statistics.clean_sheets ?? '—'}</dd>
         </div>
       </dl>
     </article>
@@ -148,6 +165,8 @@ export function ComparisonDashboard({ comparison }: ComparisonDashboardProps) {
         <TeamStatisticsCard name={team1.name} statistics={team1.statistics} />
         <TeamStatisticsCard name={team2.name} statistics={team2.statistics} />
       </div>
+
+      <ComparisonCharts comparison={comparison} />
     </div>
   )
 }
