@@ -11,8 +11,10 @@ import type { ComparisonRequest, TeamSummary, Venue } from './api/types'
 import { ComparisonDashboard } from './components/ComparisonDashboard'
 import {
   ApiErrorPanel,
+  CatalogEmptyState,
   DashboardSkeleton,
   EmptyDashboard,
+  RefreshStatus,
 } from './components/DashboardStates'
 
 type TeamSelectorProps = {
@@ -63,6 +65,7 @@ function TeamSelector({
         {label}
       </label>
       <select
+        aria-busy={isLoading}
         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-900 shadow-sm outline-none transition focus:border-pitch-500 focus:ring-4 focus:ring-pitch-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
         disabled={isDisabled}
         id={id}
@@ -131,6 +134,12 @@ function App() {
   const selectedCompetition = competitionsQuery.data?.find(
     (competition) => competition.id === competitionId,
   )
+  const competitionsAreEmpty =
+    competitionsQuery.isSuccess && competitionsQuery.data.length === 0
+  const teamsAreEmpty =
+    Boolean(competitionId) && teamsQuery.isSuccess && teams.length === 0
+  const isCatalogLoading =
+    competitionsQuery.isPending || (Boolean(competitionId) && teamsQuery.isLoading)
   const canCompare = Boolean(
     competitionId && teamsQuery.isSuccess && team1 && team2 && team1 !== team2,
   )
@@ -154,7 +163,16 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#536449_0%,#2d3b29_42%,#172117_100%)]">
+    <div
+      className="min-h-screen bg-[radial-gradient(circle_at_top,#536449_0%,#2d3b29_42%,#172117_100%)]"
+      id="top"
+    >
+      <a
+        className="sr-only z-50 rounded-lg bg-white px-4 py-3 font-bold text-ink-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+        href="#main-content"
+      >
+        Saltar al contenido principal
+      </a>
       {/* Cabecera global con identidad del producto y estado del MVP. */}
       <header className="border-b border-white/10 bg-moss-950/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -172,7 +190,7 @@ function App() {
         </div>
       </header>
 
-      <main id="top">
+      <main id="main-content" tabIndex={-1}>
         {/* Presentación del producto y formulario principal de comparación. */}
         <section className="mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 sm:pt-16 lg:px-8 lg:pb-20 lg:pt-24">
           <div className="mx-auto max-w-3xl text-center">
@@ -181,7 +199,7 @@ function App() {
                 ? `${selectedCompetition.name} · Temporada ${selectedCompetition.season}`
                 : 'Datos reales de fútbol'}
             </p>
-            <h1 className="text-balance text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-balance text-3xl font-black tracking-[-0.04em] text-white min-[400px]:text-4xl sm:text-5xl lg:text-6xl">
               Compara equipos. Entiende el partido.
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-7 text-slate-300 sm:text-lg">
@@ -190,6 +208,7 @@ function App() {
           </div>
 
           <form
+            aria-busy={isCatalogLoading}
             className="mx-auto mt-10 max-w-5xl rounded-3xl border border-white bg-white/95 p-5 shadow-[0_24px_70px_-30px_rgba(16,60,43,0.35)] sm:p-8"
             onSubmit={handleSubmit}
           >
@@ -203,7 +222,8 @@ function App() {
                   Competición
                 </label>
                 <select
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
+                  aria-busy={competitionsQuery.isPending}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-pitch-500 focus:ring-4 focus:ring-pitch-100 disabled:cursor-not-allowed disabled:text-slate-400"
                   id="competition"
                   onChange={(event) => {
                     setCompetitionId(event.target.value)
@@ -212,7 +232,11 @@ function App() {
                     clearPreviousComparison()
                   }}
                   value={competitionId}
-                  disabled={competitionsQuery.isPending || competitionsQuery.isError}
+                  disabled={
+                    competitionsQuery.isPending ||
+                    competitionsQuery.isError ||
+                    competitionsAreEmpty
+                  }
                 >
                   <option value="">
                     {competitionsQuery.isPending
@@ -228,27 +252,46 @@ function App() {
               </div>
             </div>
 
-            {competitionsQuery.isError || teamsQuery.isError ? (
+            {competitionsQuery.isError ? (
               <div className="mb-6">
                 <ApiErrorPanel
                   compact
-                  message={friendlyErrorMessage(
-                    competitionsQuery.error ?? teamsQuery.error,
-                  )}
-                  onRetry={() => {
-                    void competitionsQuery.refetch()
-                    void teamsQuery.refetch()
-                  }}
+                  message={friendlyErrorMessage(competitionsQuery.error)}
+                  onRetry={() => void competitionsQuery.refetch()}
                 />
               </div>
+            ) : null}
+
+            {!competitionsQuery.isError && teamsQuery.isError ? (
+              <div className="mb-6">
+                <ApiErrorPanel
+                  compact
+                  message={friendlyErrorMessage(teamsQuery.error)}
+                  onRetry={() => void teamsQuery.refetch()}
+                />
+              </div>
+            ) : null}
+
+            {competitionsAreEmpty ? (
+              <CatalogEmptyState
+                message="Sin una competición disponible todavía no es posible cargar equipos."
+                title="No hay competiciones disponibles"
+              />
+            ) : null}
+
+            {teamsAreEmpty ? (
+              <CatalogEmptyState
+                message="Sincroniza los datos de esta temporada y vuelve a intentarlo."
+                title="No hay equipos disponibles"
+              />
             ) : null}
 
             <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto_1fr] lg:gap-6">
               <TeamSelector
                 excludedTeam={team2}
                 id="team-1"
-                isDisabled={!teamsQuery.isSuccess}
-                isLoading={teamsQuery.isPending}
+                isDisabled={!teamsQuery.isSuccess || teamsAreEmpty}
+                isLoading={teamsQuery.isLoading}
                 label="Equipo 1"
                 onChange={(value) => {
                   setTeam1(value)
@@ -265,8 +308,8 @@ function App() {
               <TeamSelector
                 excludedTeam={team1}
                 id="team-2"
-                isDisabled={!teamsQuery.isSuccess}
-                isLoading={teamsQuery.isPending}
+                isDisabled={!teamsQuery.isSuccess || teamsAreEmpty}
+                isLoading={teamsQuery.isLoading}
                 label="Equipo 2"
                 onChange={(value) => {
                   setTeam2(value)
@@ -287,7 +330,7 @@ function App() {
                   ['team2', 'Equipo 2 local'],
                 ].map(([value, label]) => (
                   <label
-                    className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                    className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm font-semibold transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-pitch-600 ${
                       venue === value
                         ? 'border-pitch-500 bg-pitch-50 text-pitch-900 ring-2 ring-pitch-100'
                         : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
@@ -312,10 +355,16 @@ function App() {
             </fieldset>
 
             <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-6 sm:flex-row">
-              <p className="text-center text-sm text-slate-500 sm:text-left">
+              <p
+                className="text-center text-sm text-slate-500 sm:text-left"
+                id="selection-status"
+                role="status"
+              >
                 {!canCompare ? 'Selecciona dos equipos distintos para continuar.' : 'La comparación está lista.'}
               </p>
               <button
+                aria-controls="comparison-results"
+                aria-describedby="selection-status"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-pitch-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-pitch-600/20 transition enabled:hover:-translate-y-0.5 enabled:hover:bg-pitch-500 enabled:focus-visible:outline-2 enabled:focus-visible:outline-offset-2 enabled:focus-visible:outline-pitch-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none sm:w-auto"
                 disabled={!canCompare || comparisonQuery.isFetching}
                 type="submit"
@@ -327,10 +376,18 @@ function App() {
           </form>
         </section>
 
-        {/* aria-live comunica cambios del dashboard a tecnologías de asistencia. */}
-        <section aria-live="polite" className="border-t border-white/10 bg-moss-950/70">
+        {/* Los estados internos comunican los cambios sin volver a leer todo el dashboard. */}
+        <section
+          aria-busy={comparisonQuery.isFetching}
+          aria-label="Resultados de la comparación"
+          className="border-t border-white/10 bg-moss-950/70"
+          id="comparison-results"
+        >
           <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
             {comparisonQuery.isLoading ? <DashboardSkeleton /> : null}
+            {comparisonQuery.isFetching && comparisonQuery.isSuccess ? (
+              <RefreshStatus />
+            ) : null}
             {comparisonQuery.isError ? (
               <ApiErrorPanel
                 message={friendlyErrorMessage(comparisonQuery.error)}
@@ -338,7 +395,13 @@ function App() {
               />
             ) : null}
             {comparisonQuery.isSuccess ? (
-              <ComparisonDashboard comparison={comparisonQuery.data} />
+              <>
+                <span className="sr-only" role="status">
+                  Comparación lista: {comparisonQuery.data.team_1.name} contra{' '}
+                  {comparisonQuery.data.team_2.name}.
+                </span>
+                <ComparisonDashboard comparison={comparisonQuery.data} />
+              </>
             ) : null}
             {!submittedComparison ? <EmptyDashboard /> : null}
           </div>

@@ -23,9 +23,9 @@ function EmptyChart({ message }: { message: string }) {
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <article className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <h3 className="text-lg font-black text-ink-950">{title}</h3>
-      <div className="mt-4">{children}</div>
+      <div className="mt-4 min-w-0">{children}</div>
     </article>
   )
 }
@@ -54,7 +54,10 @@ export function ComparisonCharts({ comparison }: ComparisonChartsProps) {
   const history = comparison.head_to_head
 
   return (
-    <section aria-label="Gráficos de comparación" className="mt-4 grid gap-4 lg:grid-cols-2">
+    <section
+      aria-label="Gráficos de comparación"
+      className="mt-4 grid min-w-0 gap-4 lg:grid-cols-2"
+    >
       <ChartCard title="Perfil comparativo">
         {hasRadarData(comparison) ? (
           <EChart
@@ -82,7 +85,7 @@ export function ComparisonCharts({ comparison }: ComparisonChartsProps) {
       <div className="lg:col-span-2">
         <ChartCard title="Historial directo">
           {history && history.matches_played > 0 ? (
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid min-w-0 gap-6 lg:grid-cols-2">
               <EChart
                 ariaLabel={`Resultados históricos entre ${comparison.team_1.name} y ${comparison.team_2.name}`}
                 className="h-72"
@@ -90,7 +93,10 @@ export function ComparisonCharts({ comparison }: ComparisonChartsProps) {
               />
               <ol className="space-y-2" aria-label="Últimos enfrentamientos">
                 {history.recent_matches.map((match) => (
-                  <li className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700" key={match.id}>
+                  <li
+                    className="break-words rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700"
+                    key={match.id}
+                  >
                     {matchLabel(match, comparison)}
                   </li>
                 ))}

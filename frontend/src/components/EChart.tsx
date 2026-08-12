@@ -34,7 +34,9 @@ export function EChart({ option, ariaLabel, className = 'h-80' }: EChartProps) {
   useEffect(() => {
     // notMerge reemplaza la comparación anterior para no conservar series de
     // equipos que ya no están seleccionados.
-    chartRef.current?.setOption(option, { notMerge: true })
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const accessibleOption = reduceMotion ? { ...option, animation: false } : option
+    chartRef.current?.setOption(accessibleOption, { notMerge: true })
   }, [option])
 
   return (

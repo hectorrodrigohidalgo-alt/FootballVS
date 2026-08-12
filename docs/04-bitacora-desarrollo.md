@@ -18,7 +18,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
-| Fase 3 — Comparador y dashboard | En progreso | 4 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
+| Fase 3 — Comparador y dashboard | En progreso | 5 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
@@ -508,9 +508,46 @@ Estado: **En progreso**.
 - Archivos principales: `frontend/src/charts/echarts.ts`, `frontend/src/charts/comparisonOptions.ts`, `frontend/src/components/EChart.tsx`, `frontend/src/components/ComparisonCharts.tsx` y sus pruebas.
 - Resultado: el comparador presenta radar, evolución de forma e historial directo sin inventar métricas ausentes.
 
+### Punto 5 — Estados de experiencia, responsive y accesibilidad
+
+- Estado: completado y validado visualmente.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: hacer que el comparador comunique correctamente lo que ocurre durante cada consulta y mantenga su uso en pantallas pequeñas, teclado y tecnologías de asistencia.
+- Estados de experiencia:
+  - Uso de `isLoading` para distinguir una consulta de equipos realmente activa de una consulta diferida todavía deshabilitada.
+  - Estados específicos cuando no existen competiciones o equipos sincronizados.
+  - Reintentos independientes: un fallo de competiciones no solicita equipos vacíos y un fallo de equipos no vuelve a descargar competiciones innecesariamente.
+  - Skeleton durante la primera comparación y aviso discreto durante una actualización que conserva datos visibles.
+  - Errores anunciados mediante `role="alert"` y estados informativos mediante `role="status"`.
+- Antigüedad de datos:
+  - Umbral acordado de 48 horas calculado desde `model.data_updated_at`.
+  - Advertencia informativa que no bloquea la comparación.
+  - Manejo seguro de fechas inválidas mediante un estado desconocido, sin romper el dashboard.
+- Responsive:
+  - Contenido preparado desde 320 px sin desplazamiento horizontal.
+  - Tarjetas estadísticas de dos columnas en móviles estrechos y cuatro columnas cuando existe espacio.
+  - Nombres, resultados y contenedores gráficos capaces de ajustarse y dividir líneas largas.
+  - Formularios y gráficos verificados en vista móvil y escritorio.
+- Accesibilidad:
+  - Enlace inicial “Saltar al contenido principal” visible al recibir foco.
+  - Región de resultados conectada con el botón mediante `aria-controls` y marcada con `aria-busy` durante consultas.
+  - Anuncio breve cuando una comparación queda lista, evitando que un lector de pantalla vuelva a leer todo el dashboard.
+  - Forma reciente descrita con palabras completas además de sus indicadores visuales V/E/D.
+  - Focos visibles en selectores, radios y botones.
+  - Preferencia `prefers-reduced-motion` respetada por CSS y por las animaciones de ECharts.
+- Pruebas automatizadas:
+  - Catálogos vacíos, reintento aislado, región ocupada durante la carga y enlace de navegación rápida.
+  - Datos recientes, antiguos e inválidos.
+  - Desactivación de animación gráfica cuando el sistema solicita movimiento reducido.
+- Validaciones automáticas: Oxlint y TypeScript aprobados; 19 pruebas frontend aprobadas; build Vite aprobado; Ruff y 46 pruebas API aprobadas; `git diff --check` correcto.
+- Validación manual confirmada: vista de 320 px sin desbordamiento, dashboard adaptable y enlace de salto visible mediante teclado.
+- Observación: la advertencia de Vite por el tamaño del bundle de ECharts permanece como optimización de rendimiento para la Fase 5; no bloquea el build ni el MVP actual.
+- Archivos principales: `frontend/src/App.tsx`, `frontend/src/components/DashboardStates.tsx`, `frontend/src/components/ComparisonDashboard.tsx`, `frontend/src/components/ComparisonCharts.tsx`, `frontend/src/components/EChart.tsx`, `frontend/src/utils/dataFreshness.ts` y sus pruebas.
+- Resultado: experiencia de comparación comprensible, adaptable y tolerante a estados incompletos o datos antiguos.
+
 ## Próximo paso
 
-Completar el **Punto 5 de la Fase 3** reforzando estados de carga, vacío, error y datos antiguos, además del comportamiento responsive y la accesibilidad.
+Completar el **Punto 6 de la Fase 3** ejecutando la validación final, actualizando la documentación de cierre y preparando el pull request hacia `main`.
 
 ## Plantilla para próximas actualizaciones
 
