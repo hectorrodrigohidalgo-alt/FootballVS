@@ -3,14 +3,10 @@ from datetime import UTC, datetime
 
 import azure.functions as func
 
+from comparison_service import ComparisonNotFoundError, build_repository_comparison
+from data_catalog import create_data_catalog, create_repository
 from http_responses import error_response, json_response
-from mock_data import (
-    COMPETITION,
-    TEAMS,
-    VALID_VENUES,
-    build_comparison,
-    team_summaries,
-)
+from mock_data import TEAMS, VALID_VENUES, build_comparison
 
 # El MVP expone endpoints públicos de solo lectura. La protección de la clave del
 # proveedor ocurre en el backend y nunca se envía al navegador.
@@ -39,7 +35,10 @@ def health(req: func.HttpRequest) -> func.HttpResponse:
 def list_competitions(req: func.HttpRequest) -> func.HttpResponse:
     """Lista las competiciones disponibles para los selectores de la interfaz."""
     del req
-    return json_response({"data": [COMPETITION], "meta": {"source": "mock"}})
+    catalog = create_data_catalog()
+    return json_response(
+        {"data": catalog.list_competitions(), "meta": {"source": catalog.source}}
+    )
 
 
 @app.function_name(name="list_teams")
@@ -52,7 +51,9 @@ def list_teams(req: func.HttpRequest) -> func.HttpResponse:
     # Los parámetros incluidos en la ruta se obtienen desde `route_params`.
     # Normalizamos a mayúsculas porque el identificador oficial es `PL`.
     competition_id = (req.route_params.get("competition_id") or "").upper()
-    if competition_id != COMPETITION["id"]:
+    catalog = create_data_catalog()
+    teams = catalog.list_teams(competition_id)
+    if teams is None:
         return error_response(
             "competition_not_found",
             "The requested competition does not exist.",
@@ -61,10 +62,10 @@ def list_teams(req: func.HttpRequest) -> func.HttpResponse:
 
     return json_response(
         {
-            "data": team_summaries(),
+            "data": teams,
             "meta": {
                 "competition_id": competition_id,
-                "source": "mock",
+                "source": catalog.source,
             },
         }
     )
@@ -73,7 +74,7 @@ def list_teams(req: func.HttpRequest) -> func.HttpResponse:
 @app.function_name(name="compare_teams")
 @app.route(route="v1/comparisons", methods=[func.HttpMethod.GET])
 def compare_teams(req: func.HttpRequest) -> func.HttpResponse:
-    """Devuelve métricas mock determinísticas para dos equipos."""
+    """Devuelve una comparación mock o real según la fuente configurada."""
     # Los parámetros de consulta llegan como texto. Se normalizan antes de
     # validarlos para aceptar diferencias de mayúsculas y minúsculas.
     team_1_id = (req.params.get("team1") or "").lower()
@@ -96,13 +97,6 @@ def compare_teams(req: func.HttpRequest) -> func.HttpResponse:
             400,
         )
 
-    if team_1_id not in TEAMS or team_2_id not in TEAMS:
-        return error_response(
-            "team_not_found",
-            "One or more selected teams do not exist.",
-            404,
-        )
-
     if venue not in VALID_VENUES:
         return error_response(
             "invalid_venue",
@@ -110,7 +104,32 @@ def compare_teams(req: func.HttpRequest) -> func.HttpResponse:
             400,
         )
 
-    # Sólo después de validar la solicitud se calculan las métricas simuladas.
+    repository = create_repository()
+    if repository is not None:
+        try:
+            comparison = build_repository_comparison(
+                repository,
+                competition_code=(req.params.get("competition") or "PL").upper(),
+                team_1_id=team_1_id,
+                team_2_id=team_2_id,
+                venue=venue,
+            )
+        except ComparisonNotFoundError:
+            return error_response(
+                "comparison_data_not_found",
+                "The requested teams or statistics are not available.",
+                404,
+            )
+        return json_response({"data": comparison, "meta": {"source": "repository"}})
+
+    if team_1_id not in TEAMS or team_2_id not in TEAMS:
+        return error_response(
+            "team_not_found",
+            "One or more selected teams do not exist.",
+            404,
+        )
+
+    # Sólo el modo mock conserva la predicción provisional de la Fase 1.
     return json_response(
         {
             "data": build_comparison(team_1_id, team_2_id, venue),

@@ -70,6 +70,7 @@ describe('cliente HTTP', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     const result = await fetchComparison({
+      competition: 'PL',
       team1: 'arsenal',
       team2: 'liverpool',
       venue: 'team1',
@@ -77,7 +78,7 @@ describe('cliente HTTP', () => {
 
     expect(result).toEqual(comparison)
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://localhost:7071/api/v1/comparisons?team1=arsenal&team2=liverpool&venue=team1',
+      'http://localhost:7071/api/v1/comparisons?competition=PL&team1=arsenal&team2=liverpool&venue=team1',
       { headers: { Accept: 'application/json' } },
     )
   })
@@ -100,6 +101,7 @@ describe('cliente HTTP', () => {
 
     await expect(
       fetchComparison({
+        competition: 'PL',
         team1: 'unknown',
         team2: 'liverpool',
         venue: 'neutral',

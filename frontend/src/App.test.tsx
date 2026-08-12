@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -11,6 +11,14 @@ import {
 } from './api/client'
 import type { Comparison } from './api/types'
 import { renderWithQueryClient } from './test/render'
+
+// Las pruebas del flujo principal no necesitan dibujar SVG reales. El wrapper
+// de ECharts se valida por separado en EChart.test.tsx.
+vi.mock('./components/EChart', () => ({
+  EChart: ({ ariaLabel }: { ariaLabel: string }) => (
+    <div aria-label={ariaLabel} role="img" />
+  ),
+}))
 
 vi.mock('./api/client', async () => {
   const actual = await vi.importActual<typeof import('./api/client')>('./api/client')
@@ -98,6 +106,71 @@ async function selectTeams() {
 }
 
 describe('comparador principal', () => {
+  it('permite saltar directamente al contenido principal', () => {
+    renderWithQueryClient(<App />)
+
+    expect(
+      screen.getByRole('link', { name: 'Saltar al contenido principal' }),
+    ).toHaveAttribute('href', '#main-content')
+  })
+
+  it('informa cuando el catálogo no contiene competiciones', async () => {
+    mockedFetchCompetitions.mockResolvedValueOnce([])
+    renderWithQueryClient(<App />)
+
+    expect(await screen.findByText('No hay competiciones disponibles')).toBeInTheDocument()
+    expect(screen.getByLabelText('Competición')).toBeDisabled()
+    expect(mockedFetchTeams).not.toHaveBeenCalled()
+  })
+
+  it('informa cuando una competición no contiene equipos', async () => {
+    mockedFetchTeams.mockResolvedValueOnce([])
+    renderWithQueryClient(<App />)
+
+    expect(await screen.findByText('No hay equipos disponibles')).toBeInTheDocument()
+    expect(screen.getByLabelText('Equipo 1')).toBeDisabled()
+    expect(screen.getByLabelText('Equipo 2')).toBeDisabled()
+  })
+
+  it('reintenta sólo la consulta de equipos que falló', async () => {
+    mockedFetchTeams.mockRejectedValueOnce(new Error('Network error'))
+    renderWithQueryClient(<App />)
+
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: 'Reintentar' }))
+
+    await waitFor(() => expect(mockedFetchTeams).toHaveBeenCalledTimes(2))
+    expect(mockedFetchCompetitions).toHaveBeenCalledOnce()
+  })
+
+  it('marca la región como ocupada mientras construye la comparación', async () => {
+    let resolveComparison!: (value: Comparison) => void
+    mockedFetchComparison.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveComparison = resolve
+        }),
+    )
+    renderWithQueryClient(<App />)
+    const user = await selectTeams()
+
+    await user.click(screen.getByRole('button', { name: /comparar equipos/i }))
+
+    const results = screen.getByRole('region', {
+      name: 'Resultados de la comparación',
+    })
+    expect(results).toHaveAttribute('aria-busy', 'true')
+    expect(
+      screen.getByRole('status', { name: 'Cargando comparación' }),
+    ).toBeInTheDocument()
+
+    await act(async () => resolveComparison(comparison))
+    expect(
+      await screen.findByRole('heading', { name: 'Arsenal vs Liverpool' }),
+    ).toBeInTheDocument()
+    expect(results).toHaveAttribute('aria-busy', 'false')
+  })
+
   it('habilita el botón sólo con dos equipos y muestra el dashboard', async () => {
     renderWithQueryClient(<App />)
     const compareButton = screen.getByRole('button', { name: /comparar equipos/i })
@@ -112,6 +185,7 @@ describe('comparador principal', () => {
       await screen.findByRole('heading', { name: 'Arsenal vs Liverpool' }),
     ).toBeInTheDocument()
     expect(mockedFetchComparison).toHaveBeenCalledWith({
+      competition: 'PL',
       team1: 'arsenal',
       team2: 'liverpool',
       venue: 'team1',
@@ -135,5 +209,41 @@ describe('comparador principal', () => {
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('Uno de los equipos seleccionados no está disponible.')
     expect(screen.getByRole('button', { name: 'Reintentar' })).toBeEnabled()
+  })
+
+  it('representa datos reales sin inventar predicción ni Elo', async () => {
+    mockedFetchComparison.mockResolvedValueOnce({
+      ...comparison,
+      team_1: {
+        ...comparison.team_1,
+        statistics: { ...comparison.team_1.statistics, elo_rating: null },
+      },
+      team_2: {
+        ...comparison.team_2,
+        statistics: { ...comparison.team_2.statistics, elo_rating: null },
+      },
+      head_to_head: {
+        matches_played: 0,
+        team_1_wins: 0,
+        draws: 0,
+        team_2_wins: 0,
+        recent_matches: [],
+      },
+      prediction: null,
+      model: {
+        version: null,
+        is_available: false,
+        message: 'Predictions and Elo will be available in Phase 4.',
+        data_updated_at: '2026-08-12T00:00:00Z',
+      },
+    })
+    renderWithQueryClient(<App />)
+    const user = await selectTeams()
+
+    await user.click(screen.getByRole('button', { name: /comparar equipos/i }))
+
+    expect(await screen.findByText('Predicción aún no disponible')).toBeInTheDocument()
+    expect(screen.getAllByText('Elo pendiente')).toHaveLength(2)
+    expect(screen.getByText('Datos reales · modelo pendiente')).toBeInTheDocument()
   })
 })

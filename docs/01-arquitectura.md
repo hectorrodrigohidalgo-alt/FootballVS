@@ -39,8 +39,7 @@ Endpoints iniciales:
 
 - `GET /api/v1/competitions`
 - `GET /api/v1/competitions/{id}/teams`
-- `GET /api/v1/teams/{id}/summary`
-- `GET /api/v1/comparisons?team1={id}&team2={id}&venue={team1|team2|neutral}`
+- `GET /api/v1/comparisons?competition={id}&team1={id}&team2={id}&venue={team1|team2|neutral}`
 - `GET /api/v1/health`
 
 ### Datos y sincronización

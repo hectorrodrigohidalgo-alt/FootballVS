@@ -1,6 +1,6 @@
 # Guía de desarrollo local
 
-Esta guía permite levantar FootballVS desde un clon limpio en Windows PowerShell. El dashboard actual usa datos mock; la clave de `football-data.org` sólo es necesaria para ejecutar el verificador autenticado.
+Esta guía permite levantar FootballVS desde un clon limpio en Windows PowerShell. El modo predeterminado usa datos mock; el modo `repository` utiliza competiciones, equipos, snapshots e historial real sincronizados en SQLite.
 
 ## Requisitos
 
@@ -38,7 +38,7 @@ py -3.12 -m venv .venv
 Copy-Item local.settings.json.example local.settings.json
 ```
 
-El archivo `local.settings.json` es local e ignorado por Git. El dashboard mock funciona con el valor de ejemplo. Para validar el proveedor real, reemplaza `replace_me` por tu clave dentro de este archivo sin compartirla.
+El archivo `local.settings.json` es local e ignorado por Git. El modo mock funciona con los valores de ejemplo. Para validar o sincronizar el proveedor real, reemplaza `replace_me` por tu clave dentro de este archivo sin compartirla.
 
 Iniciar Azure Functions:
 
@@ -84,7 +84,7 @@ API, desde `api/`:
 .venv\Scripts\python.exe -m pytest
 ```
 
-Las pruebas y GitHub Actions usan respuestas simuladas; nunca necesitan la clave real.
+Las pruebas y GitHub Actions usan respuestas simuladas y repositorios temporales; nunca necesitan la clave real ni realizan llamadas al proveedor.
 
 ## 5. Validar el proveedor real
 
@@ -94,20 +94,40 @@ Con `FOOTBALL_DATA_API_KEY` configurada únicamente en `api/local.settings.json`
 .venv\Scripts\python.exe -m tools.validate_football_data
 ```
 
-La herramienta sólo contacta `https://api.football-data.org`, pausa entre solicitudes y presenta un resumen sin token ni respuestas completas. No es necesaria para levantar el dashboard mock.
+La herramienta sólo contacta `https://api.football-data.org`, pausa entre solicitudes y presenta un resumen sin token ni respuestas completas. No es necesaria para levantar el modo mock.
 
-## 6. Endpoints locales
+## 6. Usar datos reales desde SQLite
+
+Configura estas variables dentro de `api/local.settings.json`:
+
+```json
+{
+  "APP_DATA_SOURCE": "repository",
+  "FOOTBALLVS_DB_PATH": "data/footballvs.db"
+}
+```
+
+Después sincroniza la temporada y calcula sus snapshots desde `api/`:
+
+```powershell
+.venv\Scripts\python.exe -m tools.sync_football_data --season 2026
+.venv\Scripts\python.exe -m tools.calculate_team_statistics --season 2026
+```
+
+Reinicia Azure Functions después de cambiar `APP_DATA_SOURCE`. La base SQLite permanece dentro de `api/data/` y no se publica en Git.
+
+## 7. Endpoints locales
 
 | Método | Ruta | Fuente actual |
 | --- | --- | --- |
 | GET | `/api/v1/health` | Proceso local |
-| GET | `/api/v1/competitions` | Mock |
-| GET | `/api/v1/competitions/{competition_id}/teams` | Mock |
-| GET | `/api/v1/comparisons?team1={id}&team2={id}&venue={team1\|team2\|neutral}` | Mock |
+| GET | `/api/v1/competitions` | Mock o repositorio |
+| GET | `/api/v1/competitions/{competition_id}/teams` | Mock o repositorio |
+| GET | `/api/v1/comparisons?competition={id}&team1={id}&team2={id}&venue={team1\|team2\|neutral}` | Mock o repositorio |
 
 Equipos mock disponibles: `arsenal`, `chelsea`, `liverpool` y `manchester-city`.
 
-## 7. Seguridad local
+## 8. Seguridad local
 
 - No añadir `.env`, `.env.local` ni `local.settings.json` a Git.
 - No colocar la clave en variables que comiencen con `VITE_`; Vite las expone al navegador.
@@ -115,7 +135,7 @@ Equipos mock disponibles: `arsenal`, `chelsea`, `liverpool` y `manchester-city`.
 - No copiar claves en capturas, logs, commits, issues o pull requests.
 - Configurar la clave como Application Setting de Azure Functions al desplegar; `local.settings.json` no se publica.
 
-## 8. Problemas frecuentes
+## 9. Problemas frecuentes
 
 ### npm indica que no existe el script `dev`
 

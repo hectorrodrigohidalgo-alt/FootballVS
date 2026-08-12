@@ -47,6 +47,34 @@ export function DashboardSkeleton() {
   )
 }
 
+type CatalogEmptyStateProps = {
+  title: string
+  message: string
+}
+
+export function CatalogEmptyState({ title, message }: CatalogEmptyStateProps) {
+  return (
+    <div
+      className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4"
+      role="status"
+    >
+      <p className="font-bold text-amber-950">{title}</p>
+      <p className="mt-1 text-sm leading-6 text-amber-800">{message}</p>
+    </div>
+  )
+}
+
+export function RefreshStatus() {
+  return (
+    <div
+      className="mb-4 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-pitch-100"
+      role="status"
+    >
+      Actualizando la comparación con los datos más recientes…
+    </div>
+  )
+}
+
 export function EmptyDashboard() {
   return (
     <div className="mx-auto max-w-xl text-center">
@@ -55,7 +83,7 @@ export function EmptyDashboard() {
       </span>
       <h2 className="mt-5 text-xl font-bold text-white">Tu dashboard aparecerá aquí</h2>
       <p className="mt-2 text-sm leading-6 text-slate-400">
-        Completa la selección para consultar las métricas simuladas de la API.
+        Completa la selección para consultar las métricas disponibles de ambos equipos.
       </p>
     </div>
   )

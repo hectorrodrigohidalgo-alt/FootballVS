@@ -1,6 +1,16 @@
 # FootballVS Frontend
 
-Interfaz responsive construida con React, TypeScript, Vite, Tailwind CSS y TanStack Query.
+Interfaz responsive construida con React, TypeScript, Vite, Tailwind CSS, TanStack Query y Apache ECharts.
+
+El dashboard utiliza radar, línea de forma reciente y barras de historial directo. Los gráficos se redimensionan automáticamente y muestran estados vacíos cuando todavía no existen resultados suficientes.
+
+## Experiencia y accesibilidad
+
+- Diseño adaptable desde 320 px.
+- Estados diferenciados de carga, actualización, vacío y error.
+- Advertencia cuando los datos llevan más de 48 horas sin sincronizarse.
+- Navegación por teclado con enlace para saltar al contenido principal.
+- Regiones de estado para tecnologías de asistencia y soporte de movimiento reducido.
 
 ## Preparación local
 

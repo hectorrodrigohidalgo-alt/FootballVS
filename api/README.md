@@ -25,11 +25,11 @@ Comprobar el estado:
 GET http://localhost:7071/api/v1/health
 ```
 
-Endpoints mock disponibles:
+Endpoints disponibles en los modos `mock` y `repository`:
 
 - `GET /api/v1/competitions`
 - `GET /api/v1/competitions/{competition_id}/teams`
-- `GET /api/v1/comparisons?team1={id}&team2={id}&venue={team1|team2|neutral}`
+- `GET /api/v1/comparisons?competition={id}&team1={id}&team2={id}&venue={team1|team2|neutral}`
 
 `local.settings.json` y `.venv/` son locales y no deben publicarse en Git.
 
@@ -42,7 +42,7 @@ Desde `api/`, con el entorno virtual preparado:
 .venv\Scripts\python.exe -m pytest
 ```
 
-Las pruebas utilizan únicamente el dataset mock y no necesitan una clave de API.
+Las pruebas usan datos aislados y repositorios temporales; no realizan llamadas al proveedor ni necesitan una clave de API.
 
 ## Validación segura de football-data.org
 
@@ -107,3 +107,36 @@ Cada snapshot resume resultados, puntos, goles, porterías a cero, ambos equipos
 marcan, rendimiento como local y visitante, y forma de los últimos 5 y 10
 partidos. Sólo se incluyen encuentros con estado `FINISHED`; una temporada sin
 resultados produce métricas en cero en lugar de datos inventados.
+
+## Fuente de datos de los endpoints
+
+La variable `APP_DATA_SOURCE` selecciona el origen usado por los endpoints de
+competiciones y equipos:
+
+- `mock`: datos ficticios, valor predeterminado y modo usado por CI.
+- `repository`: documentos reales sincronizados en SQLite.
+
+Para utilizar el repositorio local, establece en `local.settings.json`:
+
+```json
+"APP_DATA_SOURCE": "repository",
+"FOOTBALLVS_DB_PATH": "data/footballvs.db"
+```
+
+El endpoint de equipos toma sólo los participantes presentes en los partidos de
+la temporada actual; así evita mezclar clubes históricos almacenados por otras
+temporadas.
+
+## Comparación real
+
+Con `APP_DATA_SOURCE=repository`, el endpoint:
+
+```text
+GET /api/v1/comparisons?competition=PL&team1={id}&team2={id}&venue={team1|team2|neutral}
+```
+
+combina equipos, snapshots e historial directo almacenados en SQLite. La
+localía selecciona estadísticas local/visitante y el campo neutral usa los
+totales generales. Sólo los enfrentamientos finalizados de la competición se
+incluyen en el historial. Hasta implementar la Fase 4, `prediction` y
+`elo_rating` son `null` de forma explícita.

@@ -1,6 +1,6 @@
 # Bitácora de desarrollo
 
-Última actualización: **8 de agosto de 2026**.
+Última actualización: **12 de agosto de 2026**.
 
 Este documento registra el avance verificable de FootballVS. Se actualiza al finalizar cada punto y distingue entre trabajo implementado localmente, validado y publicado en GitHub.
 
@@ -17,8 +17,8 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
-| Fase 2 — Datos | Pendiente de integración | 4 de 4 puntos | `feat/Fase-2-Datos` |
-| Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
+| Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
+| Fase 3 — Comparador y dashboard | En progreso | 5 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
@@ -273,7 +273,7 @@ Estado: **Completada**.
 
 ## Fase 2 — Datos
 
-Estado: **En progreso**.
+Estado: **Completada e integrada**.
 
 ### Punto 1 — Integración resiliente del proveedor
 
@@ -402,9 +402,177 @@ en una base de datos. La persistencia corresponde al Punto 3.
 - Archivos principales: `api/team_statistics.py`, `api/tools/calculate_team_statistics.py` y `api/tests/test_team_statistics.py`.
 - Resultado: estadísticas precalculadas, reproducibles y listas para alimentar los futuros endpoints de comparación.
 
+### Cierre de la Fase 2
+
+- Pull request: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/pull/4`.
+- Estado: integrado mediante squash en `main`.
+- Commit de integración: `f645dca` (`#4`).
+- GitHub Actions: cuatro verificaciones aprobadas entre eventos `push` y `pull_request`.
+- Resultado: Fase 2 cerrada con la rama principal limpia y sincronizada.
+
+## Fase 3 — Comparador y dashboard
+
+Estado: **En progreso**.
+
+### Inicio de fase
+
+- Fecha: 11 de agosto de 2026.
+- Rama: `feat/Fase-3-Comparador-Dashboard`.
+- Base: commit `f645dca` de `main`.
+- Plan: seis puntos controlables para API real, comparación, frontend, gráficos, estados de experiencia y cierre.
+- Decisión: Elo permanece en la Fase 4; la Fase 3 preparará el contrato visual sin mostrar valores inventados.
+
+### Punto 1 — Catálogo real para selectores
+
+- Estado: completado.
+- Fecha: 11 de agosto de 2026.
+- Objetivo: servir competiciones y equipos normalizados desde SQLite sin romper las pruebas ni depender del proveedor en cada consulta.
+- Implementación:
+  - Contrato `DataCatalog` independiente de la fuente de datos.
+  - Catálogo mock conservado para CI y pruebas aisladas.
+  - Catálogo de repositorio que transforma documentos internos al contrato público del frontend.
+  - Selección mediante `APP_DATA_SOURCE=mock|repository`.
+  - Competición pública identificada por código (`PL`) y temporada actual resuelta desde el repositorio.
+  - Equipos de los selectores derivados únicamente de los partidos de la temporada actual para excluir participantes históricos.
+  - Respuestas con metadato `source` para identificar si los datos provienen de mock o repositorio.
+- Validaciones automatizadas: 44 pruebas API aprobadas.
+- Validación real local: Premier League 2026/27 y 20 equipos devueltos desde SQLite.
+- Archivos principales: `api/data_catalog.py`, `api/function_app.py`, `api/tests/test_data_catalog.py` y `api/tests/test_function_app.py`.
+- Resultado: endpoints de competiciones y equipos preparados para alimentar el frontend con datos reales sincronizados.
+
+### Punto 2 — Endpoint real de comparación
+
+- Estado: completado.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: comparar dos equipos usando snapshots y partidos persistidos, sin métricas predictivas ficticias.
+- Implementación:
+  - Servicio de comparación desacoplado del endpoint HTTP.
+  - Selección de estadísticas generales, locales o visitantes según la localía solicitada.
+  - Métricas de resultados, puntos, goles, porterías a cero, ambos marcan y forma reciente.
+  - Historial directo limitado a partidos finalizados de la competición seleccionada, ordenado del más reciente al más antiguo.
+  - Últimos diez enfrentamientos incluidos junto con victorias de cada equipo y empates.
+  - Respuesta `404` uniforme cuando faltan equipos, temporada o snapshots.
+  - El modo `mock` permanece disponible para CI; el modo `repository` usa exclusivamente SQLite.
+- Decisión de integridad: `prediction` y `elo_rating` son `null` hasta la Fase 4, evitando presentar valores inventados como reales.
+- Validaciones automatizadas: Ruff aprobado y 46 pruebas API aprobadas.
+- Validación real local: comparación 2026/27 construida desde SQLite con temporada, equipos, métricas, historial y predicción no disponible.
+- Archivos principales: `api/comparison_service.py`, `api/function_app.py`, `api/data_catalog.py` y `api/tests/test_comparison_service.py`.
+- Resultado: `GET /api/v1/comparisons` puede responder con información trazable del repositorio.
+
+### Punto 3 — Frontend conectado al contrato real
+
+- Estado: completado.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: permitir que el usuario seleccione datos reales y consulte el nuevo contrato sin romper el modo mock.
+- Implementación:
+  - Selector de competición alimentado por la API y preparado para más de una opción.
+  - Selección automática de la primera competición disponible.
+  - Reinicio de equipos y resultados cuando cambia la competición.
+  - Consulta de comparación con `competition`, identificadores reales de equipos y localía.
+  - Tipos TypeScript ampliados para métricas agregadas, historial directo y disponibilidad del modelo.
+  - `prediction` y `elo_rating` aceptan `null` de forma segura.
+  - Mensajes visibles para predicción y Elo pendientes, sin presentar datos ficticios como reales.
+  - Historial directo utilizado como contenido informativo mientras se desarrolla la visualización completa.
+  - Mensaje de error específico cuando todavía no existen snapshots para la selección.
+- Validaciones: Oxlint, TypeScript, 5 pruebas frontend y build Vite aprobados.
+- Archivos principales: `frontend/src/App.tsx`, `frontend/src/api/types.ts`, `frontend/src/api/client.test.ts`, `frontend/src/App.test.tsx` y `frontend/src/components/ComparisonDashboard.tsx`.
+- Resultado: flujo de selección y comparación compatible tanto con datos mock como con SQLite real.
+
+### Punto 4 — Dashboard visual con Apache ECharts
+
+- Estado: completado.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: transformar las métricas del contrato de comparación en gráficos legibles, interactivos y adaptables a distintos tamaños de pantalla.
+- Implementación:
+  - Apache ECharts `6.1.0` instalado como dependencia directa del frontend.
+  - Registro modular de radar, línea y barras con renderizado SVG para evitar cargar tipos de gráficos que el dashboard no utiliza.
+  - Wrapper React reutilizable que crea una sola instancia por contenedor, actualiza sus opciones y libera sus recursos al desmontarse.
+  - `ResizeObserver` para recalcular automáticamente el tamaño de cada gráfico cuando cambia su tarjeta o el ancho de la pantalla.
+  - Radar normalizado de 0 a 100 para porcentaje de victorias, puntos, ataque, defensa, porterías a cero y forma reciente.
+  - Línea de forma reciente que convierte victoria, empate y derrota en 3, 1 y 0 puntos respectivamente.
+  - Barras para victorias de cada equipo y empates en el historial directo, acompañadas por una lista textual de resultados.
+  - Tarjetas estadísticas ampliadas con puntos por partido, porcentaje de victorias y porterías a cero.
+  - Estados vacíos específicos cuando la temporada todavía no tiene resultados o no existen enfrentamientos sincronizados.
+  - Texto alternativo y configuración ARIA en los gráficos; la información del historial también permanece disponible como texto.
+- Decisiones:
+  - Los valores del radar son comparativos y normalizados; no son predicciones ni sustituyen las cifras exactas mostradas en las tarjetas.
+  - El eje de ataque usa 3 goles por partido como referencia superior y el de defensa invierte los goles recibidos, de modo que una cifra mayor siempre representa mejor rendimiento.
+  - Elo y probabilidades continúan pendientes hasta la Fase 4.
+- Pruebas:
+  - Conversión de forma a puntos y normalización del radar.
+  - Estado sin datos y construcción de las barras del historial.
+  - Ciclo de vida del wrapper: inicialización, actualización y liberación de ECharts.
+  - Las pruebas generales reemplazan el dibujo SVG por un componente accesible; la integración gráfica se comprueba de forma aislada sin depender de dimensiones inexistentes en JSDOM.
+- Validaciones: Oxlint y TypeScript aprobados; 10 pruebas frontend aprobadas; build Vite de producción aprobado.
+- Observación: Vite informa que el bundle gráfico supera su umbral recomendado de 500 kB; no bloquea el build y se evaluará división de código durante la optimización de experiencia y rendimiento.
+- Archivos principales: `frontend/src/charts/echarts.ts`, `frontend/src/charts/comparisonOptions.ts`, `frontend/src/components/EChart.tsx`, `frontend/src/components/ComparisonCharts.tsx` y sus pruebas.
+- Resultado: el comparador presenta radar, evolución de forma e historial directo sin inventar métricas ausentes.
+
+### Punto 5 — Estados de experiencia, responsive y accesibilidad
+
+- Estado: completado y validado visualmente.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: hacer que el comparador comunique correctamente lo que ocurre durante cada consulta y mantenga su uso en pantallas pequeñas, teclado y tecnologías de asistencia.
+- Estados de experiencia:
+  - Uso de `isLoading` para distinguir una consulta de equipos realmente activa de una consulta diferida todavía deshabilitada.
+  - Estados específicos cuando no existen competiciones o equipos sincronizados.
+  - Reintentos independientes: un fallo de competiciones no solicita equipos vacíos y un fallo de equipos no vuelve a descargar competiciones innecesariamente.
+  - Skeleton durante la primera comparación y aviso discreto durante una actualización que conserva datos visibles.
+  - Errores anunciados mediante `role="alert"` y estados informativos mediante `role="status"`.
+- Antigüedad de datos:
+  - Umbral acordado de 48 horas calculado desde `model.data_updated_at`.
+  - Advertencia informativa que no bloquea la comparación.
+  - Manejo seguro de fechas inválidas mediante un estado desconocido, sin romper el dashboard.
+- Responsive:
+  - Contenido preparado desde 320 px sin desplazamiento horizontal.
+  - Tarjetas estadísticas de dos columnas en móviles estrechos y cuatro columnas cuando existe espacio.
+  - Nombres, resultados y contenedores gráficos capaces de ajustarse y dividir líneas largas.
+  - Formularios y gráficos verificados en vista móvil y escritorio.
+- Accesibilidad:
+  - Enlace inicial “Saltar al contenido principal” visible al recibir foco.
+  - Región de resultados conectada con el botón mediante `aria-controls` y marcada con `aria-busy` durante consultas.
+  - Anuncio breve cuando una comparación queda lista, evitando que un lector de pantalla vuelva a leer todo el dashboard.
+  - Forma reciente descrita con palabras completas además de sus indicadores visuales V/E/D.
+  - Focos visibles en selectores, radios y botones.
+  - Preferencia `prefers-reduced-motion` respetada por CSS y por las animaciones de ECharts.
+- Pruebas automatizadas:
+  - Catálogos vacíos, reintento aislado, región ocupada durante la carga y enlace de navegación rápida.
+  - Datos recientes, antiguos e inválidos.
+  - Desactivación de animación gráfica cuando el sistema solicita movimiento reducido.
+- Validaciones automáticas: Oxlint y TypeScript aprobados; 19 pruebas frontend aprobadas; build Vite aprobado; Ruff y 46 pruebas API aprobadas; `git diff --check` correcto.
+- Validación manual confirmada: vista de 320 px sin desbordamiento, dashboard adaptable y enlace de salto visible mediante teclado.
+- Observación: la advertencia de Vite por el tamaño del bundle de ECharts permanece como optimización de rendimiento para la Fase 5; no bloquea el build ni el MVP actual.
+- Archivos principales: `frontend/src/App.tsx`, `frontend/src/components/DashboardStates.tsx`, `frontend/src/components/ComparisonDashboard.tsx`, `frontend/src/components/ComparisonCharts.tsx`, `frontend/src/components/EChart.tsx`, `frontend/src/utils/dataFreshness.ts` y sus pruebas.
+- Resultado: experiencia de comparación comprensible, adaptable y tolerante a estados incompletos o datos antiguos.
+
+### Punto 6 — Validación y cierre de fase
+
+- Estado: en progreso; validación local y revisión previa completadas, pull request pendiente.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: comprobar el conjunto completo de la Fase 3, actualizar la documentación general y preparar una integración revisable hacia `main`.
+- Alcance revisado:
+  - 29 archivos modificados o creados respecto de `main` antes de la documentación final.
+  - Catálogo y comparación reales, contrato frontend, dashboard ECharts, estados de experiencia, responsive y accesibilidad.
+  - Ningún `.env`, `local.settings.json` real ni base `footballvs.db` está versionado.
+- Validación local reproducible:
+  - Instalación limpia del frontend mediante `npm ci`: 137 paquetes instalados y cero vulnerabilidades reportadas.
+  - Oxlint y TypeScript aprobados.
+  - 19 pruebas frontend aprobadas en 5 archivos.
+  - Build Vite de producción aprobado.
+  - Ruff aprobado y 46 pruebas API aprobadas.
+  - `git diff --check` sin errores de espacios.
+- Validación remota previa:
+  - Último commit funcional: `85775e6`.
+  - Workflow de evento `push`: completado correctamente.
+  - Ejecución: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31615301178`.
+  - No existía otro pull request para la rama al comenzar este punto.
+- Documentación corregida: README general actualizado para distinguir capacidades reales actuales, modo mock, modo repositorio y modelo pendiente de la Fase 4; contrato HTTP sincronizado en la documentación de arquitectura y API.
+- Observación no bloqueante: Vite continúa informando un bundle superior a 500 kB por Apache ECharts; la optimización mediante división de código se evaluará en la Fase 5.
+- Trabajo pendiente para completar el punto: publicar este cierre, crear el pull request, verificar sus checks e integrar mediante squash.
+
 ## Próximo paso
 
-Confirmar el commit, validar CI y cerrar la **Fase 2 — Datos** mediante pull request hacia `main`.
+Publicar la documentación de cierre, crear el pull request de la **Fase 3** desde terminal y comprobar sus verificaciones automáticas.
 
 ## Plantilla para próximas actualizaciones
 
