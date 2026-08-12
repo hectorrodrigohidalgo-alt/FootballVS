@@ -5,8 +5,8 @@
 - Fase 0: completada e integrada en `main`.
 - Fase 1: completada, 10 de 10 puntos, con CI verde e integrada en `main` mediante los PR `#2` y `#3`.
 - Fase 2: completada, 4 de 4 puntos, con CI verde e integrada en `main` mediante el PR `#4`.
-- Fase 3: iniciada en la rama `feat/Fase-3-Comparador-Dashboard`.
-- Próximo objetivo: servir competiciones y equipos reales desde el repositorio.
+- Fase 3: en progreso, 1 de 6 puntos completados.
+- Próximo objetivo: implementar el endpoint real de comparación.
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -62,7 +62,7 @@ Salida: datos reales consultables y trazables. **Completada e integrada.**
 
 ## Fase 3 — Comparador y dashboard
 
-- [ ] Punto 1: servir competiciones y equipos reales desde el repositorio.
+- [x] Punto 1: servir competiciones y equipos reales desde el repositorio.
 - [ ] Punto 2: implementar el endpoint de comparación con snapshots e historial directo.
 - [ ] Punto 3: conectar selectores, filtros y validaciones con los datos reales.
 - [ ] Punto 4: construir tarjetas, forma reciente, radar e historial directo con Apache ECharts.

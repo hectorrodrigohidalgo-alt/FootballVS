@@ -4,6 +4,8 @@ from collections.abc import Mapping
 import azure.functions as func
 import pytest
 
+from data_catalog import RepositoryDataCatalog
+from data_repository import SQLiteDataRepository
 from function_app import compare_teams, health, list_competitions, list_teams
 
 
@@ -62,6 +64,60 @@ def test_teams_rejects_an_unknown_competition() -> None:
 
     assert response.status_code == 404
     assert response_body(response)["error"]["code"] == "competition_not_found"
+
+
+def test_catalog_endpoints_can_read_repository_data(tmp_path, monkeypatch) -> None:
+    repository = SQLiteDataRepository(tmp_path / "footballvs.db")
+    repository.initialize()
+    repository.upsert_many(
+        "competition",
+        [
+            {
+                "id": "football-data:competition:2021",
+                "code": "PL",
+                "name": "Premier League",
+                "country": "England",
+                "current_season_id": "football-data:season:2403",
+            }
+        ],
+    )
+    repository.upsert_many(
+        "season",
+        [{"id": "football-data:season:2403", "name": "2026/27"}],
+    )
+    repository.upsert_many(
+        "team",
+        [
+            {
+                "id": "football-data:team:57",
+                "name": "Arsenal FC",
+                "short_name": "Arsenal",
+                "tla": "ARS",
+            }
+        ],
+    )
+    repository.upsert_many(
+        "match",
+        [
+            {
+                "id": "football-data:match:1",
+                "competition_id": "football-data:competition:2021",
+                "season_id": "football-data:season:2403",
+                "home_team_id": "football-data:team:57",
+                "away_team_id": "football-data:team:57",
+            }
+        ],
+    )
+    catalog = RepositoryDataCatalog(repository)
+    monkeypatch.setattr("function_app.create_data_catalog", lambda: catalog)
+
+    competitions_response = list_competitions(make_request())
+    teams_response = list_teams(
+        make_request(route_params={"competition_id": "pl"})
+    )
+
+    assert response_body(competitions_response)["meta"]["source"] == "repository"
+    assert response_body(teams_response)["data"][0]["id"] == "football-data:team:57"
 
 
 def test_comparison_is_deterministic_and_probabilities_sum_to_one() -> None:

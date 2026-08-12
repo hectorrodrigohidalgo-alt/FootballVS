@@ -107,3 +107,22 @@ Cada snapshot resume resultados, puntos, goles, porterías a cero, ambos equipos
 marcan, rendimiento como local y visitante, y forma de los últimos 5 y 10
 partidos. Sólo se incluyen encuentros con estado `FINISHED`; una temporada sin
 resultados produce métricas en cero en lugar de datos inventados.
+
+## Fuente de datos de los endpoints
+
+La variable `APP_DATA_SOURCE` selecciona el origen usado por los endpoints de
+competiciones y equipos:
+
+- `mock`: datos ficticios, valor predeterminado y modo usado por CI.
+- `repository`: documentos reales sincronizados en SQLite.
+
+Para utilizar el repositorio local, establece en `local.settings.json`:
+
+```json
+"APP_DATA_SOURCE": "repository",
+"FOOTBALLVS_DB_PATH": "data/footballvs.db"
+```
+
+El endpoint de equipos toma sólo los participantes presentes en los partidos de
+la temporada actual; así evita mezclar clubes históricos almacenados por otras
+temporadas.

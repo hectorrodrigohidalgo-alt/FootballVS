@@ -3,14 +3,9 @@ from datetime import UTC, datetime
 
 import azure.functions as func
 
+from data_catalog import create_data_catalog
 from http_responses import error_response, json_response
-from mock_data import (
-    COMPETITION,
-    TEAMS,
-    VALID_VENUES,
-    build_comparison,
-    team_summaries,
-)
+from mock_data import TEAMS, VALID_VENUES, build_comparison
 
 # El MVP expone endpoints públicos de solo lectura. La protección de la clave del
 # proveedor ocurre en el backend y nunca se envía al navegador.
@@ -39,7 +34,10 @@ def health(req: func.HttpRequest) -> func.HttpResponse:
 def list_competitions(req: func.HttpRequest) -> func.HttpResponse:
     """Lista las competiciones disponibles para los selectores de la interfaz."""
     del req
-    return json_response({"data": [COMPETITION], "meta": {"source": "mock"}})
+    catalog = create_data_catalog()
+    return json_response(
+        {"data": catalog.list_competitions(), "meta": {"source": catalog.source}}
+    )
 
 
 @app.function_name(name="list_teams")
@@ -52,7 +50,9 @@ def list_teams(req: func.HttpRequest) -> func.HttpResponse:
     # Los parámetros incluidos en la ruta se obtienen desde `route_params`.
     # Normalizamos a mayúsculas porque el identificador oficial es `PL`.
     competition_id = (req.route_params.get("competition_id") or "").upper()
-    if competition_id != COMPETITION["id"]:
+    catalog = create_data_catalog()
+    teams = catalog.list_teams(competition_id)
+    if teams is None:
         return error_response(
             "competition_not_found",
             "The requested competition does not exist.",
@@ -61,10 +61,10 @@ def list_teams(req: func.HttpRequest) -> func.HttpResponse:
 
     return json_response(
         {
-            "data": team_summaries(),
+            "data": teams,
             "meta": {
                 "competition_id": competition_id,
-                "source": "mock",
+                "source": catalog.source,
             },
         }
     )

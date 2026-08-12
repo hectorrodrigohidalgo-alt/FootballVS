@@ -18,7 +18,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
-| Fase 3 — Comparador y dashboard | En progreso | 0 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
+| Fase 3 — Comparador y dashboard | En progreso | 1 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
@@ -422,9 +422,27 @@ Estado: **En progreso**.
 - Plan: seis puntos controlables para API real, comparación, frontend, gráficos, estados de experiencia y cierre.
 - Decisión: Elo permanece en la Fase 4; la Fase 3 preparará el contrato visual sin mostrar valores inventados.
 
+### Punto 1 — Catálogo real para selectores
+
+- Estado: completado.
+- Fecha: 11 de agosto de 2026.
+- Objetivo: servir competiciones y equipos normalizados desde SQLite sin romper las pruebas ni depender del proveedor en cada consulta.
+- Implementación:
+  - Contrato `DataCatalog` independiente de la fuente de datos.
+  - Catálogo mock conservado para CI y pruebas aisladas.
+  - Catálogo de repositorio que transforma documentos internos al contrato público del frontend.
+  - Selección mediante `APP_DATA_SOURCE=mock|repository`.
+  - Competición pública identificada por código (`PL`) y temporada actual resuelta desde el repositorio.
+  - Equipos de los selectores derivados únicamente de los partidos de la temporada actual para excluir participantes históricos.
+  - Respuestas con metadato `source` para identificar si los datos provienen de mock o repositorio.
+- Validaciones automatizadas: 44 pruebas API aprobadas.
+- Validación real local: Premier League 2026/27 y 20 equipos devueltos desde SQLite.
+- Archivos principales: `api/data_catalog.py`, `api/function_app.py`, `api/tests/test_data_catalog.py` y `api/tests/test_function_app.py`.
+- Resultado: endpoints de competiciones y equipos preparados para alimentar el frontend con datos reales sincronizados.
+
 ## Próximo paso
 
-Completar el **Punto 1 de la Fase 3** sirviendo competiciones y equipos reales desde el repositorio SQLite.
+Completar el **Punto 2 de la Fase 3** implementando la comparación con snapshots e historial directo.
 
 ## Plantilla para próximas actualizaciones
 
