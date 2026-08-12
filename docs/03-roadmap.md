@@ -4,8 +4,9 @@
 
 - Fase 0: completada e integrada en `main`.
 - Fase 1: completada, 10 de 10 puntos, con CI verde e integrada en `main` mediante los PR `#2` y `#3`.
-- Fase 2: 4 de 4 puntos completados localmente; pendiente de integración.
-- Próximo objetivo: validar CI y cerrar la Fase 2 mediante pull request.
+- Fase 2: completada, 4 de 4 puntos, con CI verde e integrada en `main` mediante el PR `#4`.
+- Fase 3: iniciada en la rama `feat/Fase-3-Comparador-Dashboard`.
+- Próximo objetivo: servir competiciones y equipos reales desde el repositorio.
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -57,14 +58,20 @@ Detalle verificable: `docs/04-bitacora-desarrollo.md`.
 - [x] Punto 3: persistir datos y ejecutar sincronización idempotente.
 - [x] Punto 4: calcular estadísticas agregadas.
 
-Salida: datos reales consultables y trazables. **Completada localmente; pendiente de integración.**
+Salida: datos reales consultables y trazables. **Completada e integrada.**
 
 ## Fase 3 — Comparador y dashboard
 
-- Selectores y validaciones.
-- Endpoint de comparación.
-- Tarjetas, forma reciente, radar, Elo e historial directo.
-- Estados de carga, vacío, error y datos antiguos.
+- [ ] Punto 1: servir competiciones y equipos reales desde el repositorio.
+- [ ] Punto 2: implementar el endpoint de comparación con snapshots e historial directo.
+- [ ] Punto 3: conectar selectores, filtros y validaciones con los datos reales.
+- [ ] Punto 4: construir tarjetas, forma reciente, radar e historial directo con Apache ECharts.
+- [ ] Punto 5: completar estados de carga, vacío, error y datos antiguos, responsive y accesibilidad.
+- [ ] Punto 6: validar CI, documentar y cerrar la fase mediante pull request.
+
+El rating Elo se incorporará en la Fase 4 junto con el modelo estadístico; la
+Fase 3 dejará preparado su espacio en el contrato y la interfaz sin inventar un
+valor antes de calcularlo.
 
 Salida: comparación completa sin predicción avanzada.
 

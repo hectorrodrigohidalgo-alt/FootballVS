@@ -17,8 +17,8 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | --- | --- | ---: | --- |
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
-| Fase 2 — Datos | Pendiente de integración | 4 de 4 puntos | `feat/Fase-2-Datos` |
-| Fase 3 — Comparador y dashboard | Pendiente | 0% | — |
+| Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
+| Fase 3 — Comparador y dashboard | En progreso | 0 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
@@ -273,7 +273,7 @@ Estado: **Completada**.
 
 ## Fase 2 — Datos
 
-Estado: **En progreso**.
+Estado: **Completada e integrada**.
 
 ### Punto 1 — Integración resiliente del proveedor
 
@@ -402,9 +402,29 @@ en una base de datos. La persistencia corresponde al Punto 3.
 - Archivos principales: `api/team_statistics.py`, `api/tools/calculate_team_statistics.py` y `api/tests/test_team_statistics.py`.
 - Resultado: estadísticas precalculadas, reproducibles y listas para alimentar los futuros endpoints de comparación.
 
+### Cierre de la Fase 2
+
+- Pull request: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/pull/4`.
+- Estado: integrado mediante squash en `main`.
+- Commit de integración: `f645dca` (`#4`).
+- GitHub Actions: cuatro verificaciones aprobadas entre eventos `push` y `pull_request`.
+- Resultado: Fase 2 cerrada con la rama principal limpia y sincronizada.
+
+## Fase 3 — Comparador y dashboard
+
+Estado: **En progreso**.
+
+### Inicio de fase
+
+- Fecha: 11 de agosto de 2026.
+- Rama: `feat/Fase-3-Comparador-Dashboard`.
+- Base: commit `f645dca` de `main`.
+- Plan: seis puntos controlables para API real, comparación, frontend, gráficos, estados de experiencia y cierre.
+- Decisión: Elo permanece en la Fase 4; la Fase 3 preparará el contrato visual sin mostrar valores inventados.
+
 ## Próximo paso
 
-Confirmar el commit, validar CI y cerrar la **Fase 2 — Datos** mediante pull request hacia `main`.
+Completar el **Punto 1 de la Fase 3** sirviendo competiciones y equipos reales desde el repositorio SQLite.
 
 ## Plantilla para próximas actualizaciones
 
