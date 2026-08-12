@@ -18,7 +18,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
-| Fase 3 — Comparador y dashboard | En progreso | 5 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
+| Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
@@ -547,7 +547,7 @@ Estado: **En progreso**.
 
 ### Punto 6 — Validación y cierre de fase
 
-- Estado: en progreso; validación local y revisión previa completadas, pull request pendiente.
+- Estado: completado e integrado.
 - Fecha: 12 de agosto de 2026.
 - Objetivo: comprobar el conjunto completo de la Fase 3, actualizar la documentación general y preparar una integración revisable hacia `main`.
 - Alcance revisado:
@@ -566,13 +566,28 @@ Estado: **En progreso**.
   - Workflow de evento `push`: completado correctamente.
   - Ejecución: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31615301178`.
   - No existía otro pull request para la rama al comenzar este punto.
+- Cierre en GitHub:
+  - Pull request: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/pull/5`.
+  - Rama base: `main`.
+  - Rama de trabajo: `feat/Fase-3-Comparador-Dashboard`.
+  - Cuatro verificaciones aprobadas entre los eventos `push` y `pull_request`.
+  - Ejecución del PR: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31616450283`.
+  - Integración mediante squash completada el 12 de agosto de 2026.
+  - Commit de integración: `f3bd985` (`#5`).
 - Documentación corregida: README general actualizado para distinguir capacidades reales actuales, modo mock, modo repositorio y modelo pendiente de la Fase 4; contrato HTTP sincronizado en la documentación de arquitectura y API.
 - Observación no bloqueante: Vite continúa informando un bundle superior a 500 kB por Apache ECharts; la optimización mediante división de código se evaluará en la Fase 5.
-- Trabajo pendiente para completar el punto: publicar este cierre, crear el pull request, verificar sus checks e integrar mediante squash.
+- Resultado: Fase 3 validada, documentada e integrada; la aplicación ofrece comparación real y dashboard interactivo sin presentar predicciones todavía inexistentes.
+
+### Cierre de la Fase 3
+
+- Estado: completada, 6 de 6 puntos.
+- Integración principal: PR `#5`, commit `f3bd985`.
+- Capacidades entregadas: catálogo real, endpoint de comparación, filtros de localía, snapshots, historial directo, gráficos ECharts, estados de experiencia, responsive y accesibilidad.
+- Límite consciente: Elo, probabilidades y goles estimados se implementarán y evaluarán en la Fase 4.
 
 ## Próximo paso
 
-Publicar la documentación de cierre, crear el pull request de la **Fase 3** desde terminal y comprobar sus verificaciones automáticas.
+Iniciar la **Fase 4 — Modelo estadístico**, comenzando por el diseño, cálculo y backtesting temporal del rating Elo.
 
 ## Plantilla para próximas actualizaciones
 
