@@ -46,7 +46,7 @@ function TeamStatisticsCard({
           <h3 className="mt-1 text-xl font-black text-ink-950">{name}</h3>
         </div>
         <span className="rounded-lg bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700">
-          Elo {statistics.elo_rating}
+          {statistics.elo_rating === null ? 'Elo pendiente' : `Elo ${statistics.elo_rating}`}
         </span>
       </div>
       <div className="mt-6 grid grid-cols-4 gap-2 text-center">
@@ -98,42 +98,46 @@ export function ComparisonDashboard({ comparison }: ComparisonDashboardProps) {
         </div>
         <div className="text-left sm:text-right">
           <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">
-            Datos simulados
+            {model.is_available === false ? 'Datos reales · modelo pendiente' : 'Datos simulados'}
           </span>
           <p className="mt-2 text-xs text-slate-400">Actualizado: {updatedAt}</p>
         </div>
       </div>
 
-      <div className="mt-7 grid gap-4 sm:grid-cols-3">
-        {[
-          [team1.name, prediction.team_1_win_probability],
-          ['Empate', prediction.draw_probability],
-          [team2.name, prediction.team_2_win_probability],
-        ].map(([label, probability], index) => (
-          <article
-            className={`rounded-2xl border p-5 ${index === 1 ? 'border-slate-200 bg-white' : 'border-pitch-100 bg-pitch-50'}`}
-            key={String(label)}
-          >
-            <p className="text-sm font-semibold text-slate-600">{label}</p>
-            <p className="mt-2 text-3xl font-black text-ink-950">
-              {percentFormatter.format(Number(probability))}
-            </p>
-          </article>
-        ))}
-      </div>
+      {prediction ? (
+        <div className="mt-7 grid gap-4 sm:grid-cols-3">
+          {[
+            [team1.name, prediction.team_1_win_probability],
+            ['Empate', prediction.draw_probability],
+            [team2.name, prediction.team_2_win_probability],
+          ].map(([label, probability], index) => (
+            <article
+              className={`rounded-2xl border p-5 ${index === 1 ? 'border-slate-200 bg-white' : 'border-pitch-100 bg-pitch-50'}`}
+              key={String(label)}
+            >
+              <p className="text-sm font-semibold text-slate-600">{label}</p>
+              <p className="mt-2 text-3xl font-black text-ink-950">
+                {percentFormatter.format(Number(probability))}
+              </p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+          <p className="font-bold">Predicción aún no disponible</p>
+          <p className="mt-1 text-sm">{model.message ?? 'El modelo se incorporará en la Fase 4.'}</p>
+        </div>
+      )}
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl bg-ink-950 p-5 text-white">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-pitch-400">Goles estimados</p>
-          <div className="mt-4 flex items-end justify-between gap-5">
-            <div><p className="text-sm text-slate-400">{team1.short_name}</p><p className="text-3xl font-black">{prediction.estimated_team_1_goals}</p></div>
-            <span className="pb-2 text-slate-600">—</span>
-            <div className="text-right"><p className="text-sm text-slate-400">{team2.short_name}</p><p className="text-3xl font-black">{prediction.estimated_team_2_goals}</p></div>
-          </div>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-pitch-400">Historial directo</p>
+          <p className="mt-3 text-3xl font-black">{comparison.head_to_head?.matches_played ?? 0}</p>
+          <p className="mt-1 text-sm text-slate-400">partidos finalizados disponibles</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Modelo</p>
-          <p className="mt-3 font-bold text-ink-950">{model.version}</p>
+          <p className="mt-3 font-bold text-ink-950">{model.version ?? 'Pendiente de implementación'}</p>
           <p className="mt-1 text-sm leading-6 text-slate-500">
             Contrato provisional para validar la interfaz. No representa el modelo final.
           </p>

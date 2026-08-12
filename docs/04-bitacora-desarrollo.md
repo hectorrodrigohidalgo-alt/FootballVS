@@ -18,7 +18,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
-| Fase 3 — Comparador y dashboard | En progreso | 2 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
+| Fase 3 — Comparador y dashboard | En progreso | 3 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
@@ -459,9 +459,28 @@ Estado: **En progreso**.
 - Archivos principales: `api/comparison_service.py`, `api/function_app.py`, `api/data_catalog.py` y `api/tests/test_comparison_service.py`.
 - Resultado: `GET /api/v1/comparisons` puede responder con información trazable del repositorio.
 
+### Punto 3 — Frontend conectado al contrato real
+
+- Estado: completado.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: permitir que el usuario seleccione datos reales y consulte el nuevo contrato sin romper el modo mock.
+- Implementación:
+  - Selector de competición alimentado por la API y preparado para más de una opción.
+  - Selección automática de la primera competición disponible.
+  - Reinicio de equipos y resultados cuando cambia la competición.
+  - Consulta de comparación con `competition`, identificadores reales de equipos y localía.
+  - Tipos TypeScript ampliados para métricas agregadas, historial directo y disponibilidad del modelo.
+  - `prediction` y `elo_rating` aceptan `null` de forma segura.
+  - Mensajes visibles para predicción y Elo pendientes, sin presentar datos ficticios como reales.
+  - Historial directo utilizado como contenido informativo mientras se desarrolla la visualización completa.
+  - Mensaje de error específico cuando todavía no existen snapshots para la selección.
+- Validaciones: Oxlint, TypeScript, 5 pruebas frontend y build Vite aprobados.
+- Archivos principales: `frontend/src/App.tsx`, `frontend/src/api/types.ts`, `frontend/src/api/client.test.ts`, `frontend/src/App.test.tsx` y `frontend/src/components/ComparisonDashboard.tsx`.
+- Resultado: flujo de selección y comparación compatible tanto con datos mock como con SQLite real.
+
 ## Próximo paso
 
-Completar el **Punto 3 de la Fase 3** conectando el frontend con los datos y el contrato reales.
+Completar el **Punto 4 de la Fase 3** construyendo tarjetas, forma reciente, radar e historial directo con Apache ECharts.
 
 ## Plantilla para próximas actualizaciones
 

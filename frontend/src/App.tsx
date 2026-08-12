@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import {
@@ -89,6 +89,8 @@ function friendlyErrorMessage(error: Error | null): string {
       invalid_venue: 'La condición del encuentro no es válida.',
       missing_parameters: 'Faltan datos para realizar la comparación.',
       team_not_found: 'Uno de los equipos seleccionados no está disponible.',
+      comparison_data_not_found:
+        'Todavía no hay estadísticas sincronizadas para esta comparación.',
     }
     return messages[error.code] ?? 'La API no pudo completar la solicitud.'
   }
@@ -97,7 +99,7 @@ function friendlyErrorMessage(error: Error | null): string {
 }
 
 function App() {
-  const [competitionId] = useState('PL')
+  const [competitionId, setCompetitionId] = useState('')
   const [team1, setTeam1] = useState('')
   const [team2, setTeam2] = useState('')
   const [venue, setVenue] = useState<Venue>('team1')
@@ -114,7 +116,7 @@ function App() {
   const teamsQuery = useQuery({
     queryKey: ['teams', competitionId],
     queryFn: () => fetchTeams(competitionId),
-    enabled: competitionsQuery.isSuccess,
+    enabled: Boolean(competitionId),
   })
 
   // La comparación es una consulta declarativa diferida: sólo se habilita
@@ -130,8 +132,15 @@ function App() {
     (competition) => competition.id === competitionId,
   )
   const canCompare = Boolean(
-    teamsQuery.isSuccess && team1 && team2 && team1 !== team2,
+    competitionId && teamsQuery.isSuccess && team1 && team2 && team1 !== team2,
   )
+
+  useEffect(() => {
+    const firstCompetition = competitionsQuery.data?.[0]
+    if (!competitionId && firstCompetition) {
+      setCompetitionId(firstCompetition.id)
+    }
+  }, [competitionId, competitionsQuery.data])
 
   function clearPreviousComparison() {
     // Oculta resultados antiguos cuando cambia cualquier entrada del formulario.
@@ -141,7 +150,7 @@ function App() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!canCompare) return
-    setSubmittedComparison({ team1, team2, venue })
+    setSubmittedComparison({ competition: competitionId, team1, team2, venue })
   }
 
   return (
@@ -168,7 +177,9 @@ function App() {
         <section className="mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 sm:pt-16 lg:px-8 lg:pb-20 lg:pt-24">
           <div className="mx-auto max-w-3xl text-center">
             <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-pitch-400">
-              Premier League · Temporada 2026/27
+              {selectedCompetition
+                ? `${selectedCompetition.name} · Temporada ${selectedCompetition.season}`
+                : 'Datos reales de fútbol'}
             </p>
             <h1 className="text-balance text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
               Compara equipos. Entiende el partido.
@@ -194,14 +205,25 @@ function App() {
                 <select
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
                   id="competition"
+                  onChange={(event) => {
+                    setCompetitionId(event.target.value)
+                    setTeam1('')
+                    setTeam2('')
+                    clearPreviousComparison()
+                  }}
                   value={competitionId}
-                  disabled
+                  disabled={competitionsQuery.isPending || competitionsQuery.isError}
                 >
-                  <option value={competitionId}>
+                  <option value="">
                     {competitionsQuery.isPending
                       ? 'Cargando competición…'
-                      : selectedCompetition?.name ?? 'Premier League'}
+                      : 'Selecciona una competición'}
                   </option>
+                  {(competitionsQuery.data ?? []).map((competition) => (
+                    <option key={competition.id} value={competition.id}>
+                      {competition.name} · {competition.season}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -324,7 +346,7 @@ function App() {
       </main>
 
       <footer className="border-t border-white/10 bg-[#0d140f] px-4 py-6 text-center text-xs text-slate-400">
-        FootballVS · Las probabilidades son estimaciones estadísticas y no garantizan resultados.
+        FootballVS · Datos estadísticos informativos; el modelo predictivo se incorporará en la Fase 4.
       </footer>
     </div>
   )

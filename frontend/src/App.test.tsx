@@ -112,6 +112,7 @@ describe('comparador principal', () => {
       await screen.findByRole('heading', { name: 'Arsenal vs Liverpool' }),
     ).toBeInTheDocument()
     expect(mockedFetchComparison).toHaveBeenCalledWith({
+      competition: 'PL',
       team1: 'arsenal',
       team2: 'liverpool',
       venue: 'team1',
@@ -135,5 +136,41 @@ describe('comparador principal', () => {
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('Uno de los equipos seleccionados no está disponible.')
     expect(screen.getByRole('button', { name: 'Reintentar' })).toBeEnabled()
+  })
+
+  it('representa datos reales sin inventar predicción ni Elo', async () => {
+    mockedFetchComparison.mockResolvedValueOnce({
+      ...comparison,
+      team_1: {
+        ...comparison.team_1,
+        statistics: { ...comparison.team_1.statistics, elo_rating: null },
+      },
+      team_2: {
+        ...comparison.team_2,
+        statistics: { ...comparison.team_2.statistics, elo_rating: null },
+      },
+      head_to_head: {
+        matches_played: 0,
+        team_1_wins: 0,
+        draws: 0,
+        team_2_wins: 0,
+        recent_matches: [],
+      },
+      prediction: null,
+      model: {
+        version: null,
+        is_available: false,
+        message: 'Predictions and Elo will be available in Phase 4.',
+        data_updated_at: '2026-08-12T00:00:00Z',
+      },
+    })
+    renderWithQueryClient(<App />)
+    const user = await selectTeams()
+
+    await user.click(screen.getByRole('button', { name: /comparar equipos/i }))
+
+    expect(await screen.findByText('Predicción aún no disponible')).toBeInTheDocument()
+    expect(screen.getAllByText('Elo pendiente')).toHaveLength(2)
+    expect(screen.getByText('Datos reales · modelo pendiente')).toBeInTheDocument()
   })
 })

@@ -15,14 +15,19 @@ export type TeamSummary = {
 }
 
 export type TeamStatistics = {
+  scope?: 'overall' | 'home' | 'away'
   matches_played: number
   wins: number
   draws: number
   losses: number
+  win_percentage?: number
+  points_per_game?: number
   goals_for_per_match: number
   goals_against_per_match: number
+  clean_sheets?: number
+  both_teams_scored?: number
   recent_form: Array<'W' | 'D' | 'L'>
-  elo_rating: number
+  elo_rating: number | null
 }
 
 export type ComparedTeam = TeamSummary & {
@@ -38,9 +43,28 @@ export type Prediction = {
 }
 
 export type ModelMetadata = {
-  version: string
-  is_mock: boolean
+  version: string | null
+  is_mock?: boolean
+  is_available?: boolean
+  message?: string
   data_updated_at: string
+}
+
+export type HeadToHeadMatch = {
+  id: string
+  utc_date: string
+  home_team_id: string
+  away_team_id: string
+  home_score: number
+  away_score: number
+}
+
+export type HeadToHead = {
+  matches_played: number
+  team_1_wins: number
+  draws: number
+  team_2_wins: number
+  recent_matches: HeadToHeadMatch[]
 }
 
 export type Comparison = {
@@ -48,11 +72,13 @@ export type Comparison = {
   team_1: ComparedTeam
   team_2: ComparedTeam
   venue: Venue
-  prediction: Prediction
+  head_to_head?: HeadToHead
+  prediction: Prediction | null
   model: ModelMetadata
 }
 
 export type ComparisonRequest = {
+  competition: string
   team1: string
   team2: string
   venue: Venue
