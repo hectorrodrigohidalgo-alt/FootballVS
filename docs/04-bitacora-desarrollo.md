@@ -545,9 +545,34 @@ Estado: **En progreso**.
 - Archivos principales: `frontend/src/App.tsx`, `frontend/src/components/DashboardStates.tsx`, `frontend/src/components/ComparisonDashboard.tsx`, `frontend/src/components/ComparisonCharts.tsx`, `frontend/src/components/EChart.tsx`, `frontend/src/utils/dataFreshness.ts` y sus pruebas.
 - Resultado: experiencia de comparación comprensible, adaptable y tolerante a estados incompletos o datos antiguos.
 
+### Punto 6 — Validación y cierre de fase
+
+- Estado: en progreso; validación local y revisión previa completadas, pull request pendiente.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: comprobar el conjunto completo de la Fase 3, actualizar la documentación general y preparar una integración revisable hacia `main`.
+- Alcance revisado:
+  - 29 archivos modificados o creados respecto de `main` antes de la documentación final.
+  - Catálogo y comparación reales, contrato frontend, dashboard ECharts, estados de experiencia, responsive y accesibilidad.
+  - Ningún `.env`, `local.settings.json` real ni base `footballvs.db` está versionado.
+- Validación local reproducible:
+  - Instalación limpia del frontend mediante `npm ci`: 137 paquetes instalados y cero vulnerabilidades reportadas.
+  - Oxlint y TypeScript aprobados.
+  - 19 pruebas frontend aprobadas en 5 archivos.
+  - Build Vite de producción aprobado.
+  - Ruff aprobado y 46 pruebas API aprobadas.
+  - `git diff --check` sin errores de espacios.
+- Validación remota previa:
+  - Último commit funcional: `85775e6`.
+  - Workflow de evento `push`: completado correctamente.
+  - Ejecución: `https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/runs/31615301178`.
+  - No existía otro pull request para la rama al comenzar este punto.
+- Documentación corregida: README general actualizado para distinguir capacidades reales actuales, modo mock, modo repositorio y modelo pendiente de la Fase 4; contrato HTTP sincronizado en la documentación de arquitectura y API.
+- Observación no bloqueante: Vite continúa informando un bundle superior a 500 kB por Apache ECharts; la optimización mediante división de código se evaluará en la Fase 5.
+- Trabajo pendiente para completar el punto: publicar este cierre, crear el pull request, verificar sus checks e integrar mediante squash.
+
 ## Próximo paso
 
-Completar el **Punto 6 de la Fase 3** ejecutando la validación final, actualizando la documentación de cierre y preparando el pull request hacia `main`.
+Publicar la documentación de cierre, crear el pull request de la **Fase 3** desde terminal y comprobar sus verificaciones automáticas.
 
 ## Plantilla para próximas actualizaciones
 

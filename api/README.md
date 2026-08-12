@@ -25,11 +25,11 @@ Comprobar el estado:
 GET http://localhost:7071/api/v1/health
 ```
 
-Endpoints mock disponibles:
+Endpoints disponibles en los modos `mock` y `repository`:
 
 - `GET /api/v1/competitions`
 - `GET /api/v1/competitions/{competition_id}/teams`
-- `GET /api/v1/comparisons?team1={id}&team2={id}&venue={team1|team2|neutral}`
+- `GET /api/v1/comparisons?competition={id}&team1={id}&team2={id}&venue={team1|team2|neutral}`
 
 `local.settings.json` y `.venv/` son locales y no deben publicarse en Git.
 
@@ -42,7 +42,7 @@ Desde `api/`, con el entorno virtual preparado:
 .venv\Scripts\python.exe -m pytest
 ```
 
-Las pruebas utilizan únicamente el dataset mock y no necesitan una clave de API.
+Las pruebas usan datos aislados y repositorios temporales; no realizan llamadas al proveedor ni necesitan una clave de API.
 
 ## Validación segura de football-data.org
 
