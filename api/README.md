@@ -126,3 +126,17 @@ Para utilizar el repositorio local, establece en `local.settings.json`:
 El endpoint de equipos toma sólo los participantes presentes en los partidos de
 la temporada actual; así evita mezclar clubes históricos almacenados por otras
 temporadas.
+
+## Comparación real
+
+Con `APP_DATA_SOURCE=repository`, el endpoint:
+
+```text
+GET /api/v1/comparisons?competition=PL&team1={id}&team2={id}&venue={team1|team2|neutral}
+```
+
+combina equipos, snapshots e historial directo almacenados en SQLite. La
+localía selecciona estadísticas local/visitante y el campo neutral usa los
+totales generales. Sólo los enfrentamientos finalizados de la competición se
+incluyen en el historial. Hasta implementar la Fase 4, `prediction` y
+`elo_rating` son `null` de forma explícita.

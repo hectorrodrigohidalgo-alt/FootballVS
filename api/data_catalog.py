@@ -117,3 +117,16 @@ def create_data_catalog() -> DataCatalog:
         repository.initialize()
         return RepositoryDataCatalog(repository)
     raise ValueError("APP_DATA_SOURCE must be mock or repository.")
+
+
+def create_repository() -> SQLiteDataRepository | None:
+    """Entrega SQLite sólo cuando los endpoints usan datos persistidos."""
+    source = os.getenv("APP_DATA_SOURCE", "mock").strip().lower()
+    if source == "mock":
+        return None
+    if source != "repository":
+        raise ValueError("APP_DATA_SOURCE must be mock or repository.")
+    database_path = Path(os.getenv("FOOTBALLVS_DB_PATH", DEFAULT_DATABASE_PATH))
+    repository = SQLiteDataRepository(database_path)
+    repository.initialize()
+    return repository

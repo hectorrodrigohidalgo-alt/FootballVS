@@ -18,7 +18,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 0 — Descubrimiento y fundaciones | Completada | 100% | `main` |
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
-| Fase 3 — Comparador y dashboard | En progreso | 1 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
+| Fase 3 — Comparador y dashboard | En progreso | 2 de 6 puntos | `feat/Fase-3-Comparador-Dashboard` |
 | Fase 4 — Modelo estadístico | Pendiente | 0% | — |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
@@ -440,9 +440,28 @@ Estado: **En progreso**.
 - Archivos principales: `api/data_catalog.py`, `api/function_app.py`, `api/tests/test_data_catalog.py` y `api/tests/test_function_app.py`.
 - Resultado: endpoints de competiciones y equipos preparados para alimentar el frontend con datos reales sincronizados.
 
+### Punto 2 — Endpoint real de comparación
+
+- Estado: completado.
+- Fecha: 12 de agosto de 2026.
+- Objetivo: comparar dos equipos usando snapshots y partidos persistidos, sin métricas predictivas ficticias.
+- Implementación:
+  - Servicio de comparación desacoplado del endpoint HTTP.
+  - Selección de estadísticas generales, locales o visitantes según la localía solicitada.
+  - Métricas de resultados, puntos, goles, porterías a cero, ambos marcan y forma reciente.
+  - Historial directo limitado a partidos finalizados de la competición seleccionada, ordenado del más reciente al más antiguo.
+  - Últimos diez enfrentamientos incluidos junto con victorias de cada equipo y empates.
+  - Respuesta `404` uniforme cuando faltan equipos, temporada o snapshots.
+  - El modo `mock` permanece disponible para CI; el modo `repository` usa exclusivamente SQLite.
+- Decisión de integridad: `prediction` y `elo_rating` son `null` hasta la Fase 4, evitando presentar valores inventados como reales.
+- Validaciones automatizadas: Ruff aprobado y 46 pruebas API aprobadas.
+- Validación real local: comparación 2026/27 construida desde SQLite con temporada, equipos, métricas, historial y predicción no disponible.
+- Archivos principales: `api/comparison_service.py`, `api/function_app.py`, `api/data_catalog.py` y `api/tests/test_comparison_service.py`.
+- Resultado: `GET /api/v1/comparisons` puede responder con información trazable del repositorio.
+
 ## Próximo paso
 
-Completar el **Punto 2 de la Fase 3** implementando la comparación con snapshots e historial directo.
+Completar el **Punto 3 de la Fase 3** conectando el frontend con los datos y el contrato reales.
 
 ## Plantilla para próximas actualizaciones
 
