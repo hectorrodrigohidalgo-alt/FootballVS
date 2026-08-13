@@ -385,3 +385,35 @@ partidos finalizados de temporadas completas anteriores, con igual peso. No
 utiliza encuentros de la temporada objetivo ni posteriores. Esta regla evita
 filtración del futuro y es deliberadamente distinta de la ventana reciente
 100%/40% con la que Poisson calcula las fuerzas de ataque y defensa.
+
+## Resultado del backtesting temporal
+
+El backtesting `temporal-backtest-v0.1.0` evaluó progresivamente las temporadas
+2024/25 y 2025/26. Cada partido utilizó sólo encuentros con `utc_date`
+estrictamente anterior; los partidos simultáneos compartieron el mismo corte.
+Las probabilidades se limitaron únicamente para las métricas al intervalo
+`0.000001–0.999999` y luego se normalizaron.
+
+Poisson y Dixon-Coles alcanzaron una cobertura de 92.89% en 2024/25 y 92.63%
+en 2025/26. Los encuentros restantes se registraron como datos insuficientes y
+no recibieron probabilidades inventadas.
+
+| Modelo | Log Loss 1X2 global | Brier global | Log Loss marcador global | Accuracy |
+| --- | ---: | ---: | ---: | ---: |
+| Poisson | 1.020548 | 0.611900 | 2.965258 | 49.93% |
+| Dixon-Coles | 1.019150 | 0.611138 | 2.965072 | 50.07% |
+
+Dixon-Coles mejoró el Log Loss 1X2 un 0.14%. Cumplió cobertura, estabilidad por
+temporada y mejora del marcador exacto, pero no alcanzó el umbral relativo de
+1%. En consecuencia, `poisson-v0.1.0` permanece como modelo probabilístico
+seleccionado y Dixon-Coles conserva estado experimental.
+
+Para Elo se probaron las 180 combinaciones documentadas. El mejor candidato
+usó `K=20`, ventaja local `40`, retención `75%` y rating de ascendidos `1400`.
+Su MSE promedio fue `0.156879`, frente a `0.158357` del baseline, una mejora de
+0.93%. Aunque mejoró ambas ventanas, no alcanzó el 1%; se mantiene
+`elo-v0.1.0` con `K=20`, ventaja local `65`, retención `75%` y ascendidos en
+`1400`.
+
+Los resultados agregados se versionan en `api/backtesting/results/`. No se
+incluyen registros partido por partido ni respuestas originales del proveedor.

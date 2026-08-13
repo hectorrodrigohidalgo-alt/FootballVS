@@ -173,3 +173,22 @@ campo neutral usa fuerzas generales sin asignar ventaja local.
 La salida incluye parámetros, fuerzas, tamaños de muestra, `input_data_cutoff`
 y `calculated_at`. Todavía no se sirve desde el endpoint público: primero debe
 compararse con Dixon-Coles y superar el backtesting temporal.
+
+## Backtesting temporal
+
+Con las temporadas 2023/24, 2024/25 y 2025/26 sincronizadas, ejecutar desde
+`api/`:
+
+```powershell
+.venv\Scripts\python.exe -m tools.run_backtesting
+```
+
+El comando evalúa 2024/25 y 2025/26 en orden cronológico. Cada predicción usa
+únicamente partidos anteriores a su `utc_date`; los encuentros sin muestra
+suficiente se excluyen y contabilizan. Compara Poisson con Dixon-Coles y prueba
+las 180 configuraciones Elo acordadas.
+
+Los archivos `backtesting/results/backtest-summary.json` y
+`backtesting/results/backtest-summary.md` contienen sólo métricas agregadas,
+parámetros, cobertura y decisión. No publican registros individuales ni datos
+originales de los partidos.

@@ -739,6 +739,49 @@ Estado: **En progreso**.
 - Resultado: ajuste reproducible listo para compararse contra el baseline
   Poisson sin filtración de datos futuros.
 
+### Punto 5 — Backtesting temporal y selección conservadora
+
+- Estado: completado.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: evaluar los modelos sin información futura y seleccionar sólo
+  mejoras suficientemente sólidas.
+- Integridad temporal:
+  - Ventanas de evaluación 2024/25 y 2025/26.
+  - Predicción progresiva con corte estricto anterior a `utc_date`.
+  - Partidos simultáneos evaluados como bloque y sin influencia mutua.
+  - Partidos sin muestra marcados como `insufficient_data`, excluidos de las
+    métricas y contabilizados.
+- Métricas probabilísticas:
+  - Log Loss 1X2 principal, Brier Score y Log Loss de marcador exacto como
+    secundarias, y accuracy informativa.
+  - Límite numérico `0.000001–0.999999` sólo durante evaluación, seguido de
+    normalización 1X2.
+  - Cobertura mínima exigida de 80% por temporada.
+- Resultado Poisson frente a Dixon-Coles:
+  - Cobertura 92.89% en 2024/25 y 92.63% en 2025/26; 705 partidos evaluados.
+  - Log Loss 1X2 global: Poisson `1.020548`; Dixon-Coles `1.019150`.
+  - Brier global: Poisson `0.611900`; Dixon-Coles `0.611138`.
+  - Mejora relativa Dixon-Coles: 0.14%, inferior al mínimo de 1%.
+  - Decisión confirmada: conservar `poisson-v0.1.0`; Dixon-Coles permanece
+    experimental.
+- Resultado Elo:
+  - 180 configuraciones evaluadas sobre las dos ventanas.
+  - Baseline: MSE promedio `0.158357`.
+  - Mejor candidato: `K=20`, localía `40`, retención `75%`, ascendidos `1400`,
+    con MSE `0.156879` y mejora relativa de 0.93%.
+  - El candidato mejoró ambas temporadas, pero no alcanzó 1%.
+  - Decisión confirmada: conservar `elo-v0.1.0` con `K=20`, localía `65`,
+    retención `75%` y ascendidos `1400`.
+- Reportes:
+  - JSON procesable y Markdown legible en `api/backtesting/results/`.
+  - Sólo contienen métricas agregadas, parámetros, cobertura y decisiones; no
+    almacenan registros individuales de partidos.
+- Archivos principales: `api/backtesting/evaluator.py`,
+  `api/backtesting/elo_evaluator.py`, `api/backtesting/metrics.py`,
+  `api/backtesting/reports.py`, `api/tools/run_backtesting.py` y sus pruebas.
+- Resultado: modelos elegidos con criterios reproducibles y preparados para
+  versionarse y servirse en el punto 6.
+
 ## Plantilla para próximas actualizaciones
 
 Al completar un punto nuevo, añadir:
