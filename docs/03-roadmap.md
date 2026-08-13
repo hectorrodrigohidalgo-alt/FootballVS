@@ -6,9 +6,8 @@
 - Fase 1: completada, 10 de 10 puntos, con CI verde e integrada en `main` mediante los PR `#2` y `#3`.
 - Fase 2: completada, 4 de 4 puntos, con CI verde e integrada en `main` mediante el PR `#4`.
 - Fase 3: completada, 6 de 6 puntos, con CI verde e integrada en `main` mediante el PR `#5`.
-- Fase 4: en progreso, 5 de 6 puntos completados.
-- Próximo objetivo: versionar y servir las predicciones seleccionadas e
-  incorporar la explicación Elo en el dashboard.
+- Fase 4: completada, 6 de 6 puntos.
+- Próximo objetivo: iniciar la Fase 5 de calidad y despliegue.
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -84,11 +83,11 @@ Salida: comparación completa sin predicción avanzada. **Completada e integrada
 - [x] Punto 3: implementar el modelo base Poisson con localía.
 - [x] Punto 4: incorporar Dixon-Coles y generar probabilidades 1X2.
 - [x] Punto 5: realizar backtesting temporal, selección de parámetros y calibración.
-- [ ] Punto 6: versionar y servir predicciones, y añadir al apartado Elo un
+- [x] Punto 6: versionar y servir predicciones, y añadir al apartado Elo un
   panel explicativo con scrollbar, accesible desde el
   dashboard y sin mostrar el contenido permanentemente en la página principal.
 
-Salida: estimaciones reproducibles y evaluadas.
+Salida: estimaciones reproducibles, evaluadas y servidas. **Completada.**
 
 ## Fase 5 — Calidad y despliegue
 

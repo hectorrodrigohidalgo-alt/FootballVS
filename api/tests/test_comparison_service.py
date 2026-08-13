@@ -19,7 +19,25 @@ def create_repository(tmp_path: Path) -> SQLiteDataRepository:
             }
         ],
     )
-    repository.upsert_many("season", [{"id": "season", "name": "2026/27"}])
+    repository.upsert_many(
+        "season",
+        [
+            {
+                "id": "previous-season",
+                "competition_id": "competition",
+                "name": "2025/26",
+                "start_date": "2025-08-01",
+                "end_date": "2026-05-31",
+            },
+            {
+                "id": "season",
+                "competition_id": "competition",
+                "name": "2026/27",
+                "start_date": "2026-08-01",
+                "end_date": "2027-05-31",
+            },
+        ],
+    )
     repository.upsert_many(
         "team",
         [
@@ -74,13 +92,29 @@ def create_repository(tmp_path: Path) -> SQLiteDataRepository:
             },
         ],
     )
+    historical_matches = [
+        {
+            "id": f"historical-{index}",
+            "status": "FINISHED",
+            "competition_id": "competition",
+            "season_id": "previous-season",
+            "utc_date": f"2025-09-{index + 1:02d}T20:00:00Z",
+            "home_team_id": "team-1" if index % 2 else "team-2",
+            "away_team_id": "team-2" if index % 2 else "team-1",
+            "home_score": 2 if index % 2 else 1,
+            "away_score": 1,
+        }
+        for index in range(20)
+    ]
     repository.upsert_many(
         "match",
         [
+            *historical_matches,
             {
                 "id": "match-1",
                 "status": "FINISHED",
                 "competition_id": "competition",
+                "season_id": "previous-season",
                 "utc_date": "2025-12-01T20:00:00Z",
                 "home_team_id": "team-1",
                 "away_team_id": "team-2",
@@ -91,6 +125,7 @@ def create_repository(tmp_path: Path) -> SQLiteDataRepository:
                 "id": "match-2",
                 "status": "SCHEDULED",
                 "competition_id": "competition",
+                "season_id": "season",
                 "utc_date": "2026-09-01T20:00:00Z",
                 "home_team_id": "team-2",
                 "away_team_id": "team-1",
@@ -113,10 +148,15 @@ def test_builds_real_comparison_with_venue_and_head_to_head(tmp_path: Path) -> N
 
     assert result["team_1"]["statistics"]["scope"] == "home"
     assert result["team_2"]["statistics"]["scope"] == "away"
-    assert result["head_to_head"]["matches_played"] == 1
-    assert result["head_to_head"]["team_1_wins"] == 1
-    assert result["prediction"] is None
-    assert result["team_1"]["statistics"]["elo_rating"] is None
+    assert result["head_to_head"]["matches_played"] == 21
+    assert result["head_to_head"]["team_1_wins"] == 11
+    assert result["prediction"] is not None
+    assert result["team_1"]["statistics"]["elo_rating"] is not None
+    assert result["model"]["version"] == "poisson-v0.1.0"
+    assert result["model"]["elo_version"] == "elo-v0.1.0"
+    assert result["model"]["status"] == "validated"
+    assert result["model"]["matches_used"] == 21
+    assert "score_matrix" not in result["prediction"]
     assert result["model"]["data_updated_at"] == "2026-08-12T11:00:00Z"
 
 

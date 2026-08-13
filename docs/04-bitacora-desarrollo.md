@@ -782,6 +782,48 @@ Estado: **En progreso**.
 - Resultado: modelos elegidos con criterios reproducibles y preparados para
   versionarse y servirse en el punto 6.
 
+### Punto 6 — Publicación de modelos y explicación Elo
+
+- Estado: completado.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: servir los modelos seleccionados desde la API y presentarlos de
+  forma comprensible y accesible en el dashboard.
+- API:
+  - El servicio de comparación calcula `elo-v0.1.0` desde el historial completo
+    almacenado, evitando depender de ratings cacheados obsoletos.
+  - `poisson-v0.1.0` utiliza un corte UTC actual y conserva la degradación segura
+    a `prediction: null` cuando no alcanza los mínimos.
+  - La salida pública incluye 1X2, goles esperados, más/menos de 2.5, ambos
+    equipos marcan y tres marcadores probables.
+  - La matriz 7 × 7 permanece interna; no aumenta innecesariamente la respuesta.
+  - Metadata con versión Poisson, versión Elo, estado validado, corte y partidos
+    utilizados.
+- Frontend:
+  - Ratings Elo redondeados sólo para presentación.
+  - Tarjetas de probabilidades, goles esperados, más de 2.5, ambos marcan y
+    marcadores más probables.
+  - Etiqueta explícita de modelo validado y trazabilidad visible.
+  - Botón “¿Cómo funciona?” dentro del apartado Elo; la explicación no ocupa
+    permanentemente la página principal.
+  - Diálogo modal responsive con scrollbar interno, cierre con Escape, cierre
+    por fondo, bloqueo del scroll exterior, foco inicial, retorno del foco y
+    navegación de teclado contenida.
+- Validación real:
+  - Endpoint local en modo repositorio: Elo disponible para ambos equipos,
+    Poisson con 380 partidos, suma 1X2 igual a 1 y matriz no expuesta.
+  - Ruff y 77 pruebas API aprobadas.
+  - Lint, TypeScript y 20 pruebas frontend aprobadas.
+  - Build de producción aprobado; permanece una advertencia no bloqueante por
+    el tamaño del bundle de ECharts, candidata a optimización en la Fase 5.
+- Limitación de esta sesión: no había un navegador conectado para inspección
+  visual automatizada; el comportamiento interactivo quedó cubierto por pruebas
+  y deberá incluirse en la revisión visual de la Fase 5.
+- Archivos principales: `api/comparison_service.py`, `api/mock_data.py`,
+  `frontend/src/api/types.ts`, `frontend/src/components/ComparisonDashboard.tsx`
+  y `frontend/src/components/EloInfoDialog.tsx`.
+- Resultado: Fase 4 completada con modelos versionados, evaluados, servidos y
+  explicados al usuario.
+
 ## Plantilla para próximas actualizaciones
 
 Al completar un punto nuevo, añadir:

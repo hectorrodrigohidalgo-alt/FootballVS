@@ -40,13 +40,25 @@ export type Prediction = {
   team_2_win_probability: number
   estimated_team_1_goals: number
   estimated_team_2_goals: number
+  over_2_5_probability: number
+  under_2_5_probability: number
+  both_teams_score_probability: number
+  top_scorelines: Array<{
+    team_1_goals: number
+    team_2_goals: number
+    probability: number
+  }>
 }
 
 export type ModelMetadata = {
   version: string | null
+  elo_version?: string
+  status?: 'validated' | 'experimental'
   is_mock?: boolean
   is_available?: boolean
-  message?: string
+  message?: string | null
+  input_data_cutoff?: string
+  matches_used?: number
   data_updated_at: string
 }
 

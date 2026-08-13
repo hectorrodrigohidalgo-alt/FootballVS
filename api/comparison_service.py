@@ -1,6 +1,14 @@
+from datetime import UTC, datetime
 from typing import Any
 
 from data_repository import DataRepository
+from elo_rating import EloParameters, EloRatingError, calculate_elo_history
+from poisson_model import (
+    InsufficientPoissonDataError,
+    PoissonModelError,
+    PoissonParameters,
+    predict_poisson,
+)
 
 
 class ComparisonNotFoundError(LookupError):
@@ -15,7 +23,10 @@ def _find_by_id(documents: list[dict[str, Any]], document_id: str) -> dict[str, 
 
 
 def _public_team(
-    team: dict[str, Any], snapshot: dict[str, Any], scope: str
+    team: dict[str, Any],
+    snapshot: dict[str, Any],
+    scope: str,
+    elo_rating: float | None,
 ) -> dict[str, Any]:
     selected = snapshot if scope == "overall" else snapshot[f"{scope}_stats"]
     return {
@@ -36,9 +47,43 @@ def _public_team(
             "clean_sheets": selected["clean_sheets"],
             "both_teams_scored": selected["both_teams_scored"],
             "recent_form": snapshot["recent_form"]["last_5"],
-            "elo_rating": None,
+            "elo_rating": elo_rating,
         },
     }
+
+
+def _current_elo_ratings(
+    matches: list[dict[str, Any]],
+    seasons: list[dict[str, Any]],
+    competition_id: str,
+) -> dict[str, float]:
+    """Calcula Elo desde el historial para que nunca dependa de un cache obsoleto."""
+    try:
+        _, ratings = calculate_elo_history(
+            matches,
+            seasons,
+            competition_id=competition_id,
+            parameters=EloParameters(),
+        )
+    except EloRatingError:
+        return {}
+    return {item["team_id"]: item["rating"] for item in ratings}
+
+
+def _public_prediction(prediction: dict[str, Any]) -> dict[str, Any]:
+    """Expone resultados útiles sin transportar la matriz interna 7 × 7."""
+    fields = (
+        "team_1_win_probability",
+        "draw_probability",
+        "team_2_win_probability",
+        "estimated_team_1_goals",
+        "estimated_team_2_goals",
+        "over_2_5_probability",
+        "under_2_5_probability",
+        "both_teams_score_probability",
+        "top_scorelines",
+    )
+    return {field: prediction[field] for field in fields}
 
 
 def _head_to_head(
@@ -100,9 +145,8 @@ def build_repository_comparison(
     )
     if competition is None:
         raise ComparisonNotFoundError("The competition was not found.")
-    season = _find_by_id(
-        repository.list_documents("season"), competition["current_season_id"]
-    )
+    seasons = repository.list_documents("season")
+    season = _find_by_id(seasons, competition["current_season_id"])
     teams = repository.list_documents("team")
     team_1 = _find_by_id(teams, team_1_id)
     team_2 = _find_by_id(teams, team_2_id)
@@ -124,12 +168,37 @@ def build_repository_comparison(
 
     snapshot_1 = snapshot_for(team_1_id)
     snapshot_2 = snapshot_for(team_2_id)
+    matches = repository.list_documents("match")
+    elo_ratings = _current_elo_ratings(matches, seasons, competition["id"])
     team_1_scope = (
         "home" if venue == "team1" else "away" if venue == "team2" else "overall"
     )
     team_2_scope = (
         "away" if venue == "team1" else "home" if venue == "team2" else "overall"
     )
+    cutoff = datetime.now(UTC)
+    prediction = None
+    prediction_message = None
+    matches_used = 0
+    try:
+        full_prediction = predict_poisson(
+            matches,
+            seasons,
+            competition_id=competition["id"],
+            season_id=season["id"],
+            team_1_id=team_1_id,
+            team_2_id=team_2_id,
+            venue=venue,  # type: ignore[arg-type]
+            input_data_cutoff=cutoff,
+            parameters=PoissonParameters(),
+        )
+        prediction = _public_prediction(full_prediction)
+        matches_used = full_prediction["matches_used"]
+    except InsufficientPoissonDataError as error:
+        prediction_message = str(error)
+    except PoissonModelError:
+        prediction_message = "The prediction could not be calculated."
+
     return {
         "competition": {
             "id": competition["code"],
@@ -137,20 +206,28 @@ def build_repository_comparison(
             "country": competition["country"],
             "season": season["name"],
         },
-        "team_1": _public_team(team_1, snapshot_1, team_1_scope),
-        "team_2": _public_team(team_2, snapshot_2, team_2_scope),
+        "team_1": _public_team(
+            team_1, snapshot_1, team_1_scope, elo_ratings.get(team_1_id)
+        ),
+        "team_2": _public_team(
+            team_2, snapshot_2, team_2_scope, elo_ratings.get(team_2_id)
+        ),
         "venue": venue,
         "head_to_head": _head_to_head(
-            repository.list_documents("match"),
+            matches,
             competition["id"],
             team_1_id,
             team_2_id,
         ),
-        "prediction": None,
+        "prediction": prediction,
         "model": {
-            "version": None,
-            "is_available": False,
-            "message": "Predictions and Elo will be available in Phase 4.",
+            "version": "poisson-v0.1.0",
+            "elo_version": "elo-v0.1.0",
+            "status": "validated",
+            "is_available": prediction is not None,
+            "message": prediction_message,
+            "input_data_cutoff": cutoff.isoformat().replace("+00:00", "Z"),
+            "matches_used": matches_used,
             "data_updated_at": max(
                 snapshot_1["calculated_at"], snapshot_2["calculated_at"]
             ),
