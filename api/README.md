@@ -140,3 +140,21 @@ localía selecciona estadísticas local/visitante y el campo neutral usa los
 totales generales. Sólo los enfrentamientos finalizados de la competición se
 incluyen en el historial. Hasta implementar la Fase 4, `prediction` y
 `elo_rating` son `null` de forma explícita.
+
+## Rating Elo experimental
+
+Para calcular `elo-v0.1.0` cronológicamente sobre todas las temporadas
+sincronizadas de Premier League:
+
+```powershell
+.venv\Scripts\python.exe -m tools.calculate_elo_ratings
+```
+
+El comando persiste dos tipos documentales mediante `upsert`:
+
+- `elo_history`: un registro auditable por equipo y partido.
+- `elo_rating`: el rating actual de cada participante de la temporada más reciente.
+
+Repetir el cálculo reemplaza los mismos identificadores y no crea duplicados.
+Los partidos originales permanecen intactos. La versión es experimental hasta
+completar el backtesting temporal de la Fase 4.

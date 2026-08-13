@@ -19,7 +19,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
-| Fase 4 — Modelo estadístico | Pendiente | 0% | — |
+| Fase 4 — Modelo estadístico | En progreso | 2 de 6 puntos | `feat/Fase-4-Modelo-Estadistico` |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
 ## Fase 0 — Descubrimiento y fundaciones
@@ -587,8 +587,8 @@ Estado: **En progreso**.
 
 ## Próximo paso
 
-Continuar la **Fase 4 — Modelo estadístico** implementando el cálculo cronológico
-y el historial auditable de Elo.
+Continuar la **Fase 4 — Modelo estadístico** implementando el baseline Poisson
+con ajuste de localía.
 
 ## Fase 4 — Modelo estadístico
 
@@ -622,6 +622,43 @@ Estado: **En progreso**.
 - Experiencia acordada: la explicación Elo se abrirá desde su apartado del dashboard en un diálogo con scrollbar y controles accesibles, sin ocupar permanentemente la página principal.
 - Archivos principales: `docs/00-producto.md`, `docs/02-modelo-datos.md`, `docs/03-roadmap.md` y `docs/06-modelo-estadistico.md`.
 - Resultado: contrato matemático y criterios de selección definidos; implementación pendiente del punto 2.
+
+### Punto 2 — Cálculo cronológico e historial Elo
+
+- Estado: completado técnicamente; versión experimental aún no conectada a la API.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: transformar partidos normalizados en ratings reproducibles sin modificar los encuentros ni utilizar información futura.
+- Implementación:
+  - Configuración inmutable mediante `EloParameters`, identificada como `elo-v0.1.0`.
+  - Fórmula logística Elo y actualización cero-suma con resultados `1`, `0.5` y `0`.
+  - Procesamiento de temporadas por `start_date` y partidos finalizados por `utc_date`.
+  - Bloques simultáneos que calculan todas sus predicciones antes de aplicar cambios.
+  - Rating 1500 en el primer periodo; regresión del 75% para equipos presentes en la temporada anterior y 1400 para nuevos participantes.
+  - Ventaja local temporal de 65 puntos incluida en el resultado esperado, pero excluida del rating almacenado.
+  - Partidos programados conservados para detectar participantes, pero excluidos de las actualizaciones.
+  - Rechazo explícito de marcadores inválidos, equipos repetidos en un bloque simultáneo y parámetros fuera de rango.
+- Persistencia:
+  - Documentos deterministas `elo_history`, uno por equipo y partido, con rating anterior, rival, localía, resultado esperado y real, cambio y rating posterior.
+  - Documentos `elo_rating` con rating actual, temporada, versión y parámetros utilizados.
+  - Comando local `python -m tools.calculate_elo_ratings` basado en el repositorio SQLite existente.
+  - Escritura mediante `upsert`; repetir el comando reemplaza los mismos IDs y no genera duplicados.
+- Pruebas automatizadas:
+  - Fórmula esperada y conservación cero-suma.
+  - Historial auditable, partidos programados y orden de aplazados.
+  - Simultaneidad sin filtración entre encuentros.
+  - Transición de temporada, retención y equipos ascendidos.
+  - Parámetros, marcadores y bloques inválidos.
+  - Persistencia idempotente y error de competición ausente.
+- Validaciones: Ruff aprobado y 56 pruebas API aprobadas.
+- Validación con SQLite local:
+  - 380 partidos finalizados procesados.
+  - 760 registros `elo_history` y 20 documentos `elo_rating` persistidos.
+  - Segunda ejecución con los mismos totales: idempotencia confirmada.
+  - Suma global de cambios igual a cero.
+  - Nuevos participantes Coventry City, Hull City e Ipswich Town detectados automáticamente con 1400 puntos.
+- Decisión de integridad: el endpoint continuará mostrando Elo como no disponible hasta completar el backtesting y seleccionar una versión apta para uso en la API.
+- Archivos principales: `api/elo_rating.py`, `api/tools/calculate_elo_ratings.py`, `api/tests/test_elo_rating.py` y `api/tests/test_calculate_elo_ratings_tool.py`.
+- Resultado: rating cronológico, trazable e idempotente listo para alimentar el futuro backtesting y la evolución visual.
 
 ## Plantilla para próximas actualizaciones
 

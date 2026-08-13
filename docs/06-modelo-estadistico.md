@@ -149,3 +149,16 @@ interno que explicará en lenguaje sencillo:
 El diálogo conservará la comparación y podrá cerrarse con sus controles, la
 tecla `Escape` o una acción fuera del panel, devolviendo el foco al elemento que
 lo abrió.
+
+## Implementación experimental
+
+`api/elo_rating.py` implementa las reglas de `elo-v0.1.0` y produce historial
+por partido y ratings actuales. `api/tools/calculate_elo_ratings.py` realiza el
+cálculo desde SQLite y persiste ambos tipos mediante identificadores
+deterministas.
+
+La primera ejecución local procesó 380 partidos finalizados, generó 760
+documentos de historial y 20 ratings actuales. Una segunda ejecución conservó
+los mismos totales y la suma global de cambios fue cero. Estos valores todavía
+no se sirven en la API: permanecen experimentales hasta completar el
+backtesting temporal.

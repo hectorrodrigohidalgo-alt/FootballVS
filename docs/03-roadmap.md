@@ -6,7 +6,8 @@
 - Fase 1: completada, 10 de 10 puntos, con CI verde e integrada en `main` mediante los PR `#2` y `#3`.
 - Fase 2: completada, 4 de 4 puntos, con CI verde e integrada en `main` mediante el PR `#4`.
 - Fase 3: completada, 6 de 6 puntos, con CI verde e integrada en `main` mediante el PR `#5`.
-- Próximo objetivo: iniciar la Fase 4 implementando y validando el rating Elo.
+- Fase 4: en progreso, 2 de 6 puntos completados.
+- Próximo objetivo: implementar el modelo base Poisson con localía.
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -78,7 +79,7 @@ Salida: comparación completa sin predicción avanzada. **Completada e integrada
 ## Fase 4 — Modelo
 
 - [x] Punto 1: definir parámetros, reglas, evaluación y documentación inicial de Elo.
-- [ ] Punto 2: implementar el cálculo cronológico de Elo y su historial.
+- [x] Punto 2: implementar el cálculo cronológico de Elo y su historial.
 - [ ] Punto 3: implementar el modelo base Poisson con localía.
 - [ ] Punto 4: incorporar Dixon-Coles y generar probabilidades 1X2.
 - [ ] Punto 5: realizar backtesting temporal, selección de parámetros y calibración.
