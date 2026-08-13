@@ -138,5 +138,61 @@ GET /api/v1/comparisons?competition=PL&team1={id}&team2={id}&venue={team1|team2|
 combina equipos, snapshots e historial directo almacenados en SQLite. La
 localía selecciona estadísticas local/visitante y el campo neutral usa los
 totales generales. Sólo los enfrentamientos finalizados de la competición se
-incluyen en el historial. Hasta implementar la Fase 4, `prediction` y
-`elo_rating` son `null` de forma explícita.
+incluyen en el historial. El modo repositorio sirve los modelos seleccionados y
+sólo conserva `prediction: null` cuando la muestra es insuficiente.
+
+## Rating Elo experimental
+
+Para calcular `elo-v0.1.0` cronológicamente sobre todas las temporadas
+sincronizadas de Premier League:
+
+```powershell
+.venv\Scripts\python.exe -m tools.calculate_elo_ratings
+```
+
+El comando persiste dos tipos documentales mediante `upsert`:
+
+- `elo_history`: un registro auditable por equipo y partido.
+- `elo_rating`: el rating actual de cada participante de la temporada más reciente.
+
+Repetir el cálculo reemplaza los mismos identificadores y no crea duplicados.
+Los partidos originales permanecen intactos. La configuración publicada fue
+validada temporalmente en la Fase 4.
+
+## Baseline Poisson experimental
+
+`poisson_model.py` implementa `poisson-v0.1.0` como una función pura que recibe
+partidos, temporadas, equipos, localía y corte temporal. Utiliza como máximo la
+temporada actual con peso `1.0` y la anterior con peso `0.4`.
+
+El modelo separa ataque y defensa local/visitante, exige muestras mínimas,
+aplica un prior equivalente a tres partidos y genera goles estimados,
+probabilidades 1X2, más/menos de 2.5, ambos marcan y matriz de 0–0 a 6–6. En
+campo neutral usa fuerzas generales sin asignar ventaja local.
+
+La salida incluye parámetros, fuerzas, tamaños de muestra, `input_data_cutoff`
+y `calculated_at`.
+
+El endpoint de comparación sirve `poisson-v0.1.0`, acompañado por
+`elo-v0.1.0`. Expone 1X2, goles esperados, más/menos de 2.5, ambos equipos
+marcan y los tres marcadores más probables. La matriz 7 × 7 permanece interna.
+La metadata informa versiones, estado, corte y cantidad de partidos utilizados.
+
+## Backtesting temporal
+
+Con las temporadas 2023/24, 2024/25 y 2025/26 sincronizadas, ejecutar desde
+`api/`:
+
+```powershell
+.venv\Scripts\python.exe -m tools.run_backtesting
+```
+
+El comando evalúa 2024/25 y 2025/26 en orden cronológico. Cada predicción usa
+únicamente partidos anteriores a su `utc_date`; los encuentros sin muestra
+suficiente se excluyen y contabilizan. Compara Poisson con Dixon-Coles y prueba
+las 180 configuraciones Elo acordadas.
+
+Los archivos `backtesting/results/backtest-summary.json` y
+`backtesting/results/backtest-summary.md` contienen sólo métricas agregadas,
+parámetros, cobertura y decisión. No publican registros individuales ni datos
+originales de los partidos.

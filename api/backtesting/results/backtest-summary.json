@@ -1,0 +1,221 @@
+{
+  "backtest_version": "temporal-backtest-v0.1.0",
+  "competition_id": "football-data:competition:2021",
+  "elo": {
+    "baseline": {
+      "average_mean_absolute_error": 0.35056307960508215,
+      "average_mean_absolute_rating_change": 7.011261592101649,
+      "average_mean_squared_error": 0.15835710764163102,
+      "parameters": {
+        "home_advantage": 65.0,
+        "initial_rating": 1500.0,
+        "k_factor": 20.0,
+        "model_version": "elo-backtest-v0.1.0",
+        "promoted_rating": 1400.0,
+        "season_retention": 0.75
+      },
+      "seasons": {
+        "2024/25": {
+          "decisive_accuracy": 0.7073170731707317,
+          "evaluated_matches": 380,
+          "mean_absolute_error": 0.34896396365183613,
+          "mean_absolute_rating_change": 6.97927927303673,
+          "mean_squared_error": 0.15673595856908334
+        },
+        "2025/26": {
+          "decisive_accuracy": 0.6666666666666666,
+          "evaluated_matches": 380,
+          "mean_absolute_error": 0.35216219555832823,
+          "mean_absolute_rating_change": 7.043243911166568,
+          "mean_squared_error": 0.1599782567141787
+        }
+      }
+    },
+    "baseline_replaced": false,
+    "best_candidate": {
+      "average_mean_absolute_error": 0.3506402960854989,
+      "average_mean_absolute_rating_change": 7.012805921709984,
+      "average_mean_squared_error": 0.15687890633879292,
+      "parameters": {
+        "home_advantage": 40.0,
+        "initial_rating": 1500.0,
+        "k_factor": 20.0,
+        "model_version": "elo-backtest-v0.1.0",
+        "promoted_rating": 1400.0,
+        "season_retention": 0.75
+      },
+      "seasons": {
+        "2024/25": {
+          "decisive_accuracy": 0.7282229965156795,
+          "evaluated_matches": 380,
+          "mean_absolute_error": 0.3475608577149718,
+          "mean_absolute_rating_change": 6.951217154299443,
+          "mean_squared_error": 0.15409613960574778
+        },
+        "2025/26": {
+          "decisive_accuracy": 0.6702898550724637,
+          "evaluated_matches": 380,
+          "mean_absolute_error": 0.353719734456026,
+          "mean_absolute_rating_change": 7.074394689120525,
+          "mean_squared_error": 0.15966167307183804
+        }
+      }
+    },
+    "grid_size": 180,
+    "improves_every_season": true,
+    "relative_improvement": 0.009334606604354846,
+    "selected": {
+      "average_mean_absolute_error": 0.35056307960508215,
+      "average_mean_absolute_rating_change": 7.011261592101649,
+      "average_mean_squared_error": 0.15835710764163102,
+      "parameters": {
+        "home_advantage": 65.0,
+        "initial_rating": 1500.0,
+        "k_factor": 20.0,
+        "model_version": "elo-backtest-v0.1.0",
+        "promoted_rating": 1400.0,
+        "season_retention": 0.75
+      },
+      "seasons": {
+        "2024/25": {
+          "decisive_accuracy": 0.7073170731707317,
+          "evaluated_matches": 380,
+          "mean_absolute_error": 0.34896396365183613,
+          "mean_absolute_rating_change": 6.97927927303673,
+          "mean_squared_error": 0.15673595856908334
+        },
+        "2025/26": {
+          "decisive_accuracy": 0.6666666666666666,
+          "evaluated_matches": 380,
+          "mean_absolute_error": 0.35216219555832823,
+          "mean_absolute_rating_change": 7.043243911166568,
+          "mean_squared_error": 0.1599782567141787
+        }
+      }
+    },
+    "selection_rule": {
+      "minimum_relative_improvement": 0.01,
+      "must_improve_every_season": true
+    },
+    "target_seasons": [
+      "2024/25",
+      "2025/26"
+    ]
+  },
+  "global": {
+    "dixon_coles": {
+      "brier_score": 0.611137837119424,
+      "evaluated_matches": 705,
+      "exact_score_log_loss": 2.965072022415027,
+      "outcome_accuracy": 0.500709219858156,
+      "outcome_log_loss": 1.0191499955020737
+    },
+    "poisson": {
+      "brier_score": 0.611899868449029,
+      "evaluated_matches": 705,
+      "exact_score_log_loss": 2.9652576311511734,
+      "outcome_accuracy": 0.49929078014184397,
+      "outcome_log_loss": 1.020547721529707
+    }
+  },
+  "parameters": {
+    "maximum_season_regression": 0.01,
+    "minimum_coverage": 0.8,
+    "minimum_relative_improvement": 0.01,
+    "probability_epsilon": 1e-06,
+    "target_season_names": [
+      "2024/25",
+      "2025/26"
+    ]
+  },
+  "poisson_parameters": {
+    "current_season_weight": 1.0,
+    "maximum_score": 6,
+    "minimum_league_matches": 20,
+    "minimum_neutral_matches": 10,
+    "minimum_venue_matches": 5,
+    "model_version": "poisson-v0.1.0",
+    "previous_season_weight": 0.4,
+    "prior_matches": 3.0
+  },
+  "rho_training_exclusions": {
+    "insufficient_rho_training_data": 237
+  },
+  "seasons": [
+    {
+      "coverage": 0.9289473684210526,
+      "dixon_coles": {
+        "brier_score": 0.5943447470977555,
+        "evaluated_matches": 353,
+        "exact_score_log_loss": 2.9922016182532483,
+        "outcome_accuracy": 0.5184135977337111,
+        "outcome_log_loss": 0.9947778255737272
+      },
+      "evaluated_matches": 353,
+      "excluded_matches": 27,
+      "exclusion_reasons": {
+        "insufficient_data": 27
+      },
+      "poisson": {
+        "brier_score": 0.5947989565423007,
+        "evaluated_matches": 353,
+        "exact_score_log_loss": 2.9886689326404126,
+        "outcome_accuracy": 0.5184135977337111,
+        "outcome_log_loss": 0.9956970635293276
+      },
+      "rho": {
+        "candidates_evaluated": 41,
+        "exact_score_log_loss": 3.2084913617277895,
+        "low_score_observations": 61,
+        "observations": 275,
+        "rho": -0.13
+      },
+      "season_id": "football-data:season:2287",
+      "season_name": "2024/25",
+      "total_finished_matches": 380
+    },
+    {
+      "coverage": 0.9263157894736842,
+      "dixon_coles": {
+        "brier_score": 0.6279786347831995,
+        "evaluated_matches": 352,
+        "exact_score_log_loss": 2.9378653538613566,
+        "outcome_accuracy": 0.48295454545454547,
+        "outcome_log_loss": 1.0435914045495354
+      },
+      "evaluated_matches": 352,
+      "excluded_matches": 28,
+      "exclusion_reasons": {
+        "insufficient_data": 28
+      },
+      "poisson": {
+        "brier_score": 0.629049362491856,
+        "evaluated_matches": 352,
+        "exact_score_log_loss": 2.9417798202827043,
+        "outcome_accuracy": 0.48011363636363635,
+        "outcome_log_loss": 1.0454689779903144
+      },
+      "rho": {
+        "candidates_evaluated": 41,
+        "exact_score_log_loss": 3.085624016543295,
+        "low_score_observations": 166,
+        "observations": 628,
+        "rho": -0.06
+      },
+      "season_id": "football-data:season:2403",
+      "season_name": "2025/26",
+      "total_finished_matches": 380
+    }
+  ],
+  "selection": {
+    "checks": {
+      "exact_score_log_loss_improved": true,
+      "maximum_season_regression": true,
+      "minimum_coverage": true,
+      "minimum_relative_improvement": false
+    },
+    "dixon_coles_selected": false,
+    "relative_outcome_log_loss_improvement": 0.001369584193023482,
+    "selected_model": "poisson-v0.1.0"
+  }
+}

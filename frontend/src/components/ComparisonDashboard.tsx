@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import type { Comparison, TeamStatistics } from '../api/types'
 import { DATA_STALE_AFTER_HOURS, getDataFreshness } from '../utils/dataFreshness'
 import { ComparisonCharts } from './ComparisonCharts'
+import { EloInfoDialog } from './EloInfoDialog'
 
 type ComparisonDashboardProps = {
   comparison: Comparison
@@ -45,9 +47,11 @@ function RecentForm({ form }: { form: TeamStatistics['recent_form'] }) {
 function TeamStatisticsCard({
   name,
   statistics,
+  onOpenEloInfo,
 }: {
   name: string
   statistics: TeamStatistics
+  onOpenEloInfo: () => void
 }) {
   return (
     <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -56,9 +60,20 @@ function TeamStatisticsCard({
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Rendimiento</p>
           <h3 className="mt-1 break-words text-xl font-black text-ink-950">{name}</h3>
         </div>
-        <span className="rounded-lg bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700">
-          {statistics.elo_rating === null ? 'Elo pendiente' : `Elo ${statistics.elo_rating}`}
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="rounded-lg bg-slate-100 px-3 py-1 text-sm font-bold text-slate-700">
+            {statistics.elo_rating === null
+              ? 'Elo no disponible'
+              : `Elo ${Math.round(statistics.elo_rating)}`}
+          </span>
+          <button
+            className="text-xs font-bold text-pitch-800 underline decoration-pitch-300 underline-offset-2"
+            onClick={onOpenEloInfo}
+            type="button"
+          >
+            ¿Cómo funciona?
+          </button>
+        </div>
       </div>
       <div className="mt-6 grid grid-cols-2 gap-2 text-center min-[420px]:grid-cols-4">
         {[
@@ -108,6 +123,7 @@ function TeamStatisticsCard({
 }
 
 export function ComparisonDashboard({ comparison }: ComparisonDashboardProps) {
+  const [isEloInfoOpen, setIsEloInfoOpen] = useState(false)
   const { prediction, team_1: team1, team_2: team2, model } = comparison
   const freshness = getDataFreshness(model.data_updated_at)
   const updatedAt = freshness.updatedAt
@@ -129,14 +145,19 @@ export function ComparisonDashboard({ comparison }: ComparisonDashboardProps) {
         </div>
         <div className="text-left sm:text-right">
           <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">
-            {model.is_available === false ? 'Datos reales · modelo pendiente' : 'Datos simulados'}
+            {model.status === 'validated'
+              ? 'Datos reales · modelo validado'
+              : model.is_mock
+                ? 'Datos simulados'
+                : 'Modelo no disponible'}
           </span>
           <p className="mt-2 text-xs text-slate-400">Actualizado: {updatedAt}</p>
         </div>
       </div>
 
       {prediction ? (
-        <div className="mt-7 grid gap-4 sm:grid-cols-3">
+        <div className="mt-7">
+          <div className="grid gap-4 sm:grid-cols-3">
           {[
             [team1.name, prediction.team_1_win_probability],
             ['Empate', prediction.draw_probability],
@@ -152,6 +173,42 @@ export function ComparisonDashboard({ comparison }: ComparisonDashboardProps) {
               </p>
             </article>
           ))}
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-sm text-slate-500">Goles esperados</p>
+              <p className="mt-2 text-xl font-black text-ink-950">
+                {prediction.estimated_team_1_goals.toFixed(2)} –{' '}
+                {prediction.estimated_team_2_goals.toFixed(2)}
+              </p>
+            </article>
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-sm text-slate-500">Más de 2,5 goles</p>
+              <p className="mt-2 text-xl font-black text-ink-950">
+                {percentFormatter.format(prediction.over_2_5_probability)}
+              </p>
+            </article>
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-sm text-slate-500">Ambos equipos marcan</p>
+              <p className="mt-2 text-xl font-black text-ink-950">
+                {percentFormatter.format(prediction.both_teams_score_probability)}
+              </p>
+            </article>
+          </div>
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
+            <p className="text-sm font-bold text-slate-700">Marcadores más probables</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {prediction.top_scorelines.map((scoreline) => (
+                <span
+                  className="rounded-full bg-pitch-50 px-3 py-2 text-sm font-bold text-pitch-900"
+                  key={`${scoreline.team_1_goals}-${scoreline.team_2_goals}`}
+                >
+                  {scoreline.team_1_goals}–{scoreline.team_2_goals}{' '}
+                  {percentFormatter.format(scoreline.probability)}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       ) : (
         <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
@@ -168,16 +225,24 @@ export function ComparisonDashboard({ comparison }: ComparisonDashboardProps) {
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Modelo</p>
-          <p className="mt-3 font-bold text-ink-950">{model.version ?? 'Pendiente de implementación'}</p>
+          <p className="mt-3 font-bold text-ink-950">{model.version ?? 'No disponible'}</p>
           <p className="mt-1 text-sm leading-6 text-slate-500">
-            Contrato provisional para validar la interfaz. No representa el modelo final.
+            {model.matches_used ?? 0} partidos utilizados · Elo {model.elo_version ?? 'no disponible'}
           </p>
         </div>
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <TeamStatisticsCard name={team1.name} statistics={team1.statistics} />
-        <TeamStatisticsCard name={team2.name} statistics={team2.statistics} />
+        <TeamStatisticsCard
+          name={team1.name}
+          onOpenEloInfo={() => setIsEloInfoOpen(true)}
+          statistics={team1.statistics}
+        />
+        <TeamStatisticsCard
+          name={team2.name}
+          onOpenEloInfo={() => setIsEloInfoOpen(true)}
+          statistics={team2.statistics}
+        />
       </div>
 
       {freshness.status !== 'fresh' ? (
@@ -199,6 +264,7 @@ export function ComparisonDashboard({ comparison }: ComparisonDashboardProps) {
       ) : null}
 
       <ComparisonCharts comparison={comparison} />
+      <EloInfoDialog isOpen={isEloInfoOpen} onClose={() => setIsEloInfoOpen(false)} />
     </div>
   )
 }

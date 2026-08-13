@@ -54,6 +54,14 @@ describe('cliente HTTP', () => {
         team_2_win_probability: 0.3,
         estimated_team_1_goals: 1.65,
         estimated_team_2_goals: 1.4,
+        over_2_5_probability: 0.58,
+        under_2_5_probability: 0.42,
+        both_teams_score_probability: 0.55,
+        top_scorelines: [
+          { team_1_goals: 1, team_2_goals: 1, probability: 0.12 },
+          { team_1_goals: 2, team_2_goals: 1, probability: 0.11 },
+          { team_1_goals: 1, team_2_goals: 0, probability: 0.1 },
+        ],
       },
       model: {
         version: 'mock-contract-v1',

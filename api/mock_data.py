@@ -1,3 +1,4 @@
+from math import exp, factorial
 from typing import Any
 
 # Dataset pequeño y deliberadamente ficticio. En una fase posterior será
@@ -132,6 +133,36 @@ def build_comparison(team_1_id: str, team_2_id: str, venue: str) -> dict[str, An
         team_2_stats["goals_for_per_match"]
         + team_1_stats["goals_against_per_match"]
     ) / 2 + team_2_goal_bonus
+    total_expected_goals = estimated_team_1_goals + estimated_team_2_goals
+    under_2_5_probability = exp(-total_expected_goals) * (
+        1 + total_expected_goals + total_expected_goals**2 / 2
+    )
+    both_teams_score_probability = (
+        1
+        - exp(-estimated_team_1_goals)
+        - exp(-estimated_team_2_goals)
+        + exp(-total_expected_goals)
+    )
+    scorelines = sorted(
+        (
+            {
+                "team_1_goals": team_1_goals,
+                "team_2_goals": team_2_goals,
+                "probability": (
+                    exp(-estimated_team_1_goals)
+                    * estimated_team_1_goals**team_1_goals
+                    / factorial(team_1_goals)
+                    * exp(-estimated_team_2_goals)
+                    * estimated_team_2_goals**team_2_goals
+                    / factorial(team_2_goals)
+                ),
+            }
+            for team_1_goals in range(7)
+            for team_2_goals in range(7)
+        ),
+        key=lambda scoreline: scoreline["probability"],
+        reverse=True,
+    )
 
     # Redondear en el límite de la API evita que el frontend reciba decimales
     # extensos, conservando valores determinísticos para futuras pruebas.
@@ -146,6 +177,15 @@ def build_comparison(team_1_id: str, team_2_id: str, venue: str) -> dict[str, An
             "team_2_win_probability": round(team_2_probability, 4),
             "estimated_team_1_goals": round(estimated_team_1_goals, 2),
             "estimated_team_2_goals": round(estimated_team_2_goals, 2),
+            "over_2_5_probability": round(1 - under_2_5_probability, 4),
+            "under_2_5_probability": round(under_2_5_probability, 4),
+            "both_teams_score_probability": round(
+                both_teams_score_probability, 4
+            ),
+            "top_scorelines": [
+                {**scoreline, "probability": round(scoreline["probability"], 4)}
+                for scoreline in scorelines[:3]
+            ],
         },
         "model": {
             "version": "mock-contract-v1",

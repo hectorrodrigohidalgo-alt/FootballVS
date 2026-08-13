@@ -59,6 +59,14 @@ Aficionado al fútbol que desea analizar rápidamente un posible cruce entre dos
 - La localía es obligatoria porque modifica las probabilidades; campo neutral es una opción válida.
 - Si faltan datos, el sistema informa la limitación en vez de inventar valores.
 - Toda predicción muestra versión del modelo, fecha de cálculo y periodo de datos.
+- La explicación del modelo no ocupa espacio permanente en la página principal:
+  al activar el apartado Elo del dashboard se abre un panel informativo con
+  desplazamiento interno.
+- El panel de Elo debe poder cerrarse mediante botón, tecla `Escape` y retorno
+  del foco al elemento que lo abrió, sin perder la comparación seleccionada.
+- La explicación visible utiliza lenguaje sencillo y enlaza las métricas con su
+  significado; las fórmulas y decisiones reproducibles se documentan en
+  `docs/06-modelo-estadistico.md`.
 
 ## Criterios de éxito del MVP
 

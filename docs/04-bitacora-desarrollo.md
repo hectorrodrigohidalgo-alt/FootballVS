@@ -19,7 +19,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
-| Fase 4 — Modelo estadístico | Pendiente | 0% | — |
+| Fase 4 — Modelo estadístico | En progreso | 3 de 6 puntos | `feat/Fase-4-Modelo-Estadistico` |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
 ## Fase 0 — Descubrimiento y fundaciones
@@ -587,7 +587,242 @@ Estado: **En progreso**.
 
 ## Próximo paso
 
-Iniciar la **Fase 4 — Modelo estadístico**, comenzando por el diseño, cálculo y backtesting temporal del rating Elo.
+Continuar la **Fase 4 — Modelo estadístico** incorporando el ajuste Dixon-Coles
+y comparándolo con el baseline Poisson.
+
+## Fase 4 — Modelo estadístico
+
+Estado: **En progreso**.
+
+### Punto 1 — Diseño inicial de Elo
+
+- Estado: completado.
+- Fecha: 12 de agosto de 2026.
+- Rama: `feat/Fase-4-Modelo-Estadistico`.
+- Objetivo: fijar reglas reproducibles antes de implementar el rating y separar las hipótesis iniciales de los parámetros que finalmente seleccione el backtesting.
+- Configuración experimental `elo-v0.1.0`:
+  - Rating inicial general: 1500.
+  - Equipos ascendidos: 1400.
+  - Factor `K`: 20.
+  - Ventaja local temporal: 65; campo neutral: 0.
+  - Conservación entre temporadas: 75% de la diferencia respecto de 1500.
+  - Sin bonificación por diferencia de goles ni límites artificiales del rating.
+- Integridad temporal:
+  - Partidos ordenados por `utc_date`; `matchday` es sólo informativo.
+  - Encuentros simultáneos predichos como bloque antes de aplicar cambios.
+  - Memoria máxima de una temporada para determinar continuidad; un equipo ausente en la temporada inmediatamente anterior se trata como ascendido.
+  - Precisión completa durante el cálculo y redondeo únicamente visual.
+- Trazabilidad: cada partido generará un documento `elo_history` por equipo con ratings anterior y posterior, ajuste de localía, resultado esperado y real, cambio y versión.
+- Evaluación prevista:
+  - Ventanas temporales 2024/25 y 2025/26 después de procesar únicamente el pasado disponible.
+  - Cuadrícula de 180 combinaciones de `K`, localía, conservación y rating de ascendidos.
+  - Error cuadrático medio como métrica principal, acompañado por error absoluto, acierto decisivo y estabilidad.
+  - Una alternativa sustituirá la configuración inicial sólo si reduce al menos 1% relativo el error promedio y mantiene la mejora en ambas ventanas.
+- Evidencia preliminar: sobre 380 partidos de una temporada, `K=30` obtuvo el menor error, pero `K=20` mantuvo mejor equilibrio entre error, estabilidad y acierto; la decisión permanece provisional hasta disponer de las tres temporadas completas.
+- Experiencia acordada: la explicación Elo se abrirá desde su apartado del dashboard en un diálogo con scrollbar y controles accesibles, sin ocupar permanentemente la página principal.
+- Archivos principales: `docs/00-producto.md`, `docs/02-modelo-datos.md`, `docs/03-roadmap.md` y `docs/06-modelo-estadistico.md`.
+- Resultado: contrato matemático y criterios de selección definidos; implementación pendiente del punto 2.
+
+### Punto 2 — Cálculo cronológico e historial Elo
+
+- Estado: completado técnicamente; versión experimental aún no conectada a la API.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: transformar partidos normalizados en ratings reproducibles sin modificar los encuentros ni utilizar información futura.
+- Implementación:
+  - Configuración inmutable mediante `EloParameters`, identificada como `elo-v0.1.0`.
+  - Fórmula logística Elo y actualización cero-suma con resultados `1`, `0.5` y `0`.
+  - Procesamiento de temporadas por `start_date` y partidos finalizados por `utc_date`.
+  - Bloques simultáneos que calculan todas sus predicciones antes de aplicar cambios.
+  - Rating 1500 en el primer periodo; regresión del 75% para equipos presentes en la temporada anterior y 1400 para nuevos participantes.
+  - Ventaja local temporal de 65 puntos incluida en el resultado esperado, pero excluida del rating almacenado.
+  - Partidos programados conservados para detectar participantes, pero excluidos de las actualizaciones.
+  - Rechazo explícito de marcadores inválidos, equipos repetidos en un bloque simultáneo y parámetros fuera de rango.
+- Persistencia:
+  - Documentos deterministas `elo_history`, uno por equipo y partido, con rating anterior, rival, localía, resultado esperado y real, cambio y rating posterior.
+  - Documentos `elo_rating` con rating actual, temporada, versión y parámetros utilizados.
+  - Comando local `python -m tools.calculate_elo_ratings` basado en el repositorio SQLite existente.
+  - Escritura mediante `upsert`; repetir el comando reemplaza los mismos IDs y no genera duplicados.
+- Pruebas automatizadas:
+  - Fórmula esperada y conservación cero-suma.
+  - Historial auditable, partidos programados y orden de aplazados.
+  - Simultaneidad sin filtración entre encuentros.
+  - Transición de temporada, retención y equipos ascendidos.
+  - Parámetros, marcadores y bloques inválidos.
+  - Persistencia idempotente y error de competición ausente.
+- Validaciones: Ruff aprobado y 56 pruebas API aprobadas.
+- Validación con SQLite local:
+  - 380 partidos finalizados procesados.
+  - 760 registros `elo_history` y 20 documentos `elo_rating` persistidos.
+  - Segunda ejecución con los mismos totales: idempotencia confirmada.
+  - Suma global de cambios igual a cero.
+  - Nuevos participantes Coventry City, Hull City e Ipswich Town detectados automáticamente con 1400 puntos.
+- Decisión de integridad: el endpoint continuará mostrando Elo como no disponible hasta completar el backtesting y seleccionar una versión apta para uso en la API.
+- Archivos principales: `api/elo_rating.py`, `api/tools/calculate_elo_ratings.py`, `api/tests/test_elo_rating.py` y `api/tests/test_calculate_elo_ratings_tool.py`.
+- Resultado: rating cronológico, trazable e idempotente listo para alimentar el futuro backtesting y la evolución visual.
+
+### Punto 3 — Baseline Poisson con localía
+
+- Estado: completado técnicamente; versión experimental aún no conectada a la API.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: convertir tasas históricas de goles en una referencia probabilística reproducible antes de aplicar Dixon-Coles.
+- Configuración `poisson-v0.1.0`:
+  - Ventana máxima de dos temporadas: peso 1.0 para la actual y 0.4 para la inmediatamente anterior.
+  - Ataque y defensa separados para condición local y visitante.
+  - Campo neutral calculado con fuerzas generales y sin ventaja local.
+  - Mínimo de 5 antecedentes en la condición requerida por equipo y 20 partidos previos de liga.
+  - En neutral, mínimo de 10 antecedentes generales por equipo.
+  - Suavizado hacia el promedio de liga equivalente a 3 partidos.
+  - Matriz visible de marcadores entre 0 y 6 goles por equipo.
+- Integridad temporal:
+  - Sólo se incluyen partidos `FINISHED` con `utc_date` estrictamente anterior a `input_data_cutoff`.
+  - Los encuentros del mismo horario no utilizan resultados entre sí.
+  - La salida conserva versión, parámetros, corte, fecha de cálculo, fuerzas y tamaños de muestra.
+- Salidas experimentales:
+  - Goles estimados por equipo.
+  - Probabilidades de victoria, empate y derrota.
+  - Más/menos de 2.5 goles y ambos equipos marcan.
+  - Matriz 7 × 7, tres marcadores más probables y masa fuera de matriz.
+  - Error explícito con detalles cuando no se cumplen los requisitos mínimos.
+- Pruebas automatizadas:
+  - Normalización de 1X2 y de matriz más excedente.
+  - Orden contractual cuando el Equipo 2 es local.
+  - Campo neutral, muestras insuficientes y corte temporal estricto.
+  - Ponderación de sólo dos temporadas y exclusión de temporadas antiguas.
+  - Parámetros, equipos, localía, zona horaria y muestra formada sólo por empates 0–0.
+- Validaciones: Ruff aprobado y 64 pruebas API aprobadas.
+- Validación con SQLite local:
+  - Comparación experimental Arsenal local contra Liverpool para 2026/27 usando 380 partidos previos.
+  - Goles estimados: 2.175 y 0.896.
+  - 1X2: 66.57%, 19.16% y 14.27%.
+  - Más de 2.5: 59.26%; ambos marcan: 52.47%.
+  - Marcadores principales: 2–0, 1–0 y 2–1.
+  - Matriz más probabilidad exterior igual a 1.
+- Decisión de integridad: estos valores son evidencia técnica, no una predicción validada; el endpoint continuará sin servirlos hasta comparar Poisson, Dixon-Coles y calibración temporal.
+- Archivos principales: `api/poisson_model.py` y `api/tests/test_poisson_model.py`.
+- Resultado: baseline probabilístico trazable y preparado para medir el aporte específico de Dixon-Coles.
+
+### Punto 4 — Corrección Dixon-Coles
+
+- Estado: completado técnicamente; versión experimental aún no conectada a la API.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: corregir la independencia estricta del baseline Poisson en los
+  marcadores bajos y producir probabilidades derivadas consistentes.
+- Implementación:
+  - Factores `tau` para 0–0, 0–1, 1–0 y 1–1; el resto de la matriz permanece
+    sin cambios.
+  - Versión `dixon-coles-v0.1.0`, vinculada explícitamente con su versión base
+    Poisson.
+  - Recálculo de 1X2, ambos equipos marcan y los tres marcadores principales.
+  - Conservación comprobada de la masa total de probabilidad; más/menos de 2.5
+    permanece igual porque las celdas corregidas no superan dos goles totales.
+  - Estimación automática de `rho` por menor Log Loss de marcador exacto sobre
+    una cuadrícula de `-0.20` a `0.20`, en pasos de `0.01`.
+  - Descarte de candidatos que generen factores nulos o negativos y desempate
+    a favor del valor más cercano a cero.
+- Integridad temporal:
+  - Para cada periodo objetivo, `rho` utilizará con igual peso todas las
+    temporadas completas anteriores disponibles.
+  - La temporada objetivo y cualquier encuentro posterior quedan excluidos.
+  - La ventana de `rho` es independiente de la ponderación Poisson 100%/40%.
+- Pruebas automatizadas:
+  - Fórmulas de los cuatro factores y ausencia de cambios en otros marcadores.
+  - Selección de `rho` en ambos extremos y preferencia por cero cuando no existe
+    información relevante.
+  - Recálculo de probabilidades derivadas y conservación del total.
+  - Rechazo de observaciones, cuadrículas, metadatos y correcciones inválidas.
+- Validaciones: Ruff aprobado y 69 pruebas API aprobadas.
+- Decisión de integridad: no se fija todavía un `rho` productivo; su valor real
+  se estimará dentro del backtesting temporal del punto 5 usando únicamente el
+  pasado disponible en cada corte.
+- Archivos principales: `api/dixon_coles.py`,
+  `api/tests/test_dixon_coles.py` y `docs/06-modelo-estadistico.md`.
+- Resultado: ajuste reproducible listo para compararse contra el baseline
+  Poisson sin filtración de datos futuros.
+
+### Punto 5 — Backtesting temporal y selección conservadora
+
+- Estado: completado.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: evaluar los modelos sin información futura y seleccionar sólo
+  mejoras suficientemente sólidas.
+- Integridad temporal:
+  - Ventanas de evaluación 2024/25 y 2025/26.
+  - Predicción progresiva con corte estricto anterior a `utc_date`.
+  - Partidos simultáneos evaluados como bloque y sin influencia mutua.
+  - Partidos sin muestra marcados como `insufficient_data`, excluidos de las
+    métricas y contabilizados.
+- Métricas probabilísticas:
+  - Log Loss 1X2 principal, Brier Score y Log Loss de marcador exacto como
+    secundarias, y accuracy informativa.
+  - Límite numérico `0.000001–0.999999` sólo durante evaluación, seguido de
+    normalización 1X2.
+  - Cobertura mínima exigida de 80% por temporada.
+- Resultado Poisson frente a Dixon-Coles:
+  - Cobertura 92.89% en 2024/25 y 92.63% en 2025/26; 705 partidos evaluados.
+  - Log Loss 1X2 global: Poisson `1.020548`; Dixon-Coles `1.019150`.
+  - Brier global: Poisson `0.611900`; Dixon-Coles `0.611138`.
+  - Mejora relativa Dixon-Coles: 0.14%, inferior al mínimo de 1%.
+  - Decisión confirmada: conservar `poisson-v0.1.0`; Dixon-Coles permanece
+    experimental.
+- Resultado Elo:
+  - 180 configuraciones evaluadas sobre las dos ventanas.
+  - Baseline: MSE promedio `0.158357`.
+  - Mejor candidato: `K=20`, localía `40`, retención `75%`, ascendidos `1400`,
+    con MSE `0.156879` y mejora relativa de 0.93%.
+  - El candidato mejoró ambas temporadas, pero no alcanzó 1%.
+  - Decisión confirmada: conservar `elo-v0.1.0` con `K=20`, localía `65`,
+    retención `75%` y ascendidos `1400`.
+- Reportes:
+  - JSON procesable y Markdown legible en `api/backtesting/results/`.
+  - Sólo contienen métricas agregadas, parámetros, cobertura y decisiones; no
+    almacenan registros individuales de partidos.
+- Archivos principales: `api/backtesting/evaluator.py`,
+  `api/backtesting/elo_evaluator.py`, `api/backtesting/metrics.py`,
+  `api/backtesting/reports.py`, `api/tools/run_backtesting.py` y sus pruebas.
+- Resultado: modelos elegidos con criterios reproducibles y preparados para
+  versionarse y servirse en el punto 6.
+
+### Punto 6 — Publicación de modelos y explicación Elo
+
+- Estado: completado.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: servir los modelos seleccionados desde la API y presentarlos de
+  forma comprensible y accesible en el dashboard.
+- API:
+  - El servicio de comparación calcula `elo-v0.1.0` desde el historial completo
+    almacenado, evitando depender de ratings cacheados obsoletos.
+  - `poisson-v0.1.0` utiliza un corte UTC actual y conserva la degradación segura
+    a `prediction: null` cuando no alcanza los mínimos.
+  - La salida pública incluye 1X2, goles esperados, más/menos de 2.5, ambos
+    equipos marcan y tres marcadores probables.
+  - La matriz 7 × 7 permanece interna; no aumenta innecesariamente la respuesta.
+  - Metadata con versión Poisson, versión Elo, estado validado, corte y partidos
+    utilizados.
+- Frontend:
+  - Ratings Elo redondeados sólo para presentación.
+  - Tarjetas de probabilidades, goles esperados, más de 2.5, ambos marcan y
+    marcadores más probables.
+  - Etiqueta explícita de modelo validado y trazabilidad visible.
+  - Botón “¿Cómo funciona?” dentro del apartado Elo; la explicación no ocupa
+    permanentemente la página principal.
+  - Diálogo modal responsive con scrollbar interno, cierre con Escape, cierre
+    por fondo, bloqueo del scroll exterior, foco inicial, retorno del foco y
+    navegación de teclado contenida.
+- Validación real:
+  - Endpoint local en modo repositorio: Elo disponible para ambos equipos,
+    Poisson con 380 partidos, suma 1X2 igual a 1 y matriz no expuesta.
+  - Ruff y 77 pruebas API aprobadas.
+  - Lint, TypeScript y 20 pruebas frontend aprobadas.
+  - Build de producción aprobado; permanece una advertencia no bloqueante por
+    el tamaño del bundle de ECharts, candidata a optimización en la Fase 5.
+- Limitación de esta sesión: no había un navegador conectado para inspección
+  visual automatizada; el comportamiento interactivo quedó cubierto por pruebas
+  y deberá incluirse en la revisión visual de la Fase 5.
+- Archivos principales: `api/comparison_service.py`, `api/mock_data.py`,
+  `frontend/src/api/types.ts`, `frontend/src/components/ComparisonDashboard.tsx`
+  y `frontend/src/components/EloInfoDialog.tsx`.
+- Resultado: Fase 4 completada con modelos versionados, evaluados, servidos y
+  explicados al usuario.
 
 ## Plantilla para próximas actualizaciones
 
