@@ -62,6 +62,7 @@ docs/           Producto, arquitectura y planificación
 - [Plan de desarrollo](docs/03-roadmap.md)
 - [Bitácora de desarrollo](docs/04-bitacora-desarrollo.md)
 - [Guía de desarrollo local](docs/05-guia-desarrollo-local.md)
+- [Modelo estadístico](docs/06-modelo-estadistico.md)
 - [Forma de contribuir](CONTRIBUTING.md)
 
 ## Inicio rápido

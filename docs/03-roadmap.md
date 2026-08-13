@@ -77,10 +77,14 @@ Salida: comparación completa sin predicción avanzada. **Completada e integrada
 
 ## Fase 4 — Modelo
 
-- Implementar Elo y baseline Poisson.
-- Añadir corrección Dixon-Coles y localía.
-- Backtesting temporal y calibración.
-- Versionar y servir predicciones.
+- [x] Punto 1: definir parámetros, reglas, evaluación y documentación inicial de Elo.
+- [ ] Punto 2: implementar el cálculo cronológico de Elo y su historial.
+- [ ] Punto 3: implementar el modelo base Poisson con localía.
+- [ ] Punto 4: incorporar Dixon-Coles y generar probabilidades 1X2.
+- [ ] Punto 5: realizar backtesting temporal, selección de parámetros y calibración.
+- [ ] Punto 6: versionar y servir predicciones, y añadir al apartado Elo un
+  panel explicativo con scrollbar, accesible desde el
+  dashboard y sin mostrar el contenido permanentemente en la página principal.
 
 Salida: estimaciones reproducibles y evaluadas.
 

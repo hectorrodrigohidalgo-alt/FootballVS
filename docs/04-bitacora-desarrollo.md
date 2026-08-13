@@ -587,7 +587,41 @@ Estado: **En progreso**.
 
 ## Próximo paso
 
-Iniciar la **Fase 4 — Modelo estadístico**, comenzando por el diseño, cálculo y backtesting temporal del rating Elo.
+Continuar la **Fase 4 — Modelo estadístico** implementando el cálculo cronológico
+y el historial auditable de Elo.
+
+## Fase 4 — Modelo estadístico
+
+Estado: **En progreso**.
+
+### Punto 1 — Diseño inicial de Elo
+
+- Estado: completado.
+- Fecha: 12 de agosto de 2026.
+- Rama: `feat/Fase-4-Modelo-Estadistico`.
+- Objetivo: fijar reglas reproducibles antes de implementar el rating y separar las hipótesis iniciales de los parámetros que finalmente seleccione el backtesting.
+- Configuración experimental `elo-v0.1.0`:
+  - Rating inicial general: 1500.
+  - Equipos ascendidos: 1400.
+  - Factor `K`: 20.
+  - Ventaja local temporal: 65; campo neutral: 0.
+  - Conservación entre temporadas: 75% de la diferencia respecto de 1500.
+  - Sin bonificación por diferencia de goles ni límites artificiales del rating.
+- Integridad temporal:
+  - Partidos ordenados por `utc_date`; `matchday` es sólo informativo.
+  - Encuentros simultáneos predichos como bloque antes de aplicar cambios.
+  - Memoria máxima de una temporada para determinar continuidad; un equipo ausente en la temporada inmediatamente anterior se trata como ascendido.
+  - Precisión completa durante el cálculo y redondeo únicamente visual.
+- Trazabilidad: cada partido generará un documento `elo_history` por equipo con ratings anterior y posterior, ajuste de localía, resultado esperado y real, cambio y versión.
+- Evaluación prevista:
+  - Ventanas temporales 2024/25 y 2025/26 después de procesar únicamente el pasado disponible.
+  - Cuadrícula de 180 combinaciones de `K`, localía, conservación y rating de ascendidos.
+  - Error cuadrático medio como métrica principal, acompañado por error absoluto, acierto decisivo y estabilidad.
+  - Una alternativa sustituirá la configuración inicial sólo si reduce al menos 1% relativo el error promedio y mantiene la mejora en ambas ventanas.
+- Evidencia preliminar: sobre 380 partidos de una temporada, `K=30` obtuvo el menor error, pero `K=20` mantuvo mejor equilibrio entre error, estabilidad y acierto; la decisión permanece provisional hasta disponer de las tres temporadas completas.
+- Experiencia acordada: la explicación Elo se abrirá desde su apartado del dashboard en un diálogo con scrollbar y controles accesibles, sin ocupar permanentemente la página principal.
+- Archivos principales: `docs/00-producto.md`, `docs/02-modelo-datos.md`, `docs/03-roadmap.md` y `docs/06-modelo-estadistico.md`.
+- Resultado: contrato matemático y criterios de selección definidos; implementación pendiente del punto 2.
 
 ## Plantilla para próximas actualizaciones
 

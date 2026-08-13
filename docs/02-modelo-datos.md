@@ -43,7 +43,13 @@ La unicidad de `provider_id` hace que la importación sea idempotente.
 
 ### elo_history
 
-- `team_id`, `match_id`, `rating_before`, `rating_after`, `calculated_at`
+- `id`, `team_id`, `match_id`, `competition_id`, `season_id`, `utc_date`
+- `rating_before`, `venue_adjustment`, `expected_score`, `actual_score`
+- `rating_change`, `rating_after`, `model_version`, `calculated_at`
+
+Cada partido genera un registro por equipo. La ventaja local queda trazada en
+`venue_adjustment`, pero no se incorpora permanentemente a `rating_after`. Los
+partidos originales no se modifican durante el cálculo.
 
 ### model_version
 
