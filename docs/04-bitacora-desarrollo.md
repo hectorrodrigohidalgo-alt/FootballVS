@@ -701,6 +701,44 @@ Estado: **En progreso**.
 - Archivos principales: `api/poisson_model.py` y `api/tests/test_poisson_model.py`.
 - Resultado: baseline probabilístico trazable y preparado para medir el aporte específico de Dixon-Coles.
 
+### Punto 4 — Corrección Dixon-Coles
+
+- Estado: completado técnicamente; versión experimental aún no conectada a la API.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: corregir la independencia estricta del baseline Poisson en los
+  marcadores bajos y producir probabilidades derivadas consistentes.
+- Implementación:
+  - Factores `tau` para 0–0, 0–1, 1–0 y 1–1; el resto de la matriz permanece
+    sin cambios.
+  - Versión `dixon-coles-v0.1.0`, vinculada explícitamente con su versión base
+    Poisson.
+  - Recálculo de 1X2, ambos equipos marcan y los tres marcadores principales.
+  - Conservación comprobada de la masa total de probabilidad; más/menos de 2.5
+    permanece igual porque las celdas corregidas no superan dos goles totales.
+  - Estimación automática de `rho` por menor Log Loss de marcador exacto sobre
+    una cuadrícula de `-0.20` a `0.20`, en pasos de `0.01`.
+  - Descarte de candidatos que generen factores nulos o negativos y desempate
+    a favor del valor más cercano a cero.
+- Integridad temporal:
+  - Para cada periodo objetivo, `rho` utilizará con igual peso todas las
+    temporadas completas anteriores disponibles.
+  - La temporada objetivo y cualquier encuentro posterior quedan excluidos.
+  - La ventana de `rho` es independiente de la ponderación Poisson 100%/40%.
+- Pruebas automatizadas:
+  - Fórmulas de los cuatro factores y ausencia de cambios en otros marcadores.
+  - Selección de `rho` en ambos extremos y preferencia por cero cuando no existe
+    información relevante.
+  - Recálculo de probabilidades derivadas y conservación del total.
+  - Rechazo de observaciones, cuadrículas, metadatos y correcciones inválidas.
+- Validaciones: Ruff aprobado y 69 pruebas API aprobadas.
+- Decisión de integridad: no se fija todavía un `rho` productivo; su valor real
+  se estimará dentro del backtesting temporal del punto 5 usando únicamente el
+  pasado disponible en cada corte.
+- Archivos principales: `api/dixon_coles.py`,
+  `api/tests/test_dixon_coles.py` y `docs/06-modelo-estadistico.md`.
+- Resultado: ajuste reproducible listo para compararse contra el baseline
+  Poisson sin filtración de datos futuros.
+
 ## Plantilla para próximas actualizaciones
 
 Al completar un punto nuevo, añadir:

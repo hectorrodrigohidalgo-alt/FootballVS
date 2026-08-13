@@ -236,3 +236,152 @@ fuerzas calculadas y los tamaños de muestra, permitiendo explicar y reproducir
 cada resultado. La validación local inicial usó 380 partidos previos y confirmó
 que las probabilidades 1X2 suman 1, al igual que la matriz más su excedente. El
 baseline no se publicará en la API antes del backtesting.
+
+### Qué significa la probabilidad de un marcador
+
+Poisson no elige un único resultado como si supiera lo que ocurrirá. Distribuye
+la probabilidad entre todos los marcadores posibles a partir de los goles
+estimados de cada equipo.
+
+Supongamos que el modelo calcula:
+
+```text
+Goles estimados Equipo 1: 2.10
+Goles estimados Equipo 2: 0.90
+```
+
+Estos valores son medias estadísticas, no un marcador literal: un equipo no
+puede anotar `2.10` goles. Significan que, en muchos partidos con condiciones
+similares, el promedio se aproximaría a esos valores.
+
+La distribución de Poisson transforma cada media en probabilidades de marcar
+exactamente cero, uno, dos o más goles:
+
+```text
+P(equipo marca k goles) = e^(-lambda) × lambda^k / k!
+```
+
+Donde:
+
+- `lambda` es la media de goles estimada para el equipo;
+- `k` es una cantidad exacta de goles: 0, 1, 2, 3, etc.;
+- `e` y `k!` forman parte de la distribución matemática de Poisson.
+
+Para calcular un marcador exacto, el baseline asume provisionalmente que las
+cantidades de goles de ambos equipos son independientes y multiplica las dos
+probabilidades.
+
+Ejemplo ilustrativo:
+
+```text
+Probabilidad de que Equipo 1 marque exactamente 2: 27%
+Probabilidad de que Equipo 2 marque exactamente 0: 41%
+
+Probabilidad del marcador 2–0:
+0.27 × 0.41 = 0.1107 = 11.07%
+```
+
+La interpretación correcta es:
+
+> Según las tasas de ataque, defensa, localía y muestra histórica utilizadas,
+> aproximadamente 11 de cada 100 partidos estadísticamente similares podrían
+> terminar 2–0.
+
+No significa que exista una certeza del 11%, que el marcador vaya a ocurrir ni
+que todos los supuestos del modelo representen perfectamente el partido. Una
+lesión, expulsión, cambio táctico u otra información ausente puede alterar el
+resultado real.
+
+El mismo cálculo se repite para cada celda de la matriz:
+
+| Equipo 1 \ Equipo 2 | 0 goles | 1 gol | 2 goles |
+| --- | ---: | ---: | ---: |
+| 0 goles | P(0–0) | P(0–1) | P(0–2) |
+| 1 gol | P(1–0) | P(1–1) | P(1–2) |
+| 2 goles | P(2–0) | P(2–1) | P(2–2) |
+
+FootballVS muestra las celdas entre 0 y 6 goles por equipo. La probabilidad de
+resultados con 7 o más goles se conserva como `probability_outside_matrix`, por
+lo que la matriz y el excedente continúan sumando 100%.
+
+### Cómo se derivan las demás probabilidades
+
+Las probabilidades del dashboard se obtienen sumando grupos de marcadores de la
+misma matriz:
+
+- **Victoria del Equipo 1:** todas las celdas donde sus goles superan los del
+  Equipo 2, como 1–0, 2–0, 2–1 o 3–2.
+- **Empate:** la diagonal 0–0, 1–1, 2–2, 3–3 y siguientes.
+- **Victoria del Equipo 2:** todas las celdas donde marca más goles.
+- **Más de 2.5 goles:** resultados con al menos tres goles totales, como 2–1,
+  3–0 o 2–2.
+- **Menos de 2.5 goles:** resultados con cero, uno o dos goles totales, como
+  0–0, 1–0 o 1–1.
+- **Ambos equipos marcan:** celdas donde cada equipo tiene al menos un gol,
+  como 1–1, 2–1 o 2–3.
+
+Por tanto, goles estimados, marcador exacto, 1X2 y mercados de goles no son
+predicciones independientes: todos proceden de las mismas tasas y deben ser
+matemáticamente consistentes entre sí.
+
+### Por qué se añadirá Dixon-Coles
+
+El baseline multiplica las probabilidades de gol como si ambos equipos actuaran
+de manera independiente. En partidos reales, el estado del marcador puede
+cambiar el comportamiento de los dos: con 0–0 cerca del final pueden asumir
+menos riesgo, y un primer gol puede modificar el ritmo del encuentro.
+
+Dixon-Coles conserva la estructura de Poisson, pero ajusta específicamente
+`0–0`, `1–0`, `0–1` y `1–1`. El parámetro `rho` controla la intensidad y el
+sentido de esa corrección. FootballVS no fijará `rho` por intuición: probará
+valores históricos y conservará el ajuste sólo si mejora la evaluación temporal
+respecto de `poisson-v0.1.0`.
+
+Para estimar `rho` se utilizarán todas las temporadas completas anteriores al
+periodo objetivo con el mismo peso. Esta ventana es distinta de las fuerzas
+Poisson: `rho` representa un patrón general de dependencia en marcadores bajos,
+mientras ataque y defensa conservan su ventana reciente 100%/40%. Ningún
+partido de la temporada evaluada o posterior podrá intervenir en la estimación.
+
+### Implementación de Dixon-Coles
+
+La corrección se identifica como `dixon-coles-v0.1.0` y se implementa en
+`api/dixon_coles.py`. Recibe las medias de goles producidas por Poisson y
+modifica únicamente cuatro marcadores mediante el factor `tau`:
+
+```text
+tau(0, 0) = 1 - lambda × mu × rho
+tau(0, 1) = 1 + lambda × rho
+tau(1, 0) = 1 + mu × rho
+tau(1, 1) = 1 - rho
+tau(x, y) = 1 para cualquier otro marcador
+```
+
+`lambda` y `mu` son los goles esperados de los dos equipos. La probabilidad
+Poisson de cada uno de esos cuatro marcadores se multiplica por su `tau`. Los
+demás resultados, como 2–0, 2–1 o 3–2, permanecen intactos. Los cuatro cambios
+se compensan entre sí, de modo que no se crea ni elimina probabilidad total.
+
+Después del ajuste se vuelven a calcular victoria del Equipo 1, empate,
+victoria del Equipo 2 y ambos equipos marcan. Más/menos de 2.5 no cambia porque
+los cuatro resultados corregidos poseen como máximo dos goles totales. La
+salida registra el modelo base, `rho`, cantidad de partidos usados y fecha de
+corte, para poder reproducirla y auditarla.
+
+`rho` se estima automáticamente probando desde `-0.20` hasta `0.20`, en pasos de
+`0.01`. Para cada candidato se calcula la probabilidad asignada a cada marcador
+histórico exacto y su Log Loss promedio:
+
+```text
+Log Loss de marcador exacto = promedio de -log(probabilidad observada)
+```
+
+Se selecciona el valor con menor error. Si dos valores empatan se prefiere el
+más cercano a cero, evitando una corrección innecesaria. Cualquier candidato
+que produzca un `tau` nulo o negativo se descarta.
+
+Para predecir una temporada objetivo, la estimación de `rho` utiliza todos los
+partidos finalizados de temporadas completas anteriores, con igual peso. No
+utiliza encuentros de la temporada objetivo ni posteriores. Esta regla evita
+filtración del futuro y es deliberadamente distinta de la ventana reciente
+100%/40% con la que Poisson calcula las fuerzas de ataque y defensa.
