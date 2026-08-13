@@ -19,7 +19,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
-| Fase 4 — Modelo estadístico | En progreso | 2 de 6 puntos | `feat/Fase-4-Modelo-Estadistico` |
+| Fase 4 — Modelo estadístico | En progreso | 3 de 6 puntos | `feat/Fase-4-Modelo-Estadistico` |
 | Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
 
 ## Fase 0 — Descubrimiento y fundaciones
@@ -587,8 +587,8 @@ Estado: **En progreso**.
 
 ## Próximo paso
 
-Continuar la **Fase 4 — Modelo estadístico** implementando el baseline Poisson
-con ajuste de localía.
+Continuar la **Fase 4 — Modelo estadístico** incorporando el ajuste Dixon-Coles
+y comparándolo con el baseline Poisson.
 
 ## Fase 4 — Modelo estadístico
 
@@ -659,6 +659,47 @@ Estado: **En progreso**.
 - Decisión de integridad: el endpoint continuará mostrando Elo como no disponible hasta completar el backtesting y seleccionar una versión apta para uso en la API.
 - Archivos principales: `api/elo_rating.py`, `api/tools/calculate_elo_ratings.py`, `api/tests/test_elo_rating.py` y `api/tests/test_calculate_elo_ratings_tool.py`.
 - Resultado: rating cronológico, trazable e idempotente listo para alimentar el futuro backtesting y la evolución visual.
+
+### Punto 3 — Baseline Poisson con localía
+
+- Estado: completado técnicamente; versión experimental aún no conectada a la API.
+- Fecha: 13 de agosto de 2026.
+- Objetivo: convertir tasas históricas de goles en una referencia probabilística reproducible antes de aplicar Dixon-Coles.
+- Configuración `poisson-v0.1.0`:
+  - Ventana máxima de dos temporadas: peso 1.0 para la actual y 0.4 para la inmediatamente anterior.
+  - Ataque y defensa separados para condición local y visitante.
+  - Campo neutral calculado con fuerzas generales y sin ventaja local.
+  - Mínimo de 5 antecedentes en la condición requerida por equipo y 20 partidos previos de liga.
+  - En neutral, mínimo de 10 antecedentes generales por equipo.
+  - Suavizado hacia el promedio de liga equivalente a 3 partidos.
+  - Matriz visible de marcadores entre 0 y 6 goles por equipo.
+- Integridad temporal:
+  - Sólo se incluyen partidos `FINISHED` con `utc_date` estrictamente anterior a `input_data_cutoff`.
+  - Los encuentros del mismo horario no utilizan resultados entre sí.
+  - La salida conserva versión, parámetros, corte, fecha de cálculo, fuerzas y tamaños de muestra.
+- Salidas experimentales:
+  - Goles estimados por equipo.
+  - Probabilidades de victoria, empate y derrota.
+  - Más/menos de 2.5 goles y ambos equipos marcan.
+  - Matriz 7 × 7, tres marcadores más probables y masa fuera de matriz.
+  - Error explícito con detalles cuando no se cumplen los requisitos mínimos.
+- Pruebas automatizadas:
+  - Normalización de 1X2 y de matriz más excedente.
+  - Orden contractual cuando el Equipo 2 es local.
+  - Campo neutral, muestras insuficientes y corte temporal estricto.
+  - Ponderación de sólo dos temporadas y exclusión de temporadas antiguas.
+  - Parámetros, equipos, localía, zona horaria y muestra formada sólo por empates 0–0.
+- Validaciones: Ruff aprobado y 64 pruebas API aprobadas.
+- Validación con SQLite local:
+  - Comparación experimental Arsenal local contra Liverpool para 2026/27 usando 380 partidos previos.
+  - Goles estimados: 2.175 y 0.896.
+  - 1X2: 66.57%, 19.16% y 14.27%.
+  - Más de 2.5: 59.26%; ambos marcan: 52.47%.
+  - Marcadores principales: 2–0, 1–0 y 2–1.
+  - Matriz más probabilidad exterior igual a 1.
+- Decisión de integridad: estos valores son evidencia técnica, no una predicción validada; el endpoint continuará sin servirlos hasta comparar Poisson, Dixon-Coles y calibración temporal.
+- Archivos principales: `api/poisson_model.py` y `api/tests/test_poisson_model.py`.
+- Resultado: baseline probabilístico trazable y preparado para medir el aporte específico de Dixon-Coles.
 
 ## Plantilla para próximas actualizaciones
 

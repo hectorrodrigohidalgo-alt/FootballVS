@@ -162,3 +162,77 @@ documentos de historial y 20 ratings actuales. Una segunda ejecución conservó
 los mismos totales y la suma global de cambios fue cero. Estos valores todavía
 no se sirven en la API: permanecen experimentales hasta completar el
 backtesting temporal.
+
+## Poisson — diseño inicial
+
+El baseline Poisson utilizará una ventana móvil máxima de dos temporadas. Los
+partidos de la temporada que contiene la fecha de predicción tendrán peso `1.0`
+y los de la temporada inmediatamente anterior peso `0.4`. Las temporadas más
+antiguas quedarán fuera de la estimación activa, aunque podrán utilizarse como
+periodos anteriores en el backtesting.
+
+El peso de 40% evita que una plantilla anterior domine durante toda la nueva
+temporada, pero conserva información suficiente al comienzo, cuando todavía se
+han jugado pocos encuentros. Este valor es provisional y deberá compararse con
+otras ponderaciones sin utilizar partidos posteriores a la predicción.
+
+Poisson calculará por separado ataque y defensa como local y visitante. Cada
+fuerza será una razón respecto del promedio de goles local o visitante de la
+liga. Para un encuentro entre local `A` y visitante `B`:
+
+```text
+goles_esperados_A = promedio_local_liga × ataque_local_A × defensa_visitante_B
+goles_esperados_B = promedio_visitante_liga × ataque_visitante_B × defensa_local_A
+```
+
+Una fuerza ofensiva superior a `1` representa producción sobre el promedio. En
+defensa, un valor inferior a `1` representa menos goles recibidos que el
+promedio. La localía se deriva de estos datos separados y no reutiliza los 65
+puntos temporales definidos para Elo.
+
+El modelo sólo generará una estimación si, antes de la fecha del encuentro:
+
+- el equipo local posee al menos 5 partidos en condición de local dentro de la
+  ventana ponderada;
+- el visitante posee al menos 5 partidos en condición de visitante;
+- la liga acumula al menos 20 partidos finalizados anteriores.
+
+Si falta cualquiera de estos requisitos, la respuesta indicará datos
+insuficientes en vez de inventar una predicción. Un partido de la temporada
+anterior cuenta como antecedente disponible aunque su contribución numérica
+tenga peso `0.4`.
+
+Superados los mínimos se aplicará un suavizado equivalente a 3 partidos con
+rendimiento promedio de liga:
+
+```text
+tasa_suavizada =
+  (goles_ponderados + promedio_liga × 3)
+  / (partidos_ponderados + 3)
+```
+
+El prior evita tasas cero o valores extremos después de pocos encuentros. Su
+influencia disminuye conforme el equipo acumula más partidos ponderados.
+
+La matriz visible de marcadores abarcará de `0–0` a `6–6` (`7 × 7`). La masa
+de probabilidad donde uno o ambos equipos marquen 7 o más goles se conservará
+como `probability_outside_matrix`; no se descartará ni redistribuirá. La suma de
+la matriz y ese excedente deberá ser igual a 1 dentro de la tolerancia numérica.
+
+En campo neutral se utilizarán ataque y defensa generales calculados con todas
+las condiciones y el promedio de goles por equipo de la liga. No se aplicará
+ventaja local ni se asignará artificialmente una condición a uno de los clubes.
+Cada equipo deberá poseer al menos 10 partidos anteriores y la liga al menos 20;
+se conservarán la ventana 100%/40% y el prior de tres partidos.
+
+El baseline se identificará como `poisson-v0.1.0` y generará goles estimados,
+probabilidades 1X2, más y menos de 2.5 goles, ambos equipos marcan, matriz de
+marcadores, los tres resultados exactos más probables y probabilidad fuera de
+matriz. La futura salida `dixon-coles-v0.1.0` se conservará separada para medir
+si sus ajustes a marcadores bajos mejoran realmente al baseline.
+
+La implementación vive en `api/poisson_model.py`. Su salida incluye también las
+fuerzas calculadas y los tamaños de muestra, permitiendo explicar y reproducir
+cada resultado. La validación local inicial usó 380 partidos previos y confirmó
+que las probabilidades 1X2 suman 1, al igual que la matriz más su excedente. El
+baseline no se publicará en la API antes del backtesting.

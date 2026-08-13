@@ -158,3 +158,18 @@ El comando persiste dos tipos documentales mediante `upsert`:
 Repetir el cálculo reemplaza los mismos identificadores y no crea duplicados.
 Los partidos originales permanecen intactos. La versión es experimental hasta
 completar el backtesting temporal de la Fase 4.
+
+## Baseline Poisson experimental
+
+`poisson_model.py` implementa `poisson-v0.1.0` como una función pura que recibe
+partidos, temporadas, equipos, localía y corte temporal. Utiliza como máximo la
+temporada actual con peso `1.0` y la anterior con peso `0.4`.
+
+El modelo separa ataque y defensa local/visitante, exige muestras mínimas,
+aplica un prior equivalente a tres partidos y genera goles estimados,
+probabilidades 1X2, más/menos de 2.5, ambos marcan y matriz de 0–0 a 6–6. En
+campo neutral usa fuerzas generales sin asignar ventaja local.
+
+La salida incluye parámetros, fuerzas, tamaños de muestra, `input_data_cutoff`
+y `calculated_at`. Todavía no se sirve desde el endpoint público: primero debe
+compararse con Dixon-Coles y superar el backtesting temporal.
