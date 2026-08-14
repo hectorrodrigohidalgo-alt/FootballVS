@@ -857,7 +857,7 @@ Estado: **En progreso**.
 
 ### Punto 2 — Playwright end-to-end
 
-- Estado: completado técnicamente; validación remota pendiente del próximo push.
+- Estado: completado y validado localmente y en GitHub Actions.
 - Fecha: 14 de agosto de 2026.
 - Objetivo: comprobar el recorrido principal contra frontend y Azure Functions
   reales sin depender de datos externos.
@@ -885,6 +885,10 @@ Estado: **En progreso**.
   una versión corregida compatible; `npm audit` terminó sin vulnerabilidades.
 - Validaciones locales: TypeScript y lint aprobados; 4 de 4 ejecuciones E2E
   aprobadas en 13 segundos.
+- Validación remota: ejecución `31812203885` completada correctamente con 4 de
+  4 pruebas E2E aprobadas en 14.2 segundos.
+- Mantenimiento de Actions: `upload-artifact` actualizado a `v7`, compatible
+  con Node.js 24, después de detectar la advertencia deprecatoria de `v5`.
 - Archivos principales: `frontend/playwright.config.ts`,
   `frontend/e2e/comparison.spec.ts`, `frontend/package.json`,
   `frontend/package-lock.json` y `.github/workflows/ci.yml`.
