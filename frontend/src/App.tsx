@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useEffect, useState, type FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import {
@@ -8,7 +8,6 @@ import {
   fetchTeams,
 } from './api/client'
 import type { ComparisonRequest, TeamSummary, Venue } from './api/types'
-import { ComparisonDashboard } from './components/ComparisonDashboard'
 import {
   ApiErrorPanel,
   CatalogEmptyState,
@@ -16,6 +15,14 @@ import {
   EmptyDashboard,
   RefreshStatus,
 } from './components/DashboardStates'
+
+// El dashboard y Apache ECharts se descargan sólo después de obtener una
+// comparación. Así la portada no paga el coste de los gráficos antes de usarlos.
+const ComparisonDashboard = lazy(() =>
+  import('./components/ComparisonDashboard').then((module) => ({
+    default: module.ComparisonDashboard,
+  })),
+)
 
 type TeamSelectorProps = {
   id: string
@@ -400,7 +407,9 @@ function App() {
                   Comparación lista: {comparisonQuery.data.team_1.name} contra{' '}
                   {comparisonQuery.data.team_2.name}.
                 </span>
-                <ComparisonDashboard comparison={comparisonQuery.data} />
+                <Suspense fallback={<DashboardSkeleton />}>
+                  <ComparisonDashboard comparison={comparisonQuery.data} />
+                </Suspense>
               </>
             ) : null}
             {!submittedComparison ? <EmptyDashboard /> : null}

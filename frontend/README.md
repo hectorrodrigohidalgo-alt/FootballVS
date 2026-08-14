@@ -4,6 +4,10 @@ Interfaz responsive construida con React, TypeScript, Vite, Tailwind CSS, TanSta
 
 El dashboard utiliza radar, línea de forma reciente y barras de historial directo. Los gráficos se redimensionan automáticamente y muestran estados vacíos cuando todavía no existen resultados suficientes.
 
+El dashboard y Apache ECharts se cargan bajo demanda después de solicitar una
+comparación, lo que evita incluir la biblioteca de gráficos en la descarga
+JavaScript inicial.
+
 ## Experiencia y accesibilidad
 
 - Diseño adaptable desde 320 px.

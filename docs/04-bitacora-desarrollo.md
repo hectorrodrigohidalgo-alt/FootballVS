@@ -20,7 +20,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
 | Fase 4 — Modelo estadístico | Completada | 6 de 6 puntos | `main` (PR `#7`) |
-| Fase 5 — Calidad y despliegue | En progreso | 3 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
+| Fase 5 — Calidad y despliegue | En progreso | 4 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -924,6 +924,36 @@ Estado: **En progreso**.
   `frontend/src/components/EloInfoDialog.tsx`.
 - Resultado: accesibilidad y adaptación responsive verificadas; el punto 4
   abordará el rendimiento y la división del bundle de ECharts.
+
+### Punto 4 — Rendimiento y bundle de ECharts
+
+- Estado: completado y validado localmente.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: reducir el JavaScript necesario para abrir la página sin retirar
+  métricas, gráficos ni comportamiento accesible.
+- Línea base: un único archivo JavaScript de 814,20 kB, equivalente a 268,72 kB
+  con gzip.
+- Decisiones:
+  - Se conservaron los imports modulares de `echarts/core`, `echarts/charts` y
+    `echarts/components`, junto con `SVGRenderer`, porque el proyecto ya seguía
+    el patrón oficial de tree shaking.
+  - `ComparisonDashboard` se carga mediante `React.lazy` y `Suspense`; el código
+    de ECharts sólo se solicita después de obtener una comparación.
+  - El fallback reutiliza `DashboardSkeleton` para comunicar la carga adicional
+    sin dejar un espacio vacío.
+- Resultado del build:
+  - JavaScript inicial: 238,85 kB, o 75,14 kB con gzip.
+  - Dashboard diferido: 576,15 kB, o 195,07 kB con gzip.
+  - Reducción de la descarga JavaScript inicial: aproximadamente 70,7%.
+- Advertencia controlada: el chunk diferido supera el umbral informativo de
+  500 kB de Vite. Se conserva visible y documentado; no se aumentó el umbral
+  para ocultarlo porque ya no bloquea la carga inicial.
+- Validaciones: build, lint, TypeScript, 20 pruebas unitarias y 14 pruebas E2E
+  aprobadas; la suite E2E finalizó en 20,8 segundos.
+- Archivos principales: `frontend/src/App.tsx`, `frontend/src/charts/echarts.ts`
+  y `frontend/src/components/DashboardStates.tsx`.
+- Resultado: carga inicial optimizada sin regresiones; el punto 5 reforzará la
+  seguridad y configuración de producción.
 
 ## Plantilla para próximas actualizaciones
 
