@@ -93,7 +93,7 @@ Salida: estimaciones reproducibles, evaluadas y servidas. **Completada.**
 
 - [x] Punto 1: definir criterios de calidad, alcance E2E y condiciones de salida.
 - [x] Punto 2: implementar Playwright E2E con Chromium, móvil y escritorio.
-- [ ] Punto 3: auditar accesibilidad y experiencia responsive.
+- [x] Punto 3: auditar accesibilidad y experiencia responsive.
 - [ ] Punto 4: medir y optimizar rendimiento, incluido el bundle de ECharts.
 - [ ] Punto 5: reforzar seguridad y configuración de producción.
 - [ ] Punto 6: aprovisionar y desplegar los servicios gratuitos de Azure.

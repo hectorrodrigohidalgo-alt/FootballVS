@@ -66,7 +66,7 @@ function TeamSelector({
       </label>
       <select
         aria-busy={isLoading}
-        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-900 shadow-sm outline-none transition focus:border-pitch-500 focus:ring-4 focus:ring-pitch-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-base text-slate-900 shadow-sm outline-none transition focus:border-pitch-500 focus:ring-4 focus:ring-pitch-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-600"
         disabled={isDisabled}
         id={id}
         onChange={(event) => onChange(event.target.value)}
@@ -223,7 +223,7 @@ function App() {
                 </label>
                 <select
                   aria-busy={competitionsQuery.isPending}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-pitch-500 focus:ring-4 focus:ring-pitch-100 disabled:cursor-not-allowed disabled:text-slate-400"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-pitch-500 focus:ring-4 focus:ring-pitch-100 disabled:cursor-not-allowed disabled:text-slate-600"
                   id="competition"
                   onChange={(event) => {
                     setCompetitionId(event.target.value)
@@ -365,7 +365,7 @@ function App() {
               <button
                 aria-controls="comparison-results"
                 aria-describedby="selection-status"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-pitch-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-pitch-600/20 transition enabled:hover:-translate-y-0.5 enabled:hover:bg-pitch-500 enabled:focus-visible:outline-2 enabled:focus-visible:outline-offset-2 enabled:focus-visible:outline-pitch-600 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-pitch-700 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-pitch-600/20 transition enabled:hover:-translate-y-0.5 enabled:hover:bg-pitch-900 enabled:focus-visible:outline-2 enabled:focus-visible:outline-offset-2 enabled:focus-visible:outline-pitch-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-600 disabled:shadow-none sm:w-auto"
                 disabled={!canCompare || comparisonQuery.isFetching}
                 type="submit"
               >

@@ -11,6 +11,7 @@ El dashboard utiliza radar, línea de forma reciente y barras de historial direc
 - Advertencia cuando los datos llevan más de 48 horas sin sincronizarse.
 - Navegación por teclado con enlace para saltar al contenido principal.
 - Regiones de estado para tecnologías de asistencia y soporte de movimiento reducido.
+- Auditorías WCAG A/AA con Axe y pruebas responsive en 320, 768 y 1280 px.
 
 ## Preparación local
 

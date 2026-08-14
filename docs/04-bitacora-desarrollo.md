@@ -1,6 +1,6 @@
 # Bitácora de desarrollo
 
-Última actualización: **12 de agosto de 2026**.
+Última actualización: **14 de agosto de 2026**.
 
 Este documento registra el avance verificable de FootballVS. Se actualiza al finalizar cada punto y distingue entre trabajo implementado localmente, validado y publicado en GitHub.
 
@@ -19,8 +19,8 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
-| Fase 4 — Modelo estadístico | En progreso | 3 de 6 puntos | `feat/Fase-4-Modelo-Estadistico` |
-| Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
+| Fase 4 — Modelo estadístico | Completada | 6 de 6 puntos | `main` (PR `#7`) |
+| Fase 5 — Calidad y despliegue | En progreso | 3 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -894,6 +894,36 @@ Estado: **En progreso**.
   `frontend/package-lock.json` y `.github/workflows/ci.yml`.
 - Resultado: flujo crítico protegido en móvil y escritorio; el punto 3
   profundizará en accesibilidad y revisión responsive.
+
+### Punto 3 — Accesibilidad y experiencia responsive
+
+- Estado: completado y validado localmente.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: comprobar que el flujo principal sea utilizable con teclado,
+  tecnologías de asistencia y pantallas desde 320 px.
+- Implementación:
+  - Auditorías automáticas con `@axe-core/playwright` sobre el inicio, el
+    dashboard comparativo y el diálogo informativo de Elo.
+  - Reglas WCAG 2.0 y 2.1 de niveles A y AA, bloqueando infracciones de impacto
+    serio o crítico.
+  - Prueba del enlace para saltar al contenido, apertura y cierre del diálogo,
+    contención y devolución del foco, tecla Escape y navegación hacia contenido
+    desplazable.
+  - Comprobaciones responsive en 320 × 720, 768 × 1024 y 1280 × 900, sin
+    desbordamiento horizontal y con los resultados visibles.
+- Correcciones realizadas:
+  - Se aumentó el contraste de textos secundarios y controles deshabilitados.
+  - Se añadió `pitch-700` para que el botón principal con texto blanco alcance
+    el contraste mínimo AA sin abandonar la paleta verde musgo.
+  - La fórmula Elo desplazable puede recibir foco y muestra un contorno visible.
+- Validación: 14 de 14 ejecuciones Playwright aprobadas en Chromium de escritorio
+  y móvil; sin infracciones serias o críticas en las vistas auditadas.
+- Archivos principales: `frontend/e2e/accessibility.spec.ts`,
+  `frontend/e2e/responsive.spec.ts`, `frontend/e2e/helpers.ts`,
+  `frontend/src/App.tsx`, `frontend/src/index.css` y
+  `frontend/src/components/EloInfoDialog.tsx`.
+- Resultado: accesibilidad y adaptación responsive verificadas; el punto 4
+  abordará el rendimiento y la división del bundle de ECharts.
 
 ## Plantilla para próximas actualizaciones
 
