@@ -30,6 +30,7 @@ artifacts/
 
 # Azure and tools
 .azure/
+.azurefunctions/
 .func/
 .idea/
 .vscode/

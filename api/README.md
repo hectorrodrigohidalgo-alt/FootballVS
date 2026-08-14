@@ -32,6 +32,11 @@ Endpoints disponibles en los modos `mock` y `repository`:
 - `GET /api/v1/comparisons?competition={id}&team1={id}&team2={id}&venue={team1|team2|neutral}`
 
 `local.settings.json` y `.venv/` son locales y no deben publicarse en Git.
+La carpeta `.azurefunctions/` también es local: puede contener identificadores
+generados por Core Tools y permanece ignorada.
+
+Las respuestas HTTP incluyen cabeceras defensivas y CI audita las dependencias
+de producción con `pip-audit`.
 
 ## Calidad y pruebas
 

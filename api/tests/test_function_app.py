@@ -40,6 +40,15 @@ def test_health_reports_service_status() -> None:
     assert body["timestamp"].endswith("+00:00")
 
 
+def test_json_responses_include_defensive_headers() -> None:
+    response = health(make_request())
+
+    assert response.headers["Cache-Control"] == "no-store"
+    assert response.headers["Referrer-Policy"] == "no-referrer"
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert response.mimetype == "application/json"
+
+
 def test_competitions_returns_the_mock_premier_league() -> None:
     response = list_competitions(make_request())
     body = response_body(response)

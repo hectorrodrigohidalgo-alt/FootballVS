@@ -20,7 +20,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
 | Fase 4 — Modelo estadístico | Completada | 6 de 6 puntos | `main` (PR `#7`) |
-| Fase 5 — Calidad y despliegue | En progreso | 4 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
+| Fase 5 — Calidad y despliegue | En progreso | 5 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -954,6 +954,42 @@ Estado: **En progreso**.
   y `frontend/src/components/DashboardStates.tsx`.
 - Resultado: carga inicial optimizada sin regresiones; el punto 5 reforzará la
   seguridad y configuración de producción.
+
+### Punto 5 — Seguridad y configuración de producción
+
+- Estado: completado y validado localmente.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: impedir la publicación accidental de datos locales, reforzar las
+  respuestas públicas y bloquear dependencias con vulnerabilidades conocidas.
+- Auditoría de secretos y archivos:
+  - `.env`, `frontend/.env.local`, `api/local.settings.json` y las bases SQLite
+    permanecen ignorados y no están rastreados por Git.
+  - Se retiró `api/.azurefunctions/config`, que contenía un identificador local
+    generado por Azure Functions Core Tools.
+  - `.azurefunctions/` quedó incluido en `.gitignore` para evitar que vuelva a
+    publicarse configuración específica de una máquina.
+- Cabeceras defensivas de la API:
+  - `Cache-Control: no-store` evita reutilizar comparaciones obsoletas.
+  - `X-Content-Type-Options: nosniff` impide interpretar JSON como otro tipo de
+    contenido.
+  - `Referrer-Policy: no-referrer` evita filtrar la URL de origen.
+  - Una prueba automática verifica las tres cabeceras y el tipo JSON.
+- Dependencias:
+  - CI ejecuta `npm audit --audit-level=high` después de instalar el frontend.
+  - `pip-audit==2.10.1` quedó fijado como herramienta de desarrollo y CI audita
+    exclusivamente `api/requirements.txt`.
+  - Auditorías locales: cero vulnerabilidades conocidas en npm y Python.
+- Decisiones de producción:
+  - Los endpoints permanecen anónimos porque el MVP ofrece consultas públicas
+    de sólo lectura; la clave de `football-data.org` nunca llega al navegador.
+  - El dominio CORS definitivo y los Application Settings secretos se
+    configurarán sobre el recurso real de Azure durante el punto 6.
+- Validaciones: Ruff aprobado y 78 de 78 pruebas API aprobadas.
+- Archivos principales: `.gitignore`, `.github/workflows/ci.yml`,
+  `api/http_responses.py`, `api/tests/test_function_app.py` y
+  `api/requirements-dev.txt`.
+- Resultado: configuración local saneada y controles de seguridad automatizados;
+  el punto 6 aprovisionará y desplegará los servicios de Azure.
 
 ## Plantilla para próximas actualizaciones
 
