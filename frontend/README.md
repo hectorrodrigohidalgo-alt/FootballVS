@@ -49,3 +49,26 @@ npm.cmd run test:watch
 ```
 
 Las pruebas simulan las respuestas HTTP; no necesitan ejecutar Azure Functions ni disponer de una clave real.
+
+## Pruebas end-to-end
+
+La suite Playwright inicia Vite en `http://localhost:5273` y Azure Functions en
+`http://localhost:7171`, ambos en puertos exclusivos para no interferir con el
+desarrollo normal. El backend usa datos mock y no requiere API key ni SQLite.
+
+La primera vez, instalar únicamente Chromium:
+
+```powershell
+npx playwright install chromium
+```
+
+Después ejecutar escritorio y móvil:
+
+```powershell
+npm run test:e2e
+```
+
+Azure Functions Core Tools debe estar instalado y `api/.venv` preparado con
+`api/requirements-dev.txt`. Los reportes y evidencias de fallos permanecen
+ignorados por Git. En CI, la validación E2E es obligatoria y publica el reporte
+HTML como artefacto.

@@ -91,10 +91,14 @@ Salida: estimaciones reproducibles, evaluadas y servidas. **Completada.**
 
 ## Fase 5 — Calidad y despliegue
 
-- Pruebas end-to-end, accesibilidad, rendimiento y seguridad.
-- Aprovisionar servicios Azure gratuitos.
-- Configurar secretos, observabilidad y despliegues.
-- Completar documentación técnica y de usuario.
+- [x] Punto 1: definir criterios de calidad, alcance E2E y condiciones de salida.
+- [x] Punto 2: implementar Playwright E2E con Chromium, móvil y escritorio.
+- [ ] Punto 3: auditar accesibilidad y experiencia responsive.
+- [ ] Punto 4: medir y optimizar rendimiento, incluido el bundle de ECharts.
+- [ ] Punto 5: reforzar seguridad y configuración de producción.
+- [ ] Punto 6: aprovisionar y desplegar los servicios gratuitos de Azure.
+- [ ] Punto 7: configurar secretos, observabilidad y comprobaciones posteriores.
+- [ ] Punto 8: completar documentación y cerrar el MVP.
 
 Salida: MVP público.
 

@@ -9,6 +9,8 @@ node_modules/
 dist/
 coverage/
 .vite/
+playwright-report/
+test-results/
 
 # Python
 __pycache__/
@@ -17,6 +19,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .venv/
+.venv-broken/
 venv/
 
 # Models and data

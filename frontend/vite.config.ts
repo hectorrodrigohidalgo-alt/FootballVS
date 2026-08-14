@@ -9,6 +9,8 @@ export default defineConfig({
   test: {
     clearMocks: true,
     environment: 'jsdom',
+    // Los escenarios e2e/*.spec.ts pertenecen exclusivamente a Playwright.
+    include: ['src/**/*.test.{ts,tsx}'],
     // Un solo worker evita sobrecargar equipos modestos y runners gratuitos.
     maxWorkers: 1,
     pool: 'threads',

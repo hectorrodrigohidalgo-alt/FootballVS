@@ -824,6 +824,73 @@ Estado: **En progreso**.
 - Resultado: Fase 4 completada con modelos versionados, evaluados, servidos y
   explicados al usuario.
 
+## Fase 5 — Calidad y despliegue
+
+### Punto 1 — Criterios de calidad y alcance E2E
+
+- Estado: completado.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: fijar condiciones verificables para considerar el MVP apto para
+  despliegue público antes de incorporar nuevas herramientas.
+- Criterios de salida:
+  - Pruebas API, frontend y end-to-end completamente verdes.
+  - Flujo principal cubierto: selección, comparación, resultados y explicación
+    Elo.
+  - Sin errores críticos de accesibilidad y navegación completa por teclado.
+  - Experiencia funcional en móvil, tablet y escritorio.
+  - Build de producción correcto y advertencias de tamaño reducidas o
+    justificadas.
+  - Ausencia de secretos, archivos `.env` y configuración local en Git.
+  - Frontend y backend publicados mediante HTTPS, con salud y comparación
+    verificadas en producción.
+  - Secretos, observabilidad y documentación de operación configurados.
+- Decisiones E2E confirmadas:
+  - Playwright como herramienta.
+  - Chromium como navegador inicial para reducir descargas y minutos de CI.
+  - Proyectos de escritorio y móvil dentro del mismo navegador.
+  - Frontend Vite conectado por HTTP a Azure Functions en modo mock.
+  - Sin API key, SQLite ni solicitudes a `football-data.org` durante CI.
+  - La validación Playwright será obligatoria y bloqueará el Pull Request si
+    falla.
+- Resultado: alcance de calidad aprobado; el punto 2 implementará la suite E2E
+  y su trabajo obligatorio en GitHub Actions.
+
+### Punto 2 — Playwright end-to-end
+
+- Estado: completado técnicamente; validación remota pendiente del próximo push.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: comprobar el recorrido principal contra frontend y Azure Functions
+  reales sin depender de datos externos.
+- Implementación:
+  - `@playwright/test` incorporado como dependencia de desarrollo.
+  - Dos proyectos sobre Chromium: escritorio mediante `Desktop Chrome` y móvil
+    mediante emulación `Pixel 5`.
+  - Servidores aislados: Vite en el puerto 5273 y Azure Functions en el 7171.
+  - Backend forzado a `APP_DATA_SOURCE=mock`, sin API key, SQLite ni llamadas al
+    proveedor.
+  - Entorno virtual Python activado de forma portable en Windows y Linux.
+  - Captura de pantalla sólo al fallar, video retenido al fallar y trace en el
+    primer reintento.
+- Escenarios:
+  - Selección de competición, equipos y localía; comparación; dashboard;
+    predicción; Elo; apertura y cierre con Escape del diálogo informativo.
+  - Prevención de seleccionar el mismo equipo y botón de comparación bloqueado.
+  - Ambos escenarios ejecutados en los dos proyectos responsive.
+- CI:
+  - Trabajo `End-to-end Chromium` dependiente de la calidad frontend y API.
+  - Instalación exclusiva de Chromium y sus dependencias del sistema.
+  - Fallos bloquean el Pull Request.
+  - Reporte HTML conservado durante 14 días como artefacto.
+- Seguridad de dependencias: `nanoid` transitivo actualizado desde `3.3.17` a
+  una versión corregida compatible; `npm audit` terminó sin vulnerabilidades.
+- Validaciones locales: TypeScript y lint aprobados; 4 de 4 ejecuciones E2E
+  aprobadas en 13 segundos.
+- Archivos principales: `frontend/playwright.config.ts`,
+  `frontend/e2e/comparison.spec.ts`, `frontend/package.json`,
+  `frontend/package-lock.json` y `.github/workflows/ci.yml`.
+- Resultado: flujo crítico protegido en móvil y escritorio; el punto 3
+  profundizará en accesibilidad y revisión responsive.
+
 ## Plantilla para próximas actualizaciones
 
 Al completar un punto nuevo, añadir:
