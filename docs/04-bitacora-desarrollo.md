@@ -991,6 +991,32 @@ Estado: **En progreso**.
 - Resultado: configuración local saneada y controles de seguridad automatizados;
   el punto 6 aprovisionará y desplegará los servicios de Azure.
 
+### Punto 6 — Azure Static Web Apps Free
+
+- Estado: en progreso.
+- Inicio: 15 de agosto de 2026.
+- Objetivo: publicar frontend y API administrada en un único recurso gratuito,
+  sin Function App, Storage Account ni base de datos facturables por separado.
+- Infraestructura confirmada:
+  - Suscripción `Azure subscription 1` habilitada con presupuesto mensual de
+    control.
+  - Grupo de recursos `rg-footballvs` creado correctamente en Chile Central.
+  - Arquitectura elegida: Azure Static Web Apps Free con Azure Functions
+    administrada y snapshot SQLite de sólo lectura.
+- Preparación del repositorio:
+  - `staticwebapp.config.json` configura fallback de React, cabeceras web y
+    runtime administrado `python:3.11`.
+  - El frontend usa `/api/v1` en producción y conserva
+    `http://localhost:7071/api/v1` durante el desarrollo local.
+  - CI prueba la API en Python 3.11 y 3.12; E2E utiliza 3.11 para coincidir con
+    Azure.
+  - Ruff apunta a Python 3.11 para impedir sintaxis incompatible con el runtime
+    publicado.
+- Validación local: configuración JSON válida, build con URL relativa,
+  lint y TypeScript aprobados, 20 pruebas frontend y 78 pruebas API aprobadas.
+- Pendiente: crear la Static Web App Free, configurar el despliegue desde GitHub,
+  publicar el snapshot de datos y verificar las rutas públicas.
+
 ## Plantilla para próximas actualizaciones
 
 Al completar un punto nuevo, añadir:

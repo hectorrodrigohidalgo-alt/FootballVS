@@ -8,6 +8,10 @@ El dashboard y Apache ECharts se cargan bajo demanda después de solicitar una
 comparación, lo que evita incluir la biblioteca de gráficos en la descarga
 JavaScript inicial.
 
+En Azure Static Web Apps, `public/staticwebapp.config.json` habilita el fallback
+de la SPA, aplica cabeceras defensivas y selecciona Python 3.11 para la API
+administrada. El cliente usa `/api/v1` automáticamente en builds de producción.
+
 ## Experiencia y accesibilidad
 
 - Diseño adaptable desde 320 px.

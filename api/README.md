@@ -38,6 +38,10 @@ generados por Core Tools y permanece ignorada.
 Las respuestas HTTP incluyen cabeceras defensivas y CI audita las dependencias
 de producción con `pip-audit`.
 
+La API se mantiene compatible con Python 3.11 porque es el runtime administrado
+seleccionado para Azure Static Web Apps; CI también conserva una ejecución en
+Python 3.12 para validar el entorno local del proyecto.
+
 ## Calidad y pruebas
 
 Desde `api/`, con el entorno virtual preparado:

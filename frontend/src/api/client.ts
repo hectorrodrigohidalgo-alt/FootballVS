@@ -9,8 +9,12 @@ import type {
 
 // Vite sólo expone al navegador variables con el prefijo VITE_. Esta URL es
 // pública; la clave de football-data.org permanece en Azure Functions.
+const DEFAULT_API_BASE_URL = import.meta.env.PROD
+  ? '/api/v1'
+  : 'http://localhost:7071/api/v1'
+
 const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:7071/api/v1'
+  import.meta.env.VITE_API_BASE_URL ?? DEFAULT_API_BASE_URL
 ).replace(/\/$/, '')
 
 export class ApiClientError extends Error {

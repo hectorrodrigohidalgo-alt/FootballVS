@@ -55,9 +55,13 @@ jobs:
         run: npm run build
 
   api:
-    name: API quality
+    name: API quality (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
     defaults:
       run:
         working-directory: api
@@ -69,7 +73,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: |
             api/requirements.txt
@@ -107,7 +111,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          # Coincide con el runtime administrado de Azure Static Web Apps.
+          python-version: '3.11'
           cache: pip
           cache-dependency-path: |
             api/requirements.txt
