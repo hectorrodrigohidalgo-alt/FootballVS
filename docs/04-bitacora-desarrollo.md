@@ -20,7 +20,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
 | Fase 4 — Modelo estadístico | Completada | 6 de 6 puntos | `main` (PR `#7`) |
-| Fase 5 — Calidad y despliegue | En progreso | 5 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
+| Fase 5 — Calidad y despliegue | En progreso | 6 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -993,7 +993,7 @@ Estado: **En progreso**.
 
 ### Punto 6 — Azure Static Web Apps Free
 
-- Estado: en progreso.
+- Estado: completado.
 - Inicio: 15 de agosto de 2026.
 - Objetivo: publicar frontend y API administrada en un único recurso gratuito,
   sin Function App, Storage Account ni base de datos facturables por separado.
@@ -1014,13 +1014,27 @@ Estado: **En progreso**.
     publicado.
 - Validación local: configuración JSON válida, build con URL relativa,
   lint y TypeScript aprobados, 20 pruebas frontend y 78 pruebas API aprobadas.
-- Pendiente: crear la Static Web App Free, configurar el despliegue desde GitHub,
-  publicar el snapshot de datos y verificar las rutas públicas.
 - Recurso creado: `footballvs-web`, plan Free, región Central US, trasladado al
   grupo `rg-footballvs`.
-- Workflow preparado localmente para compilar el frontend con Node 24 y dejar
-  que Azure construya la API administrada en Python 3.11. Durante la validación
-  usa la rama de la fase como producción; antes del merge se cambiará a `main`.
+- Despliegue automatizado:
+  - El workflow `deploy-static-web-app.yml` compila el frontend con Node 24 y
+    deja que Azure construya la API administrada en Python 3.11.
+  - El token de despliegue se guardó como secreto de GitHub y no se añadió al
+    repositorio.
+  - La ejecución pública terminó correctamente y publicó frontend y API bajo el
+    mismo dominio.
+- Validación pública:
+  - Sitio: `https://ambitious-island-0894cf010.7.azurestaticapps.net`.
+  - Frontend, `/api/v1/health` y `/api/v1/competitions` respondieron con HTTP
+    200.
+  - Las cabeceras defensivas del frontend y la API están presentes.
+  - La API permanece intencionalmente en modo `mock` hasta configurar en el
+    punto 7 la clave del proveedor y el snapshot SQLite de sólo lectura.
+- Decisión antes del merge: retirar la rama de la fase de los disparadores y
+  establecer `main` como única rama de producción.
+- Resultado: infraestructura gratuita aprovisionada y MVP accesible
+  públicamente; los datos reales y las comprobaciones posteriores corresponden
+  al punto 7.
 
 ## Plantilla para próximas actualizaciones
 
