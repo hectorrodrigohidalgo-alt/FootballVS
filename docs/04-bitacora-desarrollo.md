@@ -1016,6 +1016,11 @@ Estado: **En progreso**.
   lint y TypeScript aprobados, 20 pruebas frontend y 78 pruebas API aprobadas.
 - Pendiente: crear la Static Web App Free, configurar el despliegue desde GitHub,
   publicar el snapshot de datos y verificar las rutas públicas.
+- Recurso creado: `footballvs-web`, plan Free, región Central US, trasladado al
+  grupo `rg-footballvs`.
+- Workflow preparado localmente para compilar el frontend con Node 24 y dejar
+  que Azure construya la API administrada en Python 3.11. Durante la validación
+  usa la rama de la fase como producción; antes del merge se cambiará a `main`.
 
 ## Plantilla para próximas actualizaciones
 
