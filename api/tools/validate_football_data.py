@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import sys
 import time
 from collections.abc import Callable
@@ -17,7 +18,12 @@ DEFAULT_SETTINGS_PATH = Path(__file__).resolve().parents[1] / "local.settings.js
 
 
 def load_local_configuration(settings_path: Path) -> tuple[str, str]:
-    """Lee la clave local sin imprimirla ni copiarla a otra ubicación."""
+    """Obtiene la configuración desde el entorno o el archivo local ignorado."""
+    environment_api_key = os.getenv("FOOTBALL_DATA_API_KEY")
+    environment_base_url = os.getenv("FOOTBALL_DATA_BASE_URL")
+    if environment_api_key:
+        return environment_api_key, environment_base_url or DEFAULT_BASE_URL
+
     try:
         document = json.loads(settings_path.read_text(encoding="utf-8"))
         values = document["Values"]
@@ -25,7 +31,7 @@ def load_local_configuration(settings_path: Path) -> tuple[str, str]:
         base_url = values.get("FOOTBALL_DATA_BASE_URL", DEFAULT_BASE_URL)
     except (FileNotFoundError, KeyError, TypeError, json.JSONDecodeError) as error:
         raise FootballDataConfigurationError(
-            "A valid api/local.settings.json file is required."
+            "Set FOOTBALL_DATA_API_KEY or provide a valid api/local.settings.json."
         ) from error
 
     if not isinstance(api_key, str) or not isinstance(base_url, str):

@@ -114,7 +114,9 @@ Después sincroniza la temporada y calcula sus snapshots desde `api/`:
 .venv\Scripts\python.exe -m tools.calculate_team_statistics --season 2026
 ```
 
-Reinicia Azure Functions después de cambiar `APP_DATA_SOURCE`. La base SQLite permanece dentro de `api/data/` y no se publica en Git.
+Reinicia Azure Functions después de cambiar `APP_DATA_SOURCE`. La base SQLite
+permanece dentro de `api/data/` y no se publica en Git. En producción, GitHub
+Actions genera otra copia temporal y la empaqueta como snapshot de sólo lectura.
 
 ## 7. Endpoints locales
 
@@ -133,7 +135,8 @@ Equipos mock disponibles: `arsenal`, `chelsea`, `liverpool` y `manchester-city`.
 - No colocar la clave en variables que comiencen con `VITE_`; Vite las expone al navegador.
 - Versionar sólo `.env.example` y `local.settings.json.example` con valores ficticios.
 - No copiar claves en capturas, logs, commits, issues o pull requests.
-- Configurar la clave como Application Setting de Azure Functions al desplegar; `local.settings.json` no se publica.
+- Configurar la clave como GitHub Secret para el despliegue; Azure no necesita
+  conocerla y `local.settings.json` nunca se publica.
 
 ## 9. Problemas frecuentes
 

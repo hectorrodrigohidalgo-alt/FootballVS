@@ -1,6 +1,8 @@
 # FootballVS API
 
-API serverless construida con Azure Functions y Python 3.12 mediante el modelo de programación v2.
+API serverless construida con Azure Functions y el modelo de programación v2.
+Producción utiliza Python 3.11 dentro de Azure Static Web Apps; el desarrollo
+local también está validado con Python 3.12.
 
 ## Preparación local
 
@@ -32,6 +34,15 @@ Endpoints disponibles en los modos `mock` y `repository`:
 - `GET /api/v1/comparisons?competition={id}&team1={id}&team2={id}&venue={team1|team2|neutral}`
 
 `local.settings.json` y `.venv/` son locales y no deben publicarse en Git.
+La carpeta `.azurefunctions/` también es local: puede contener identificadores
+generados por Core Tools y permanece ignorada.
+
+Las respuestas HTTP incluyen cabeceras defensivas y CI audita las dependencias
+de producción con `pip-audit`.
+
+La API se mantiene compatible con Python 3.11 porque es el runtime administrado
+seleccionado para Azure Static Web Apps; CI también conserva una ejecución en
+Python 3.12 para validar el entorno local del proyecto.
 
 ## Calidad y pruebas
 
@@ -122,6 +133,17 @@ Para utilizar el repositorio local, establece en `local.settings.json`:
 "APP_DATA_SOURCE": "repository",
 "FOOTBALLVS_DB_PATH": "data/footballvs.db"
 ```
+
+Las herramientas de sincronización buscan primero
+`FOOTBALL_DATA_API_KEY` y `FOOTBALL_DATA_BASE_URL` en variables de entorno.
+Esto permite que GitHub Actions genere el snapshot sin crear ni publicar un
+`local.settings.json`. Si esas variables no existen, el desarrollo local
+continúa leyendo el archivo ignorado.
+
+Durante el despliegue, GitHub Actions sincroniza la temporada actual y una
+temporada anterior, calcula estadísticas y Elo, y empaqueta
+`data/footballvs.db` como un snapshot de sólo lectura. La base sigue ignorada
+por Git y no forma parte del historial del repositorio.
 
 El endpoint de equipos toma sólo los participantes presentes en los partidos de
 la temporada actual; así evita mezclar clubes históricos almacenados por otras

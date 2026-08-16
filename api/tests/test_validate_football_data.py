@@ -1,7 +1,13 @@
+import json
+from pathlib import Path
 from typing import Any
 
 from football_data_client import FootballDataRequestError
-from tools.validate_football_data import validate_provider_access
+from tools.validate_football_data import (
+    DEFAULT_BASE_URL,
+    load_local_configuration,
+    validate_provider_access,
+)
 
 
 class FakeClient:
@@ -31,6 +37,42 @@ class FakeClient:
             return {"matches": [{"id": index} for index in range(10)]}
 
         raise FootballDataRequestError("Restricted", status_code=403)
+
+
+def test_configuration_prefers_environment_secret(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setenv("FOOTBALL_DATA_API_KEY", "github-actions-secret")
+    monkeypatch.setenv("FOOTBALL_DATA_BASE_URL", DEFAULT_BASE_URL)
+
+    assert load_local_configuration(tmp_path / "missing.json") == (
+        "github-actions-secret",
+        DEFAULT_BASE_URL,
+    )
+
+
+def test_configuration_falls_back_to_ignored_local_file(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.delenv("FOOTBALL_DATA_API_KEY", raising=False)
+    monkeypatch.delenv("FOOTBALL_DATA_BASE_URL", raising=False)
+    settings_path = tmp_path / "local.settings.json"
+    settings_path.write_text(
+        json.dumps(
+            {
+                "Values": {
+                    "FOOTBALL_DATA_API_KEY": "local-secret",
+                    "FOOTBALL_DATA_BASE_URL": DEFAULT_BASE_URL,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert load_local_configuration(settings_path) == (
+        "local-secret",
+        DEFAULT_BASE_URL,
+    )
 
 
 def test_validation_reports_access_and_stops_at_first_restricted_season() -> None:

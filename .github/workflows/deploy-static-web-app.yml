@@ -1,0 +1,85 @@
+name: Deploy Azure Static Web Apps
+
+on:
+  push:
+    branches:
+      - main
+  # Actualiza el snapshot cada día a las 10:17 UTC. El minuto no redondo evita
+  # la franja de mayor congestión de los workflows programados.
+  schedule:
+    - cron: '17 10 * * *'
+  workflow_dispatch:
+
+# El despliegue sólo necesita leer el repositorio. El acceso a Azure se limita
+# al token de la Static Web App guardado como secreto de GitHub.
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-static-web-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy Free Static Web App
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # La clave sólo existe durante este paso. Los comandos imprimen resúmenes,
+      # nunca el token ni las respuestas completas del proveedor.
+      - name: Build read-only football data snapshot
+        working-directory: api
+        env:
+          FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+          FOOTBALLVS_DB_PATH: data/footballvs.db
+        run: |
+          python -m tools.sync_football_data --season 2025
+          python -m tools.sync_football_data --season 2026
+          python -m tools.calculate_team_statistics --season 2026
+          python -m tools.calculate_elo_ratings
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build production frontend
+        working-directory: frontend
+        run: npm run build
+
+      # Azure construye la API Python 3.11 a partir de api/requirements.txt.
+      # El frontend ya está compilado para evitar depender del Node de Oryx.
+      - name: Deploy frontend and managed API
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: frontend/dist
+          api_location: api
+          output_location: ''
+          skip_app_build: true
+
+      # Comprueba el recorrido público completo después de que Azure publique.
+      # Los reintentos toleran el arranque en frío y la propagación del recurso.
+      - name: Verify public deployment
+        working-directory: api
+        run: >-
+          python -m tools.smoke_test_public_deployment
+          --base-url https://ambitious-island-0894cf010.7.azurestaticapps.net
+          --attempts 6
+          --delay-seconds 10

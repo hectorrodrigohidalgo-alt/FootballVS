@@ -21,7 +21,7 @@ const formLabels = {
 
 function RecentForm({ form }: { form: TeamStatistics['recent_form'] }) {
   if (form.length === 0) {
-    return <span className="text-sm text-slate-400">Sin datos</span>
+    return <span className="text-sm text-slate-600">Sin datos</span>
   }
 
   return (
@@ -57,7 +57,7 @@ function TeamStatisticsCard({
     <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex flex-col items-start justify-between gap-3 min-[420px]:flex-row">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Rendimiento</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-600">Rendimiento</p>
           <h3 className="mt-1 break-words text-xl font-black text-ink-950">{name}</h3>
         </div>
         <div className="flex flex-col items-end gap-1">
@@ -84,7 +84,7 @@ function TeamStatisticsCard({
         ].map(([label, value]) => (
           <div className="rounded-xl bg-slate-50 px-2 py-3" key={label}>
             <p className="text-lg font-black text-ink-950">{value}</p>
-            <p className="mt-1 text-xs font-bold text-slate-400">{label}</p>
+            <p className="mt-1 text-xs font-bold text-slate-600">{label}</p>
           </div>
         ))}
       </div>
@@ -224,7 +224,7 @@ export function ComparisonDashboard({ comparison }: ComparisonDashboardProps) {
           <p className="mt-1 text-sm text-slate-400">partidos finalizados disponibles</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Modelo</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-600">Modelo</p>
           <p className="mt-3 font-bold text-ink-950">{model.version ?? 'No disponible'}</p>
           <p className="mt-1 text-sm leading-6 text-slate-500">
             {model.matches_used ?? 0} partidos utilizados · Elo {model.elo_version ?? 'no disponible'}

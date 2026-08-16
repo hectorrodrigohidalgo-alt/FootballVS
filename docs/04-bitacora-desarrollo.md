@@ -1,8 +1,12 @@
 # Bitácora de desarrollo
 
-Última actualización: **12 de agosto de 2026**.
+Última actualización: **16 de agosto de 2026**.
 
 Este documento registra el avance verificable de FootballVS. Se actualiza al finalizar cada punto y distingue entre trabajo implementado localmente, validado y publicado en GitHub.
+
+Las primeras fases conservan decisiones históricas que luego fueron
+reemplazadas. La arquitectura vigente se encuentra en `docs/01-arquitectura.md`
+y la operación actual en `docs/07-despliegue-produccion.md`.
 
 ## Convenciones
 
@@ -19,8 +23,8 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 1 — Esqueleto ejecutable | Completada | 10 de 10 puntos | `main` (integrada) |
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
-| Fase 4 — Modelo estadístico | En progreso | 3 de 6 puntos | `feat/Fase-4-Modelo-Estadistico` |
-| Fase 5 — Calidad y despliegue | Pendiente | 0% | — |
+| Fase 4 — Modelo estadístico | Completada | 6 de 6 puntos | `main` (PR `#7`) |
+| Fase 5 — Calidad y despliegue | Completada | 8 de 8 puntos | PR `#8` |
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -823,6 +827,313 @@ Estado: **En progreso**.
   y `frontend/src/components/EloInfoDialog.tsx`.
 - Resultado: Fase 4 completada con modelos versionados, evaluados, servidos y
   explicados al usuario.
+
+## Fase 5 — Calidad y despliegue
+
+### Punto 1 — Criterios de calidad y alcance E2E
+
+- Estado: completado.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: fijar condiciones verificables para considerar el MVP apto para
+  despliegue público antes de incorporar nuevas herramientas.
+- Criterios de salida:
+  - Pruebas API, frontend y end-to-end completamente verdes.
+  - Flujo principal cubierto: selección, comparación, resultados y explicación
+    Elo.
+  - Sin errores críticos de accesibilidad y navegación completa por teclado.
+  - Experiencia funcional en móvil, tablet y escritorio.
+  - Build de producción correcto y advertencias de tamaño reducidas o
+    justificadas.
+  - Ausencia de secretos, archivos `.env` y configuración local en Git.
+  - Frontend y backend publicados mediante HTTPS, con salud y comparación
+    verificadas en producción.
+  - Secretos, observabilidad y documentación de operación configurados.
+- Decisiones E2E confirmadas:
+  - Playwright como herramienta.
+  - Chromium como navegador inicial para reducir descargas y minutos de CI.
+  - Proyectos de escritorio y móvil dentro del mismo navegador.
+  - Frontend Vite conectado por HTTP a Azure Functions en modo mock.
+  - Sin API key, SQLite ni solicitudes a `football-data.org` durante CI.
+  - La validación Playwright será obligatoria y bloqueará el Pull Request si
+    falla.
+- Resultado: alcance de calidad aprobado; el punto 2 implementará la suite E2E
+  y su trabajo obligatorio en GitHub Actions.
+
+### Punto 2 — Playwright end-to-end
+
+- Estado: completado y validado localmente y en GitHub Actions.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: comprobar el recorrido principal contra frontend y Azure Functions
+  reales sin depender de datos externos.
+- Implementación:
+  - `@playwright/test` incorporado como dependencia de desarrollo.
+  - Dos proyectos sobre Chromium: escritorio mediante `Desktop Chrome` y móvil
+    mediante emulación `Pixel 5`.
+  - Servidores aislados: Vite en el puerto 5273 y Azure Functions en el 7171.
+  - Backend forzado a `APP_DATA_SOURCE=mock`, sin API key, SQLite ni llamadas al
+    proveedor.
+  - Entorno virtual Python activado de forma portable en Windows y Linux.
+  - Captura de pantalla sólo al fallar, video retenido al fallar y trace en el
+    primer reintento.
+- Escenarios:
+  - Selección de competición, equipos y localía; comparación; dashboard;
+    predicción; Elo; apertura y cierre con Escape del diálogo informativo.
+  - Prevención de seleccionar el mismo equipo y botón de comparación bloqueado.
+  - Ambos escenarios ejecutados en los dos proyectos responsive.
+- CI:
+  - Trabajo `End-to-end Chromium` dependiente de la calidad frontend y API.
+  - Instalación exclusiva de Chromium y sus dependencias del sistema.
+  - Fallos bloquean el Pull Request.
+  - Reporte HTML conservado durante 14 días como artefacto.
+- Seguridad de dependencias: `nanoid` transitivo actualizado desde `3.3.17` a
+  una versión corregida compatible; `npm audit` terminó sin vulnerabilidades.
+- Validaciones locales: TypeScript y lint aprobados; 4 de 4 ejecuciones E2E
+  aprobadas en 13 segundos.
+- Validación remota: ejecución `31812203885` completada correctamente con 4 de
+  4 pruebas E2E aprobadas en 14.2 segundos.
+- Mantenimiento de Actions: `upload-artifact` actualizado a `v7`, compatible
+  con Node.js 24, después de detectar la advertencia deprecatoria de `v5`.
+- Archivos principales: `frontend/playwright.config.ts`,
+  `frontend/e2e/comparison.spec.ts`, `frontend/package.json`,
+  `frontend/package-lock.json` y `.github/workflows/ci.yml`.
+- Resultado: flujo crítico protegido en móvil y escritorio; el punto 3
+  profundizará en accesibilidad y revisión responsive.
+
+### Punto 3 — Accesibilidad y experiencia responsive
+
+- Estado: completado y validado localmente.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: comprobar que el flujo principal sea utilizable con teclado,
+  tecnologías de asistencia y pantallas desde 320 px.
+- Implementación:
+  - Auditorías automáticas con `@axe-core/playwright` sobre el inicio, el
+    dashboard comparativo y el diálogo informativo de Elo.
+  - Reglas WCAG 2.0 y 2.1 de niveles A y AA, bloqueando infracciones de impacto
+    serio o crítico.
+  - Prueba del enlace para saltar al contenido, apertura y cierre del diálogo,
+    contención y devolución del foco, tecla Escape y navegación hacia contenido
+    desplazable.
+  - Comprobaciones responsive en 320 × 720, 768 × 1024 y 1280 × 900, sin
+    desbordamiento horizontal y con los resultados visibles.
+- Correcciones realizadas:
+  - Se aumentó el contraste de textos secundarios y controles deshabilitados.
+  - Se añadió `pitch-700` para que el botón principal con texto blanco alcance
+    el contraste mínimo AA sin abandonar la paleta verde musgo.
+  - La fórmula Elo desplazable puede recibir foco y muestra un contorno visible.
+- Validación: 14 de 14 ejecuciones Playwright aprobadas en Chromium de escritorio
+  y móvil; sin infracciones serias o críticas en las vistas auditadas.
+- Archivos principales: `frontend/e2e/accessibility.spec.ts`,
+  `frontend/e2e/responsive.spec.ts`, `frontend/e2e/helpers.ts`,
+  `frontend/src/App.tsx`, `frontend/src/index.css` y
+  `frontend/src/components/EloInfoDialog.tsx`.
+- Resultado: accesibilidad y adaptación responsive verificadas; el punto 4
+  abordará el rendimiento y la división del bundle de ECharts.
+
+### Punto 4 — Rendimiento y bundle de ECharts
+
+- Estado: completado y validado localmente.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: reducir el JavaScript necesario para abrir la página sin retirar
+  métricas, gráficos ni comportamiento accesible.
+- Línea base: un único archivo JavaScript de 814,20 kB, equivalente a 268,72 kB
+  con gzip.
+- Decisiones:
+  - Se conservaron los imports modulares de `echarts/core`, `echarts/charts` y
+    `echarts/components`, junto con `SVGRenderer`, porque el proyecto ya seguía
+    el patrón oficial de tree shaking.
+  - `ComparisonDashboard` se carga mediante `React.lazy` y `Suspense`; el código
+    de ECharts sólo se solicita después de obtener una comparación.
+  - El fallback reutiliza `DashboardSkeleton` para comunicar la carga adicional
+    sin dejar un espacio vacío.
+- Resultado del build:
+  - JavaScript inicial: 238,85 kB, o 75,14 kB con gzip.
+  - Dashboard diferido: 576,15 kB, o 195,07 kB con gzip.
+  - Reducción de la descarga JavaScript inicial: aproximadamente 70,7%.
+- Advertencia controlada: el chunk diferido supera el umbral informativo de
+  500 kB de Vite. Se conserva visible y documentado; no se aumentó el umbral
+  para ocultarlo porque ya no bloquea la carga inicial.
+- Validaciones: build, lint, TypeScript, 20 pruebas unitarias y 14 pruebas E2E
+  aprobadas; la suite E2E finalizó en 20,8 segundos.
+- Archivos principales: `frontend/src/App.tsx`, `frontend/src/charts/echarts.ts`
+  y `frontend/src/components/DashboardStates.tsx`.
+- Resultado: carga inicial optimizada sin regresiones; el punto 5 reforzará la
+  seguridad y configuración de producción.
+
+### Punto 5 — Seguridad y configuración de producción
+
+- Estado: completado y validado localmente.
+- Fecha: 14 de agosto de 2026.
+- Objetivo: impedir la publicación accidental de datos locales, reforzar las
+  respuestas públicas y bloquear dependencias con vulnerabilidades conocidas.
+- Auditoría de secretos y archivos:
+  - `.env`, `frontend/.env.local`, `api/local.settings.json` y las bases SQLite
+    permanecen ignorados y no están rastreados por Git.
+  - Se retiró `api/.azurefunctions/config`, que contenía un identificador local
+    generado por Azure Functions Core Tools.
+  - `.azurefunctions/` quedó incluido en `.gitignore` para evitar que vuelva a
+    publicarse configuración específica de una máquina.
+- Cabeceras defensivas de la API:
+  - `Cache-Control: no-store` evita reutilizar comparaciones obsoletas.
+  - `X-Content-Type-Options: nosniff` impide interpretar JSON como otro tipo de
+    contenido.
+  - `Referrer-Policy: no-referrer` evita filtrar la URL de origen.
+  - Una prueba automática verifica las tres cabeceras y el tipo JSON.
+- Dependencias:
+  - CI ejecuta `npm audit --audit-level=high` después de instalar el frontend.
+  - `pip-audit==2.10.1` quedó fijado como herramienta de desarrollo y CI audita
+    exclusivamente `api/requirements.txt`.
+  - Auditorías locales: cero vulnerabilidades conocidas en npm y Python.
+- Decisiones de producción:
+  - Los endpoints permanecen anónimos porque el MVP ofrece consultas públicas
+    de sólo lectura; la clave de `football-data.org` nunca llega al navegador.
+  - El dominio CORS definitivo y los Application Settings secretos se
+    configurarán sobre el recurso real de Azure durante el punto 6.
+- Validaciones: Ruff aprobado y 78 de 78 pruebas API aprobadas.
+- Archivos principales: `.gitignore`, `.github/workflows/ci.yml`,
+  `api/http_responses.py`, `api/tests/test_function_app.py` y
+  `api/requirements-dev.txt`.
+- Resultado: configuración local saneada y controles de seguridad automatizados;
+  el punto 6 aprovisionará y desplegará los servicios de Azure.
+
+### Punto 6 — Azure Static Web Apps Free
+
+- Estado: completado.
+- Inicio: 15 de agosto de 2026.
+- Objetivo: publicar frontend y API administrada en un único recurso gratuito,
+  sin Function App, Storage Account ni base de datos facturables por separado.
+- Infraestructura confirmada:
+  - Suscripción `Azure subscription 1` habilitada con presupuesto mensual de
+    control.
+  - Grupo de recursos `rg-footballvs` creado correctamente en Chile Central.
+  - Arquitectura elegida: Azure Static Web Apps Free con Azure Functions
+    administrada y snapshot SQLite de sólo lectura.
+- Preparación del repositorio:
+  - `staticwebapp.config.json` configura fallback de React, cabeceras web y
+    runtime administrado `python:3.11`.
+  - El frontend usa `/api/v1` en producción y conserva
+    `http://localhost:7071/api/v1` durante el desarrollo local.
+  - CI prueba la API en Python 3.11 y 3.12; E2E utiliza 3.11 para coincidir con
+    Azure.
+  - Ruff apunta a Python 3.11 para impedir sintaxis incompatible con el runtime
+    publicado.
+- Validación local: configuración JSON válida, build con URL relativa,
+  lint y TypeScript aprobados, 20 pruebas frontend y 78 pruebas API aprobadas.
+- Recurso creado: `footballvs-web`, plan Free, región Central US, trasladado al
+  grupo `rg-footballvs`.
+- Despliegue automatizado:
+  - El workflow `deploy-static-web-app.yml` compila el frontend con Node 24 y
+    deja que Azure construya la API administrada en Python 3.11.
+  - El token de despliegue se guardó como secreto de GitHub y no se añadió al
+    repositorio.
+  - La ejecución pública terminó correctamente y publicó frontend y API bajo el
+    mismo dominio.
+- Validación pública:
+  - Sitio: `https://ambitious-island-0894cf010.7.azurestaticapps.net`.
+  - Frontend, `/api/v1/health` y `/api/v1/competitions` respondieron con HTTP
+    200.
+  - Las cabeceras defensivas del frontend y la API están presentes.
+  - La API permanece intencionalmente en modo `mock` hasta configurar en el
+    punto 7 la clave del proveedor y el snapshot SQLite de sólo lectura.
+- Decisión antes del merge: retirar la rama de la fase de los disparadores y
+  establecer `main` como única rama de producción.
+- Resultado: infraestructura gratuita aprovisionada y MVP accesible
+  públicamente; los datos reales y las comprobaciones posteriores corresponden
+  al punto 7.
+
+### Punto 7 — Secretos, snapshot y comprobaciones posteriores
+
+- Estado: completado.
+- Inicio: 15 de agosto de 2026.
+- Objetivo: publicar datos reales sin exponer credenciales ni añadir servicios
+  facturables de Azure.
+- Secretos:
+  - `FOOTBALL_DATA_API_KEY` se configuró como secreto del repositorio en GitHub
+    Actions.
+  - La clave no se imprimió, no se añadió al historial de PowerShell y no se
+    incorporó a Git.
+- Snapshot preparado:
+  - La configuración del proveedor acepta variables de entorno durante CI y
+    conserva `api/local.settings.json` como alternativa local ignorada.
+  - El workflow sincroniza Premier League 2025/26 y 2026/27.
+  - Después calcula los snapshots estadísticos de 2026/27 y el historial Elo de
+    las dos temporadas.
+  - `api/data/footballvs.db` se genera temporalmente durante GitHub Actions y se
+    empaqueta con la API; permanece excluido del repositorio.
+- Validación local: Ruff aprobado y 83 pruebas de API aprobadas.
+- Validación en GitHub Actions:
+  - Ejecución `31916316452` completada correctamente en 1 minuto y 28 segundos.
+  - Las dos temporadas se sincronizaron sin exponer la clave.
+  - Se generaron 20 snapshots de equipo, 760 registros históricos Elo y 20
+    ratings Elo actuales.
+  - El snapshot se empaquetó junto con la API administrada y el despliegue
+    terminó correctamente.
+- Mantenimiento del workflow: se retiró `production_branch` porque la versión
+  actual de `Azure/static-web-apps-deploy@v1` ya no reconoce esa entrada; las
+  ramas autorizadas permanecen controladas por el disparador `push`.
+- Activación en Azure:
+  - `APP_DATA_SOURCE=repository` se configuró como application setting de la
+    Static Web App; Azure oculta su valor al mostrar el resultado.
+  - El catálogo público responde con `meta.source=repository`, Premier League
+    2026/27 y 20 equipos.
+  - Una comparación pública real respondió correctamente con predicción
+    disponible, 380 partidos utilizados y ratings Elo para ambos equipos.
+- Comprobaciones posteriores al despliegue:
+  - `smoke_test_public_deployment.py` verifica el documento React, salud de la
+    API, catálogo real, al menos dos equipos, comparación y metadatos del
+    modelo.
+  - El script reintenta el recorrido completo para tolerar el arranque en frío
+    y la propagación de Azure.
+  - La ejecución local contra el sitio público confirmó `repository`, 20
+    equipos, `poisson-v0.1.0` y predicción disponible.
+  - El workflow ejecuta este smoke test después de publicar y falla si el MVP
+    deja de cumplir el recorrido esencial.
+- Validación final en GitHub Actions:
+  - La ejecución `31917025446` terminó correctamente en 1 minuto y 37 segundos.
+  - Snapshot, cálculos, frontend, API administrada y despliegue fueron
+    aprobados.
+  - `Verify public deployment` confirmó el recorrido real después de publicar,
+    sin advertencias del workflow.
+- Resultado: secreto protegido, snapshot real desplegado y vigilancia activa
+  del recorrido esencial en cada publicación.
+
+### Punto 8 — Documentación y cierre del MVP
+
+- Estado: completado en la rama de fase; PR `#8` abierto para integración.
+- Inicio: 16 de agosto de 2026.
+- Documentación operativa:
+  - README actualizado con capacidades, stack y URL pública reales.
+  - Arquitectura corregida a un único recurso Azure Static Web Apps Free con
+    API administrada y snapshot SQLite.
+  - Cosmos DB documentado únicamente como evolución futura condicionada a
+    volumen y costo.
+  - Nueva guía `07-despliegue-produccion.md` con secretos, publicación, smoke
+    tests, recuperación, costos y mantenimiento de temporada.
+- Actualización de datos:
+  - `main` será la única rama que despliega después del merge.
+  - El snapshot se actualizará automáticamente todos los días a las 10:17 UTC,
+    además de los despliegues por push y ejecuciones manuales.
+  - La programación no crea nuevos recursos Azure; utiliza GitHub Actions y las
+    mismas seis solicitudes principales al proveedor por ejecución.
+- Validación final local:
+  - Frontend: Oxlint, TypeScript, 20 pruebas Vitest y build aprobados.
+  - API: Ruff y 83 pruebas pytest aprobadas.
+  - E2E: 14 pruebas Playwright aprobadas en Chromium escritorio y móvil,
+    incluidas accesibilidad, responsive y recorrido del comparador.
+  - Todos los enlaces Markdown locales existen.
+  - Ningún `.env`, `local.settings.json` o `footballvs.db` está versionado y la
+    clave real no aparece en archivos seguidos por Git.
+  - `git diff --check` aprobado.
+- Observación no bloqueante: ECharts permanece en un chunk diferido superior a
+  500 kB; no forma parte del JavaScript inicial y su carga bajo demanda ya fue
+  validada.
+- Validación final en GitHub:
+  - Ejecución CI `31917765075` aprobada con frontend, API en Python 3.11 y 3.12,
+    auditorías de dependencias y 14 pruebas E2E.
+  - El push final de la rama no desplegó Azure, confirmando que sólo `main`
+    publica a producción.
+  - PR `#8` creado como borrador y marcado `MERGEABLE` por GitHub.
+- Resultado: los 8 puntos de la Fase 5 están implementados, documentados y
+  listos para revisión e integración en `main`.
 
 ## Plantilla para próximas actualizaciones
 

@@ -90,7 +90,11 @@ export function EloInfoDialog({ isOpen, onClose }: EloInfoDialogProps) {
             un equipo supera lo esperado gana puntos; si rinde por debajo, los pierde. Los
             puntos que gana uno son los que pierde el otro.
           </p>
-          <pre className="mt-3 overflow-x-auto rounded-xl bg-slate-950 p-4 text-xs text-pitch-100">
+          <pre
+            aria-label="Fórmula para actualizar el rating Elo"
+            className="mt-3 overflow-x-auto rounded-xl bg-slate-950 p-4 text-xs text-pitch-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pitch-600"
+            tabIndex={0}
+          >
             rating nuevo = rating anterior + K × (resultado real − esperado)
           </pre>
 

@@ -4,6 +4,14 @@ Interfaz responsive construida con React, TypeScript, Vite, Tailwind CSS, TanSta
 
 El dashboard utiliza radar, línea de forma reciente y barras de historial directo. Los gráficos se redimensionan automáticamente y muestran estados vacíos cuando todavía no existen resultados suficientes.
 
+El dashboard y Apache ECharts se cargan bajo demanda después de solicitar una
+comparación, lo que evita incluir la biblioteca de gráficos en la descarga
+JavaScript inicial.
+
+En Azure Static Web Apps, `public/staticwebapp.config.json` habilita el fallback
+de la SPA, aplica cabeceras defensivas y selecciona Python 3.11 para la API
+administrada. El cliente usa `/api/v1` automáticamente en builds de producción.
+
 ## Experiencia y accesibilidad
 
 - Diseño adaptable desde 320 px.
@@ -11,6 +19,7 @@ El dashboard utiliza radar, línea de forma reciente y barras de historial direc
 - Advertencia cuando los datos llevan más de 48 horas sin sincronizarse.
 - Navegación por teclado con enlace para saltar al contenido principal.
 - Regiones de estado para tecnologías de asistencia y soporte de movimiento reducido.
+- Auditorías WCAG A/AA con Axe y pruebas responsive en 320, 768 y 1280 px.
 
 ## Preparación local
 
@@ -49,3 +58,26 @@ npm.cmd run test:watch
 ```
 
 Las pruebas simulan las respuestas HTTP; no necesitan ejecutar Azure Functions ni disponer de una clave real.
+
+## Pruebas end-to-end
+
+La suite Playwright inicia Vite en `http://localhost:5273` y Azure Functions en
+`http://localhost:7171`, ambos en puertos exclusivos para no interferir con el
+desarrollo normal. El backend usa datos mock y no requiere API key ni SQLite.
+
+La primera vez, instalar únicamente Chromium:
+
+```powershell
+npx playwright install chromium
+```
+
+Después ejecutar escritorio y móvil:
+
+```powershell
+npm run test:e2e
+```
+
+Azure Functions Core Tools debe estar instalado y `api/.venv` preparado con
+`api/requirements-dev.txt`. Los reportes y evidencias de fallos permanecen
+ignorados por Git. En CI, la validación E2E es obligatoria y publica el reporte
+HTML como artefacto.

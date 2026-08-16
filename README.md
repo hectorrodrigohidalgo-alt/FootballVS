@@ -1,16 +1,23 @@
 # FootballVS
 
 [![Continuous Integration](https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/workflows/ci.yml/badge.svg)](https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/workflows/ci.yml)
+[![Deploy Azure Static Web Apps](https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/workflows/deploy-static-web-app.yml/badge.svg)](https://github.com/hectorrodrigohidalgo-alt/FootballVS/actions/workflows/deploy-static-web-app.yml)
 
-FootballVS es una aplicación web responsive para comparar dos equipos de fútbol mediante estadísticas históricas y visualizaciones interactivas. El modelo estadístico se incorporará en la Fase 4.
+FootballVS es una aplicación web responsive para comparar dos equipos de fútbol
+mediante estadísticas históricas, ratings Elo, probabilidades Poisson y
+visualizaciones interactivas.
 
-El MVP comenzará con la Premier League 2026/27 y utilizará la API v4 de `football-data.org` mediante su plan gratuito.
+El MVP utiliza Premier League 2025/26 y 2026/27 desde la API v4 de
+`football-data.org` mediante su plan gratuito.
 
-La cuenta gratuita validada permite consultar equipos y partidos desde 2023/24 hasta 2026/27. El entrenamiento inicial utilizará las tres temporadas completas 2023/24–2025/26 y añadirá 2026/27 progresivamente.
+**Sitio público:**
+[FootballVS en Azure](https://ambitious-island-0894cf010.7.azurestaticapps.net)
 
 ## Estado
 
-Las Fases 0, 1, 2 y 3 están completadas e integradas en `main`. FootballVS dispone de catálogo y comparaciones reales desde SQLite, dashboard interactivo y experiencia responsive y accesible. La Fase 4 incorporará y evaluará el modelo estadístico.
+Las Fases 0 a 5 están completadas. El PR `#8` reúne el cierre de calidad y
+despliegue del MVP público con datos reales, actualización diaria y
+comprobaciones posteriores a cada publicación.
 
 ## MVP
 
@@ -21,27 +28,28 @@ El usuario podrá:
 3. Ejecutar la comparación cuando la selección sea válida.
 4. Consultar forma reciente, estadísticas agregadas y enfrentamientos directos.
 5. Explorar radar, evolución de forma y distribución del historial mediante gráficos interactivos.
-
-Elo, probabilidades 1X2 y marcadores estimados corresponden a la Fase 4 y se muestran explícitamente como no disponibles cuando se utilizan datos reales.
+6. Consultar ratings Elo, probabilidades 1X2, goles estimados y marcadores más
+   probables con información sobre el funcionamiento del modelo.
 
 El MVP no incluye autenticación, pagos, apuestas, datos en vivo ni predicciones de jugadores.
 
 ## Stack
 
-Implementado hasta la Fase 3:
-
 - Frontend: React, TypeScript, Vite, Tailwind CSS, TanStack Query y Apache ECharts.
-- API: Python con Azure Functions.
-- Datos: cliente resiliente de `football-data.org`, normalización, sincronización idempotente y persistencia local SQLite.
+- API: Python 3.11 con Azure Functions administrada por Static Web Apps.
+- Datos: cliente resiliente de `football-data.org`, normalización,
+  sincronización idempotente y snapshot SQLite de sólo lectura.
 - Comparación: snapshots estadísticos, filtros por localía e historial directo.
-- Calidad: Vitest, Testing Library, pytest, Ruff, Oxlint y GitHub Actions.
+- Modelos: Elo `elo-v0.1.0` y Poisson `poisson-v0.1.0`, seleccionados mediante
+  backtesting temporal.
+- Calidad: Vitest, Testing Library, Playwright, Axe, pytest, Ruff, Oxlint,
+  auditoría de dependencias y GitHub Actions.
 - Modos de ejecución: `mock` para desarrollo aislado y CI; `repository` para datos reales sincronizados.
-
-Previsto para fases posteriores:
-
-- Persistencia: Azure Cosmos DB.
-- Analítica: pandas, NumPy, Elo y Poisson con corrección Dixon-Coles.
-- Despliegue: Azure Static Web Apps y Azure Functions.
+- Despliegue: Azure Static Web Apps Free con API administrada y GitHub Actions.
+- Producción: GitHub Actions genera el snapshot, publica el sistema y ejecuta
+  un smoke test contra el recorrido real.
+- Actualización: el snapshot se reconstruye automáticamente una vez al día y
+  también admite ejecución manual.
 
 ## Estructura
 
@@ -63,6 +71,7 @@ docs/           Producto, arquitectura y planificación
 - [Bitácora de desarrollo](docs/04-bitacora-desarrollo.md)
 - [Guía de desarrollo local](docs/05-guia-desarrollo-local.md)
 - [Modelo estadístico](docs/06-modelo-estadistico.md)
+- [Despliegue y operación](docs/07-despliegue-produccion.md)
 - [Forma de contribuir](CONTRIBUTING.md)
 
 ## Inicio rápido
