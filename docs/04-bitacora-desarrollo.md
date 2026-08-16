@@ -1055,10 +1055,36 @@ Estado: **En progreso**.
     las dos temporadas.
   - `api/data/footballvs.db` se genera temporalmente durante GitHub Actions y se
     empaqueta con la API; permanece excluido del repositorio.
-- Validación local: Ruff aprobado y 80 pruebas de API aprobadas.
-- Pendiente: versionar y ejecutar el workflow, comprobar que el snapshot quedó
-  empaquetado, activar `APP_DATA_SOURCE=repository` en Azure y añadir smoke
-  tests posteriores al despliegue.
+- Validación local: Ruff aprobado y 83 pruebas de API aprobadas.
+- Validación en GitHub Actions:
+  - Ejecución `31916316452` completada correctamente en 1 minuto y 28 segundos.
+  - Las dos temporadas se sincronizaron sin exponer la clave.
+  - Se generaron 20 snapshots de equipo, 760 registros históricos Elo y 20
+    ratings Elo actuales.
+  - El snapshot se empaquetó junto con la API administrada y el despliegue
+    terminó correctamente.
+- Mantenimiento del workflow: se retiró `production_branch` porque la versión
+  actual de `Azure/static-web-apps-deploy@v1` ya no reconoce esa entrada; las
+  ramas autorizadas permanecen controladas por el disparador `push`.
+- Activación en Azure:
+  - `APP_DATA_SOURCE=repository` se configuró como application setting de la
+    Static Web App; Azure oculta su valor al mostrar el resultado.
+  - El catálogo público responde con `meta.source=repository`, Premier League
+    2026/27 y 20 equipos.
+  - Una comparación pública real respondió correctamente con predicción
+    disponible, 380 partidos utilizados y ratings Elo para ambos equipos.
+- Comprobaciones posteriores al despliegue:
+  - `smoke_test_public_deployment.py` verifica el documento React, salud de la
+    API, catálogo real, al menos dos equipos, comparación y metadatos del
+    modelo.
+  - El script reintenta el recorrido completo para tolerar el arranque en frío
+    y la propagación de Azure.
+  - La ejecución local contra el sitio público confirmó `repository`, 20
+    equipos, `poisson-v0.1.0` y predicción disponible.
+  - El workflow ejecuta este smoke test después de publicar y falla si el MVP
+    deja de cumplir el recorrido esencial.
+- Pendiente: versionar el smoke test y validar su primera ejecución dentro de
+  GitHub Actions.
 
 ## Plantilla para próximas actualizaciones
 

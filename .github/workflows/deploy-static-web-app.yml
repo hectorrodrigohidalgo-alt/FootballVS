@@ -70,4 +70,13 @@ jobs:
           api_location: api
           output_location: ''
           skip_app_build: true
-          production_branch: feat/Fase-5-Calidad-Despliegue
+
+      # Comprueba el recorrido público completo después de que Azure publique.
+      # Los reintentos toleran el arranque en frío y la propagación del recurso.
+      - name: Verify public deployment
+        working-directory: api
+        run: >-
+          python -m tools.smoke_test_public_deployment
+          --base-url https://ambitious-island-0894cf010.7.azurestaticapps.net
+          --attempts 6
+          --delay-seconds 10
