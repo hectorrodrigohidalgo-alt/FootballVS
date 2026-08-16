@@ -1,83 +1,121 @@
 # Arquitectura técnica
 
-## Decisión
+## Arquitectura de producción
 
-Se utilizará un monorepo con frontend React/TypeScript, API serverless Python y un proceso separado de sincronización y cálculo. Esto mantiene bajo el costo y permite desplegar cada componente de manera independiente.
+FootballVS utiliza un único recurso Azure Static Web Apps Free. Ese recurso
+sirve el frontend React y una API Python administrada bajo el mismo dominio.
+No existen una Function App, una Storage Account ni una base Cosmos DB
+facturables por separado.
 
 ```text
-football-data.org API v4
-       |
-       v
-Sincronizador programado --> Normalización --> Cosmos DB
-                                  |
-                                  +--> Elo y estadísticas
-                                  +--> Entrenamiento/evaluación del modelo
-                                                   |
-Navegador --> Static Web Apps --> Azure Functions -+
-   |                                  |
-   +-------- Apache ECharts <---------+
+football-data.org
+        |
+        | GitHub Actions: sincroniza, normaliza y calcula
+        v
+Snapshot SQLite de sólo lectura
+        |
+        | despliegue seguro
+        v
+Azure Static Web Apps Free
+  ├── Frontend React + Apache ECharts
+  └── /api/v1 — Azure Functions administrada (Python 3.11)
+        ^
+        |
+     Navegador
 ```
+
+La clave de `football-data.org` sólo existe como secreto de GitHub Actions. El
+navegador y la API publicada nunca la reciben. Azure usa
+`APP_DATA_SOURCE=repository` para leer el snapshot empaquetado.
 
 ## Componentes
 
 ### Frontend
 
-- React + TypeScript + Vite.
-- Tailwind CSS para diseño responsive.
-- Apache ECharts para gráficos interactivos.
-- TanStack Query para caché y estado remoto.
-- Validación de respuestas de API antes de representarlas.
+- React, TypeScript y Vite.
+- Tailwind CSS para diseño responsive desde 320 px.
+- Apache ECharts cargado bajo demanda para gráficos interactivos.
+- TanStack Query para estado remoto, caché y reintentos controlados.
+- Fallback SPA y cabeceras defensivas mediante `staticwebapp.config.json`.
+- En producción consulta rutas relativas `/api/v1` bajo el mismo dominio.
 
 ### API
 
-- Azure Functions con Python.
-- Endpoints versionados bajo `/api/v1`.
-- La clave del proveedor vive sólo en configuración segura del backend.
-- Respuestas precalculadas y cacheables para reducir consumo y latencia.
+- Azure Functions con modelo Python v2, administrada por Static Web Apps.
+- Runtime de producción Python 3.11; Python 3.12 permanece validado localmente.
+- Endpoints anónimos y versionados bajo `/api/v1`.
+- Validación de parámetros y respuestas JSON con cabeceras defensivas.
 
-Endpoints iniciales:
+Endpoints:
 
+- `GET /api/v1/health`
 - `GET /api/v1/competitions`
 - `GET /api/v1/competitions/{id}/teams`
 - `GET /api/v1/comparisons?competition={id}&team1={id}&team2={id}&venue={team1|team2|neutral}`
-- `GET /api/v1/health`
 
-### Datos y sincronización
+### Datos
 
-- El proveedor inicial es `football-data.org` y la competición se consulta con el código `PL`.
-- SQLite actúa como almacén documental local sin costo durante el desarrollo; Cosmos DB será el adaptador de producción cuando exista una suscripción activa.
-- El sincronizador depende del contrato `DataRepository`, no directamente de SQLite o Cosmos DB.
-- El navegador nunca consulta directamente al proveedor externo.
-- Una función programada importa cambios respetando límites de uso.
-- El plan gratuito admite 10 solicitudes por minuto; el cliente aplicará limitación, reintentos con espera y caché.
-- La sincronización no dependerá de datos en vivo: los resultados y calendarios gratuitos pueden llegar con demora.
-- Los identificadores externos se conservan junto a identificadores internos.
-- La escritura de partidos es idempotente.
-- Se registra cada ejecución, rango consultado, resultado y error.
-- La disponibilidad histórica se comprobó mediante los recursos autenticados de competición, equipos y partidos: la ventana accesible es 2023/24–2026/27 y 2022/23 está restringida.
+- El proveedor es `football-data.org` y la competición inicial usa el código
+  `PL`.
+- `DataRepository` desacopla la lógica de consulta de la tecnología física.
+- SQLite guarda documentos JSON por `entity_type` e identificador estable.
+- Cada sincronización usa `upsert`, por lo que repetirla no duplica registros.
+- El workflow genera `api/data/footballvs.db` temporalmente; Git lo ignora, pero
+  Azure recibe una copia empaquetada de sólo lectura.
+- El snapshot publicado incluye como máximo la temporada actual y una anterior.
+- El cliente limita solicitudes, reintenta errores transitorios y restringe el
+  token al host HTTPS oficial.
+
+Cosmos DB queda únicamente como alternativa futura si el volumen o la
+actualización en línea justifican abandonar el snapshot gratuito.
 
 ### Modelo estadístico
 
-Primera versión:
+- Elo mide fortaleza dinámica y procesa partidos por `utc_date`.
+- Cada temporada vuelve hacia la media con retención del 40 % y asigna 1400 a
+  equipos ascendidos sin historial.
+- Poisson estima goles, probabilidades 1X2, más/menos de 2.5, ambos marcan y
+  marcadores probables.
+- La localía, muestras mínimas y corte temporal forman parte del contrato.
+- Dixon-Coles fue evaluado, pero no reemplazó a Poisson al no superar la mejora
+  mínima del 1 % acordada.
 
-1. Elo para medir fortaleza dinámica.
-2. Poisson para estimar goles de cada equipo.
-3. Corrección Dixon-Coles para marcadores bajos y dependencias frecuentes.
-4. Ajustes por localía, forma temporal y fuerza ofensiva/defensiva.
+## Automatización
 
-No se llamará `xG` a estos goles estimados porque no provienen de eventos de disparo. Una versión posterior podrá comparar Gradient Boosting sólo si existe volumen y calidad suficientes.
+### Integración continua
 
-## Despliegue objetivo
+`ci.yml` ejecuta calidad de frontend, API, accesibilidad y E2E sin secretos ni
+solicitudes al proveedor. Utiliza mocks y repositorios temporales.
 
-- Azure Static Web Apps Free: frontend y previews.
-- Azure Functions: API y tareas programadas.
-- Azure Cosmos DB Free Tier: datos normalizados y resultados precalculados.
-- GitHub Actions: validación, build y despliegue.
+### Despliegue
 
-## Seguridad y observabilidad
+`deploy-static-web-app.yml`:
 
-- Secretos únicamente en variables locales ignoradas y secretos de Azure/GitHub.
-- CORS limitado al dominio de la aplicación.
-- Validación de parámetros y límites de consulta.
-- Logs estructurados sin claves ni datos sensibles.
-- Monitoreo de errores, duración, consumo y última sincronización.
+1. Lee `FOOTBALL_DATA_API_KEY` desde GitHub Secrets.
+2. Sincroniza Premier League 2025/26 y 2026/27.
+3. Calcula snapshots de equipos y Elo.
+4. Compila el frontend.
+5. Publica frontend, API y SQLite en Azure Static Web Apps Free.
+6. Ejecuta un smoke test público de página, salud, catálogo, equipos y
+   comparación real.
+
+El workflow se activa con cada push a `main`, manualmente o todos los días a las
+10:17 UTC. La programación sólo entra en vigor cuando el archivo existe en la
+rama predeterminada.
+
+## Seguridad y operación
+
+- `.env`, `local.settings.json`, bases SQLite y configuración local de Azure se
+  mantienen fuera de Git.
+- Los secretos se almacenan en GitHub Secrets; Azure sólo recibe la selección
+  no sensible `APP_DATA_SOURCE=repository`.
+- El frontend aplica CSP, Permissions Policy, Referrer Policy y protección
+  contra detección de tipo.
+- La API no almacena ni registra el token del proveedor.
+- GitHub Actions conserva el resultado verificable de CI, despliegue y smoke
+  test.
+- El plan Azure debe permanecer en `Free`; cualquier evolución a servicios
+  facturables requiere una decisión explícita.
+
+Consulta [Despliegue y operación](07-despliegue-produccion.md) para comandos de
+verificación, mantenimiento y recuperación.

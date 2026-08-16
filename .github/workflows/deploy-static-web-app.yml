@@ -3,8 +3,11 @@ name: Deploy Azure Static Web Apps
 on:
   push:
     branches:
-      - feat/Fase-5-Calidad-Despliegue
       - main
+  # Actualiza el snapshot cada día a las 10:17 UTC. El minuto no redondo evita
+  # la franja de mayor congestión de los workflows programados.
+  schedule:
+    - cron: '17 10 * * *'
   workflow_dispatch:
 
 # El despliegue sólo necesita leer el repositorio. El acceso a Azure se limita

@@ -69,21 +69,23 @@ partidos originales no se modifican durante el cálculo.
 - `id`, `provider`, `started_at`, `finished_at`, `status`
 - `requested_resource`, `records_read`, `records_written`, `error_summary`
 
-## Particiones propuestas
+## Persistencia de producción
 
-La partición exacta se decidirá tras medir patrones de acceso. Como punto de partida:
+El MVP usa SQLite como snapshot documental tanto en desarrollo como en
+producción. Una única tabla almacena `entity_type`, `id` y el JSON normalizado;
+la clave primaria compuesta hace idempotentes los `upsert`.
 
-- Partidos por `competition_id` o `season_id`.
-- Equipos y snapshots por `team_id`.
-- Predicciones por una clave estable de comparación y versión.
-- Ejecuciones de sincronización por `provider`.
+GitHub Actions crea `api/data/footballvs.db`, calcula los documentos derivados y
+lo empaqueta con la API. El archivo está ignorado por Git y la aplicación
+publicada sólo lo consulta; cada despliegue reemplaza el snapshot completo.
 
-No se fijará el diseño físico de Cosmos DB hasta validar consultas, volumen y límites del plan gratuito.
+Esta decisión evita recursos de almacenamiento facturables y es adecuada para
+una competición, dos temporadas y lecturas públicas de baja escala.
 
-## Persistencia local validada
+## Evolución posible
 
-SQLite utiliza temporalmente una tabla documental con clave primaria compuesta
-por `entity_type` e `id`. Cada carga ejecuta un `upsert`: crea el documento si no
-existe y reemplaza su contenido si ya está guardado. Esta estructura permitió
-verificar la idempotencia antes de decidir contenedores y particiones físicas de
-Cosmos DB.
+`DataRepository` permite incorporar otro adaptador sin cambiar normalización,
+estadísticas ni modelos. Cosmos DB sólo se evaluará si se requieren escrituras
+en línea, varias competiciones o un volumen que deje de ser práctico para el
+snapshot. En ese caso deberán medirse consultas, particiones y costo antes de
+cambiar la arquitectura.

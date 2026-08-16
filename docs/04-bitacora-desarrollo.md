@@ -1,8 +1,12 @@
 # Bitácora de desarrollo
 
-Última actualización: **14 de agosto de 2026**.
+Última actualización: **16 de agosto de 2026**.
 
 Este documento registra el avance verificable de FootballVS. Se actualiza al finalizar cada punto y distingue entre trabajo implementado localmente, validado y publicado en GitHub.
+
+Las primeras fases conservan decisiones históricas que luego fueron
+reemplazadas. La arquitectura vigente se encuentra en `docs/01-arquitectura.md`
+y la operación actual en `docs/07-despliegue-produccion.md`.
 
 ## Convenciones
 
@@ -1091,6 +1095,39 @@ Estado: **En progreso**.
     sin advertencias del workflow.
 - Resultado: secreto protegido, snapshot real desplegado y vigilancia activa
   del recorrido esencial en cada publicación.
+
+### Punto 8 — Documentación y cierre del MVP
+
+- Estado: en progreso.
+- Inicio: 16 de agosto de 2026.
+- Documentación operativa:
+  - README actualizado con capacidades, stack y URL pública reales.
+  - Arquitectura corregida a un único recurso Azure Static Web Apps Free con
+    API administrada y snapshot SQLite.
+  - Cosmos DB documentado únicamente como evolución futura condicionada a
+    volumen y costo.
+  - Nueva guía `07-despliegue-produccion.md` con secretos, publicación, smoke
+    tests, recuperación, costos y mantenimiento de temporada.
+- Actualización de datos:
+  - `main` será la única rama que despliega después del merge.
+  - El snapshot se actualizará automáticamente todos los días a las 10:17 UTC,
+    además de los despliegues por push y ejecuciones manuales.
+  - La programación no crea nuevos recursos Azure; utiliza GitHub Actions y las
+    mismas seis solicitudes principales al proveedor por ejecución.
+- Validación final local:
+  - Frontend: Oxlint, TypeScript, 20 pruebas Vitest y build aprobados.
+  - API: Ruff y 83 pruebas pytest aprobadas.
+  - E2E: 14 pruebas Playwright aprobadas en Chromium escritorio y móvil,
+    incluidas accesibilidad, responsive y recorrido del comparador.
+  - Todos los enlaces Markdown locales existen.
+  - Ningún `.env`, `local.settings.json` o `footballvs.db` está versionado y la
+    clave real no aparece en archivos seguidos por Git.
+  - `git diff --check` aprobado.
+- Observación no bloqueante: ECharts permanece en un chunk diferido superior a
+  500 kB; no forma parte del JavaScript inicial y su carga bajo demanda ya fue
+  validada.
+- Pendiente: versionar el cierre, validar CI, cerrar el roadmap y preparar el
+  pull request.
 
 ## Plantilla para próximas actualizaciones
 

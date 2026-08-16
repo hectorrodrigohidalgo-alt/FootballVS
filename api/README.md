@@ -1,6 +1,8 @@
 # FootballVS API
 
-API serverless construida con Azure Functions y Python 3.12 mediante el modelo de programación v2.
+API serverless construida con Azure Functions y el modelo de programación v2.
+Producción utiliza Python 3.11 dentro de Azure Static Web Apps; el desarrollo
+local también está validado con Python 3.12.
 
 ## Preparación local
 
