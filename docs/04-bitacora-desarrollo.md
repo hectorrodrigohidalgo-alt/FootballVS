@@ -20,7 +20,7 @@ Este documento registra el avance verificable de FootballVS. Se actualiza al fin
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
 | Fase 4 — Modelo estadístico | Completada | 6 de 6 puntos | `main` (PR `#7`) |
-| Fase 5 — Calidad y despliegue | En progreso | 6 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
+| Fase 5 — Calidad y despliegue | En progreso | 7 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -1038,7 +1038,7 @@ Estado: **En progreso**.
 
 ### Punto 7 — Secretos, snapshot y comprobaciones posteriores
 
-- Estado: en progreso.
+- Estado: completado.
 - Inicio: 15 de agosto de 2026.
 - Objetivo: publicar datos reales sin exponer credenciales ni añadir servicios
   facturables de Azure.
@@ -1083,8 +1083,14 @@ Estado: **En progreso**.
     equipos, `poisson-v0.1.0` y predicción disponible.
   - El workflow ejecuta este smoke test después de publicar y falla si el MVP
     deja de cumplir el recorrido esencial.
-- Pendiente: versionar el smoke test y validar su primera ejecución dentro de
-  GitHub Actions.
+- Validación final en GitHub Actions:
+  - La ejecución `31917025446` terminó correctamente en 1 minuto y 37 segundos.
+  - Snapshot, cálculos, frontend, API administrada y despliegue fueron
+    aprobados.
+  - `Verify public deployment` confirmó el recorrido real después de publicar,
+    sin advertencias del workflow.
+- Resultado: secreto protegido, snapshot real desplegado y vigilancia activa
+  del recorrido esencial en cada publicación.
 
 ## Plantilla para próximas actualizaciones
 
