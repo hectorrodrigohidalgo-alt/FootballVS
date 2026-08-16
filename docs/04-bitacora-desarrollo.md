@@ -1036,6 +1036,30 @@ Estado: **En progreso**.
   públicamente; los datos reales y las comprobaciones posteriores corresponden
   al punto 7.
 
+### Punto 7 — Secretos, snapshot y comprobaciones posteriores
+
+- Estado: en progreso.
+- Inicio: 15 de agosto de 2026.
+- Objetivo: publicar datos reales sin exponer credenciales ni añadir servicios
+  facturables de Azure.
+- Secretos:
+  - `FOOTBALL_DATA_API_KEY` se configuró como secreto del repositorio en GitHub
+    Actions.
+  - La clave no se imprimió, no se añadió al historial de PowerShell y no se
+    incorporó a Git.
+- Snapshot preparado:
+  - La configuración del proveedor acepta variables de entorno durante CI y
+    conserva `api/local.settings.json` como alternativa local ignorada.
+  - El workflow sincroniza Premier League 2025/26 y 2026/27.
+  - Después calcula los snapshots estadísticos de 2026/27 y el historial Elo de
+    las dos temporadas.
+  - `api/data/footballvs.db` se genera temporalmente durante GitHub Actions y se
+    empaqueta con la API; permanece excluido del repositorio.
+- Validación local: Ruff aprobado y 80 pruebas de API aprobadas.
+- Pendiente: versionar y ejecutar el workflow, comprobar que el snapshot quedó
+  empaquetado, activar `APP_DATA_SOURCE=repository` en Azure y añadir smoke
+  tests posteriores al despliegue.
+
 ## Plantilla para próximas actualizaciones
 
 Al completar un punto nuevo, añadir:

@@ -26,6 +26,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # La clave sólo existe durante este paso. Los comandos imprimen resúmenes,
+      # nunca el token ni las respuestas completas del proveedor.
+      - name: Build read-only football data snapshot
+        working-directory: api
+        env:
+          FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+          FOOTBALLVS_DB_PATH: data/footballvs.db
+        run: |
+          python -m tools.sync_football_data --season 2025
+          python -m tools.sync_football_data --season 2026
+          python -m tools.calculate_team_statistics --season 2026
+          python -m tools.calculate_elo_ratings
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:

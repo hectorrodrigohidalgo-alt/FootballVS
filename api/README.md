@@ -132,6 +132,17 @@ Para utilizar el repositorio local, establece en `local.settings.json`:
 "FOOTBALLVS_DB_PATH": "data/footballvs.db"
 ```
 
+Las herramientas de sincronización buscan primero
+`FOOTBALL_DATA_API_KEY` y `FOOTBALL_DATA_BASE_URL` en variables de entorno.
+Esto permite que GitHub Actions genere el snapshot sin crear ni publicar un
+`local.settings.json`. Si esas variables no existen, el desarrollo local
+continúa leyendo el archivo ignorado.
+
+Durante el despliegue, GitHub Actions sincroniza la temporada actual y una
+temporada anterior, calcula estadísticas y Elo, y empaqueta
+`data/footballvs.db` como un snapshot de sólo lectura. La base sigue ignorada
+por Git y no forma parte del historial del repositorio.
+
 El endpoint de equipos toma sólo los participantes presentes en los partidos de
 la temporada actual; así evita mezclar clubes históricos almacenados por otras
 temporadas.
