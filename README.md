@@ -15,10 +15,9 @@ El MVP utiliza Premier League 2025/26 y 2026/27 desde la API v4 de
 
 ## Estado
 
-Las Fases 0 a 4 están completadas. La Fase 5 tiene desplegado el MVP público
-con datos reales, calidad automatizada y comprobaciones posteriores a cada
-publicación. La rama de la fase se integrará en `main` al completar el cierre
-documental.
+Las Fases 0 a 5 están completadas. El PR `#8` reúne el cierre de calidad y
+despliegue del MVP público con datos reales, actualización diaria y
+comprobaciones posteriores a cada publicación.
 
 ## MVP
 

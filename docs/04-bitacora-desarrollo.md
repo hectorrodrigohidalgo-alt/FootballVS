@@ -24,7 +24,7 @@ y la operación actual en `docs/07-despliegue-produccion.md`.
 | Fase 2 — Datos | Completada | 4 de 4 puntos | `main` (PR `#4`) |
 | Fase 3 — Comparador y dashboard | Completada | 6 de 6 puntos | `main` (PR `#5`) |
 | Fase 4 — Modelo estadístico | Completada | 6 de 6 puntos | `main` (PR `#7`) |
-| Fase 5 — Calidad y despliegue | En progreso | 7 de 8 puntos | `feat/Fase-5-Calidad-Despliegue` |
+| Fase 5 — Calidad y despliegue | Completada | 8 de 8 puntos | PR `#8` |
 
 ## Fase 0 — Descubrimiento y fundaciones
 
@@ -1098,7 +1098,7 @@ Estado: **En progreso**.
 
 ### Punto 8 — Documentación y cierre del MVP
 
-- Estado: en progreso.
+- Estado: completado en la rama de fase; PR `#8` abierto para integración.
 - Inicio: 16 de agosto de 2026.
 - Documentación operativa:
   - README actualizado con capacidades, stack y URL pública reales.
@@ -1126,8 +1126,14 @@ Estado: **En progreso**.
 - Observación no bloqueante: ECharts permanece en un chunk diferido superior a
   500 kB; no forma parte del JavaScript inicial y su carga bajo demanda ya fue
   validada.
-- Pendiente: versionar el cierre, validar CI, cerrar el roadmap y preparar el
-  pull request.
+- Validación final en GitHub:
+  - Ejecución CI `31917765075` aprobada con frontend, API en Python 3.11 y 3.12,
+    auditorías de dependencias y 14 pruebas E2E.
+  - El push final de la rama no desplegó Azure, confirmando que sólo `main`
+    publica a producción.
+  - PR `#8` creado como borrador y marcado `MERGEABLE` por GitHub.
+- Resultado: los 8 puntos de la Fase 5 están implementados, documentados y
+  listos para revisión e integración en `main`.
 
 ## Plantilla para próximas actualizaciones
 

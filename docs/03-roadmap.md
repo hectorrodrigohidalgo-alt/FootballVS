@@ -98,9 +98,9 @@ Salida: estimaciones reproducibles, evaluadas y servidas. **Completada.**
 - [x] Punto 5: reforzar seguridad y configuración de producción.
 - [x] Punto 6: aprovisionar y desplegar los servicios gratuitos de Azure.
 - [x] Punto 7: configurar secretos, observabilidad y comprobaciones posteriores.
-- [ ] Punto 8: completar documentación y cerrar el MVP.
+- [x] Punto 8: completar documentación y cerrar el MVP.
 
-Salida: MVP público.
+Salida: MVP público. **Completada en el PR `#8`.**
 
 ## Hitos y versiones sugeridas
 
